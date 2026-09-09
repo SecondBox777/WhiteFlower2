@@ -24,6 +24,29 @@ npm test
 - `app.js`: 문항 이동, 응답 수정, 이메일 검증, 데모 결제 흐름
 - `server.mjs`: 허용된 정적 파일만 제공하는 로컬 서버
 
+## Cloudflare 배포
+
+배포용 파일은 `npm run build`로 생성하는 `dist/`에만 담깁니다. HTML, CSS, 브라우저 JavaScript 및 문항 파일 총 4개를 복사합니다. `node_modules`, 로컬 서버, 테스트, 환경변수 파일은 포함하지 않습니다. 문항을 줄이거나 제거할 필요가 없습니다.
+
+### Workers Git 연동
+
+- 루트 디렉터리: 저장소 루트
+- 빌드 명령: `npm run build`
+- 배포 명령: `npx wrangler deploy`
+- Worker 이름: `whiteflower2` (기존 Cloudflare 프로젝트 이름이 다르면 `wrangler.jsonc`의 `name`을 해당 이름으로 변경)
+
+`wrangler.jsonc`가 정적 에셋 디렉터리를 `./dist`로 지정합니다. Wrangler 자체 빌드 설정도 있으므로 빌드 명령을 비워 두더라도 `npx wrangler deploy`가 배포 전에 파일을 생성합니다. 빌드 명령을 별도로 설정하면 같은 빌드가 한 번 더 실행되어도 안전합니다.
+
+기존 배포 명령에 `--assets .` 또는 저장소 루트 경로가 있다면 반드시 제거하세요. CLI 인수로 잘못된 경로를 지정하면 설정 파일의 `dist` 경로를 덮어쓸 수 있습니다. `server.mjs`는 로컬 개발 전용이며 Workers에서는 실행하지 않습니다.
+
+### Cloudflare Pages를 사용하는 경우
+
+프레임워크는 None, 빌드 명령은 `npm run build`, 빌드 출력 디렉터리는 `dist`로 설정하세요.
+
+### 25 MiB 오류의 원인
+
+`node_modules/workerd/bin/workerd`는 배포 도구의 실행 파일이며 웹사이트 콘텐츠가 아닙니다. 저장소 전체를 정적 에셋으로 지정하면 이 파일까지 업로드되어 크기 제한을 초과할 수 있습니다. `.gitignore`만 추가하는 대신, 공개 파일만 담은 `dist`로 업로드 범위를 제한해 해결합니다.
+
 ## 데모 범위
 
 실제 결제, IQ 산출, 결과 분석지 생성 및 이메일 발송은 구현되지 않았습니다. 응답은 브라우저 메모리에만 유지되며 새로고침하면 사라집니다. 이메일은 외부로 전송하거나 영구 저장하지 않습니다. 완료 창을 닫으면 입력 이메일이 화면에서 제거됩니다. Google Fonts를 불러오며 연결할 수 없으면 시스템 글꼴을 사용합니다.
