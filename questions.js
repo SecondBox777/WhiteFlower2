@@ -1,23 +1,32 @@
-// Example content only. These items are not a standardized IQ assessment.
+// Set to 30 to reserve another ten question slots.
+export const TOTAL_QUESTIONS = 20;
+
+const imageQuestions = Array.from({ length: 10 }, (_, index) => {
+  const id = `Q${String(index + 1).padStart(2, '0')}`;
+  return {
+    id,
+    category: '도형 추론',
+    title: '물음표에 들어갈 도형을 고르세요.',
+    image: `${id}.png`,
+    imageAlt: `${index + 1}번 도형 추론 문제와 보기 A, B, C, D`,
+    options: ['A', 'B', 'C', 'D'],
+    placeholder: false,
+    // Answer keys and explanations will be supplied separately before scoring.
+    answer: null,
+    explanation: null,
+  };
+});
+
 export const questions = [
-  { category: '패턴 인식', title: '물음표에 들어갈 숫자는 무엇일까요?', prompt: '2, 4, 8, 16, ?', options: ['20', '24', '32', '36'], answer: 2, explanation: '앞의 수에 2를 곱하는 규칙입니다.' },
-  { category: '논리적 사고', title: '다음 조건에서 반드시 참인 것은?', prompt: '모든 장미는 꽃입니다.\n모든 꽃은 식물입니다.', options: ['모든 식물은 장미다', '모든 장미는 식물이다', '모든 꽃은 장미다', '장미는 식물이 아니다'], answer: 1, explanation: '장미는 꽃에 포함되고 꽃은 식물에 포함되므로 모든 장미는 식물입니다.' },
-  { category: '공간 지각', title: '위쪽 화살표를 시계 방향으로 90° 돌리면?', prompt: '↑  ↻  90°', options: ['↑', '←', '↓', '→'], answer: 3, explanation: '위쪽에서 시계 방향으로 90도 회전하면 오른쪽입니다.' },
-  { category: '수리적 사고', title: '공책 3권이 6,000원입니다. 같은 공책 5권의 가격은?', options: ['8,000원', '9,000원', '10,000원', '12,000원'], answer: 2, explanation: '한 권에 2,000원이므로 5권은 10,000원입니다.' },
-  { category: '패턴 인식', title: '다음 순서에서 빈칸에 들어갈 모양은?', prompt: '●  ▲  ■  ●  ▲  ?', options: ['●', '■', '◆', '▲'], answer: 1, explanation: '원, 삼각형, 사각형이 순서대로 반복됩니다.' },
-  { category: '논리적 사고', title: '세 사람 중 키가 가장 큰 사람은?', prompt: '민수는 지우보다 큽니다.\n지우는 서연보다 큽니다.', options: ['민수', '지우', '서연', '알 수 없다'], answer: 0, explanation: '민수 > 지우 > 서연 순서입니다.' },
-  { category: '공간 지각', title: '정육면체에서 하나의 면과 모서리를 공유하는 면은 몇 개일까요?', prompt: '□', options: ['2개', '3개', '4개', '5개'], answer: 2, explanation: '자기 자신과 반대편 면을 제외한 4개 면과 모서리를 공유합니다.' },
-  { category: '수리적 사고', title: '80의 25%는 얼마일까요?', options: ['15', '20', '25', '40'], answer: 1, explanation: '25%는 4분의 1이므로 80 ÷ 4 = 20입니다.' },
-  { category: '패턴 인식', title: '물음표에 들어갈 숫자는 무엇일까요?', prompt: '1, 1, 2, 3, 5, 8, ?', options: ['10', '11', '13', '16'], answer: 2, explanation: '바로 앞 두 수를 더합니다. 5 + 8 = 13입니다.' },
-  { category: '논리적 사고', title: '반드시 참인 결론을 고르세요.', prompt: '파란 상자에는 모두 공이 있습니다.\n이 상자에는 공이 없습니다.', options: ['이 상자는 파란색이다', '이 상자는 파란색이 아니다', '모든 상자가 비어 있다', '공은 모두 파란색이다'], answer: 1, explanation: '파란 상자라면 공이 있어야 하므로, 공이 없는 이 상자는 파란색일 수 없습니다.' },
-  { category: '공간 지각', title: '다음 배열을 180° 회전한 결과는?', prompt: '●  ○\n▲  ■', options: ['■ ▲ / ○ ●', '○ ● / ■ ▲', '▲ ■ / ● ○', '● ○ / ▲ ■'], answer: 0, explanation: '180도 회전하면 좌상단과 우하단, 우상단과 좌하단의 위치가 서로 바뀝니다. /는 줄바꿈을 뜻합니다.' },
-  { category: '수리적 사고', title: '다섯 수의 평균이 12입니다. 이 수들의 합은?', options: ['17', '24', '50', '60'], answer: 3, explanation: '합계 = 평균 × 개수이므로 12 × 5 = 60입니다.' },
-  { category: '패턴 인식', title: '물음표에 들어갈 숫자는 무엇일까요?', prompt: '3, 6, 11, 18, 27, ?', options: ['36', '38', '40', '42'], answer: 1, explanation: '차이가 3, 5, 7, 9로 증가하므로 다음에는 11을 더해 38입니다.' },
-  { category: '논리적 사고', title: '정확히 한 사람만 참말을 합니다. 누가 참말을 할까요?', prompt: '가: “나는 범인이 아니다.”\n나: “가가 범인이다.”\n다: “나는 범인이 아니다.”\n범인은 세 사람 중 한 명입니다.', options: ['가', '나', '다', '알 수 없다'], answer: 0, explanation: '가와 나의 말은 서로 반대이므로 둘 중 하나만 참입니다. 다의 말은 거짓이어야 해서 다가 범인이고, 가만 참말을 합니다.' },
-  { category: '공간 지각', title: '정사각형 종이를 반으로 한 번 접고, 접힌 선을 피해 구멍을 하나 뚫었습니다. 펼치면 구멍은 몇 개일까요?', options: ['1개', '2개', '3개', '4개'], answer: 1, explanation: '겹친 두 겹을 뚫었으므로 펼치면 대칭인 위치에 구멍 2개가 생깁니다.' },
-  { category: '수리적 사고', title: '기계 4대가 4분에 제품 4개를 만듭니다. 같은 속도의 기계 8대가 8개를 만드는 데 걸리는 시간은?', options: ['2분', '4분', '8분', '16분'], answer: 1, explanation: '각 기계는 4분에 1개를 만듭니다. 8대가 동시에 일하면 4분에 8개를 만듭니다.' },
-  { category: '패턴 인식', title: '물음표에 들어갈 문자는 무엇일까요?', prompt: 'A, C, F, J, O, ?', options: ['S', 'T', 'U', 'V'], answer: 2, explanation: '알파벳 위치가 2, 3, 4, 5칸씩 증가합니다. O에서 6칸 뒤는 U입니다.' },
-  { category: '논리적 사고', title: '카드는 한쪽에 문자, 다른 쪽에 숫자가 있습니다. 아래 규칙을 검증하려면 반드시 뒤집어야 할 카드는?', prompt: '규칙: 모음 뒤에는 짝수가 있다.\n보이는 카드: A · B · 4 · 7', options: ['A와 4', 'B와 4', 'A와 7', '4와 7'], answer: 2, explanation: 'A 뒤가 짝수인지, 홀수 7 뒤가 모음이 아닌지 확인해야 합니다. 짝수 뒤에 모음이 있어야 한다는 규칙은 없습니다.' },
-  { category: '공간 지각', title: '북쪽을 보고 서 있습니다. 오른쪽으로 90°, 다시 오른쪽으로 90°, 왼쪽으로 90° 돌면 어느 방향을 볼까요?', options: ['북쪽', '남쪽', '동쪽', '서쪽'], answer: 2, explanation: '북쪽 → 동쪽 → 남쪽 → 동쪽 순서입니다.' },
-  { category: '수리적 사고', title: '가방과 펜의 가격 합은 11,000원입니다. 가방은 펜보다 10,000원 비쌉니다. 펜의 가격은?', options: ['500원', '1,000원', '1,500원', '2,000원'], answer: 0, explanation: '펜이 x원이면 가방은 x + 10,000원입니다. 2x + 10,000 = 11,000이므로 x = 500입니다.' }
+  ...imageQuestions,
+  ...Array.from({ length: TOTAL_QUESTIONS - imageQuestions.length }, (_, index) => ({
+    id: `Q${String(imageQuestions.length + index + 1).padStart(2, '0')}`,
+    category: '준비 중',
+    title: '새로운 문제가 들어갈 자리예요.',
+    prompt: '문항 준비 중 · PLACEHOLDER\n아무 보기나 선택하면 다음 단계로 진행할 수 있어요.',
+    options: ['A', 'B', 'C', 'D'],
+    placeholder: true,
+    answer: null,
+    explanation: null,
+  })),
 ];

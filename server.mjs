@@ -2,6 +2,10 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 
 const files = { '/': ['index.html', 'text/html'], '/index.html': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'], '/app.js': ['app.js', 'text/javascript'], '/questions.js': ['questions.js', 'text/javascript'] };
+for (let i = 1; i <= 10; i++) {
+  const name = `Q${String(i).padStart(2, '0')}.png`;
+  files[`/${name}`] = [name, 'image/png'];
+}
 const server = http.createServer(async (req, res) => {
   const file = files[new URL(req.url, 'http://localhost').pathname];
   if (!file || !['GET', 'HEAD'].includes(req.method)) { res.writeHead(404); res.end('Not found'); return; }

@@ -20,13 +20,19 @@ npm test
 
 - `index.html`: 소개, 인지 영역, 리포트 예시, FAQ
 - `style.css`: 데스크톱·모바일 스타일, 기하학 일러스트
-- `questions.js`: 네 영역별 5개씩 총 20개 예시 문항과 정답·해설
+- `questions.js`: Q01~Q10 이미지 문항 + 임시 문항 10개 (총 20문항)
 - `app.js`: 문항 이동, 응답 수정, 이메일 검증, 데모 결제 흐름
 - `server.mjs`: 허용된 정적 파일만 제공하는 로컬 서버
 
+## 문항 교체
+
+`Q01.png`~`Q10.png`를 순서대로 표시하며 A~D 선택지를 제공합니다. 11~20번은 placeholder로, 아무 보기나 선택해 결제 데모까지 진행할 수 있습니다. `questions.js`의 `TOTAL_QUESTIONS`를 `30`으로 바꾸면 임시 문항이 20개로 늘어나며 화면의 문항 수도 함께 변경됩니다.
+
+정답표와 해설은 아직 입력하지 않았으며 `answer`와 `explanation`은 `null`입니다. 실제 채점 연결 전 확정된 정답표를 추가하고 placeholder는 채점에서 제외하세요.
+
 ## Cloudflare 배포
 
-배포용 파일은 `npm run build`로 생성하는 `dist/`에만 담깁니다. HTML, CSS, 브라우저 JavaScript 및 문항 파일 총 4개를 복사합니다. `node_modules`, 로컬 서버, 테스트, 환경변수 파일은 포함하지 않습니다. 문항을 줄이거나 제거할 필요가 없습니다.
+배포용 파일은 `npm run build`로 생성하는 `dist/`에만 담깁니다. HTML, CSS, 브라우저 JavaScript 및 문항 파일과 Q01~Q10 PNG 이미지 총 14개를 복사합니다. `node_modules`, 로컬 서버, 테스트, 환경변수 파일은 포함하지 않습니다. 문항을 줄이거나 제거할 필요가 없습니다.
 
 ### Workers Git 연동
 
