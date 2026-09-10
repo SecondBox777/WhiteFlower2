@@ -7,7 +7,7 @@ const imageQuestions = Array.from({ length: 10 }, (_, index) => {
     id,
     category: '도형 추론',
     title: '물음표에 들어갈 도형을 고르세요.',
-    image: `${id}.png`,
+    image: `${id}.webp`,
     imageAlt: `${index + 1}번 도형 추론 문제와 보기 A, B, C, D`,
     options: ['A', 'B', 'C', 'D'],
     placeholder: false,

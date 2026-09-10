@@ -10,6 +10,23 @@ let current = 0;
 let stage = 'intro';
 let lastTrigger;
 
+// Keep decoded images alive for subsequent questions and backward navigation.
+const preloadedImages = new Map();
+function preloadQuestions(start, count = 2) {
+  for (const q of questions.slice(start, start + count)) {
+    if (!q.image || preloadedImages.has(q.image)) continue;
+    const image = new Image();
+    image.decoding = 'async';
+    image.fetchPriority = start === 0 ? 'auto' : 'low';
+    preloadedImages.set(q.image, image);
+    image.onerror = () => preloadedImages.delete(q.image);
+    image.src = q.image;
+    // Decode in advance without blocking answer selection or navigation.
+    image.decode().catch(() => {});
+  }
+}
+preloadQuestions(0, 1);
+
 function render(markup) {
   content.innerHTML = markup;
   dialog.scrollTop = 0;
@@ -19,13 +36,15 @@ function render(markup) {
 
 function intro() {
   stage = 'intro';
+  preloadQuestions(0, 3);
   render(`<span class="flow-eyebrow">MEET YOUR MIND</span><h2 class="flow-title" id="flow-title">잠깐의 집중, 새로운 발견.</h2><p class="flow-text">편안한 마음으로 ${questions.length}개의 질문에 답해 주세요.<br>가장 적절하다고 생각하는 답을 하나씩 선택하면 됩니다.</p><div class="flow-info">◷ 권장 시간 약 15분 · 시간 제한 없음<br>◇ 도형 추론 10문항 · 임시 문항 ${questions.filter(q => q.placeholder).length}개<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.</div><p class="flow-text">이 테스트는 표준화된 IQ 검사가 아닌 참고용 예시입니다. 테스트는 무료이며, 상세 리포트 구매 단계는 데모로 체험할 수 있습니다.</p><button class="button primary full" id="begin">준비됐어요, 시작하기 <span>→</span></button><p class="flow-footnote">응답은 이 페이지에서만 유지됩니다. 새로고침하면 초기화됩니다.</p>`);
   document.querySelector('#begin').onclick = () => { stage = 'test'; question(); };
 }
 
 function question() {
   const q = questions[current];
-  render(`<div class="progress-top"><span>${q.category}</span><span>${String(current + 1).padStart(2, '0')} <span aria-hidden="true">/</span> ${questions.length}</span></div><div class="progress-track" role="progressbar" aria-label="문항 진행률" aria-valuenow="${current + 1}" aria-valuemin="0" aria-valuemax="${questions.length}"><span style="width:${(current + 1) / questions.length * 100}%"></span></div><span class="flow-eyebrow">QUESTION ${String(current + 1).padStart(2, '0')}</span><h2 class="flow-title" id="flow-title">${q.title}</h2>${q.prompt ? `<div class="question-prompt">${q.prompt}</div>` : ''}${q.image ? `<a class="question-image-link" href="${q.image}" target="_blank" rel="noopener" aria-label="${q.imageAlt} 원본 크게 보기 (새 탭)"><img class="question-image" src="${q.image}" alt="${q.imageAlt}" width="1254" height="1254"><span>문제 크게 보기 ↗</span></a><p class="flow-footnote">이미지 아래의 보기 A~D 중 하나를 선택해 주세요.</p>` : ''}<div class="answers" role="group" aria-labelledby="flow-title">${q.options.map((option, i) => `<button class="answer ${answers[current] === i ? 'selected' : ''}" data-answer="${i}" aria-pressed="${answers[current] === i}"><span>${option}</span>보기 ${option}</button>`).join('')}</div><div class="flow-actions"><button class="button secondary" id="previous" ${current === 0 ? 'disabled' : ''}>← 이전 문항</button><button class="button primary" id="next" ${answers[current] === null ? 'disabled' : ''}>${current === questions.length - 1 ? '테스트 완료' : '다음 문항'} <span>→</span></button></div><p class="flow-footnote">정답을 모르겠다면 가장 가까운 답을 선택해 주세요.</p>`);
+  preloadQuestions(current + 1);
+  render(`<div class="progress-top"><span>${q.category}</span><span>${String(current + 1).padStart(2, '0')} <span aria-hidden="true">/</span> ${questions.length}</span></div><div class="progress-track" role="progressbar" aria-label="문항 진행률" aria-valuenow="${current + 1}" aria-valuemin="0" aria-valuemax="${questions.length}"><span style="width:${(current + 1) / questions.length * 100}%"></span></div><span class="flow-eyebrow">QUESTION ${String(current + 1).padStart(2, '0')}</span><h2 class="flow-title" id="flow-title">${q.title}</h2>${q.prompt ? `<div class="question-prompt">${q.prompt}</div>` : ''}${q.image ? `<a class="question-image-link" href="${q.image}" target="_blank" rel="noopener" aria-label="${q.imageAlt} 크게 보기 (새 탭)"><img class="question-image" decoding="async" fetchpriority="high" src="${q.image}" alt="${q.imageAlt}" width="1254" height="1254"><span>문제 크게 보기 ↗</span></a><p class="flow-footnote">이미지 아래의 보기 A~D 중 하나를 선택해 주세요.</p>` : ''}<div class="answers" role="group" aria-labelledby="flow-title">${q.options.map((option, i) => `<button class="answer ${answers[current] === i ? 'selected' : ''}" data-answer="${i}" aria-pressed="${answers[current] === i}"><span>${option}</span>보기 ${option}</button>`).join('')}</div><div class="flow-actions"><button class="button secondary" id="previous" ${current === 0 ? 'disabled' : ''}>← 이전 문항</button><button class="button primary" id="next" ${answers[current] === null ? 'disabled' : ''}>${current === questions.length - 1 ? '테스트 완료' : '다음 문항'} <span>→</span></button></div><p class="flow-footnote">정답을 모르겠다면 가장 가까운 답을 선택해 주세요.</p>`);
   content.querySelectorAll('[data-answer]').forEach(button => {
     button.onclick = () => {
       answers[current] = Number(button.dataset.answer);
