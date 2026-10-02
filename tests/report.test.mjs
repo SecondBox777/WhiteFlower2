@@ -33,3 +33,19 @@ test('analysis preserves excluded-response reasons',()=>{
  const data=validateSubmission(submission());data.seconds[0]=0;data.answers[1]=null;
  const analysis=buildAnalysis(data);assert.equal(analysis.items[0].excluded,'too_fast');assert.equal(analysis.items[0].earned,0);assert.equal(analysis.items[1].excluded,'unanswered');
 });
+
+test('configuration errors identify missing bindings without exposing secrets', async () => {
+ for (const [env, missing] of [[{OPENAI_MODEL:'gpt-6-sol'}, 'OPENAI_API_KEY'], [{OPENAI_API_KEY:'private-test-key'}, 'OPENAI_MODEL']]) {
+  const response = await handleReport(context(submission(), env));
+  assert.equal(response.status, 503);
+  const body = await response.json();
+  assert.ok(body.error.includes(missing));
+  assert.ok(!body.error.includes('private-test-key'));
+ }
+});
+test('experimental submissions are marked as random integration data', () => {
+ const data = validateSubmission({...submission(), experimental:true});
+ assert.equal(buildAnalysis(data).experimental, true);
+ assert.equal(buildAnalysis(validateSubmission(submission())).experimental, false);
+ assert.throws(() => validateSubmission({...submission(), experimental:'true'}));
+});

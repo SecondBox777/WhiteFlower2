@@ -67,3 +67,5 @@ CLI 배포는 `npm run deploy`, 로컬 Worker 실행은 `npm run worker:dev`입�
 먼저 Worker 코드를 배포한 뒤 Workers & Pages → 기존 Worker → Settings → Variables and Secrets에 `OPENAI_API_KEY`를 Secret으로, `OPENAI_MODEL`을 텍스트 변수로 추가하고 배포합니다. 빌드 환경변수가 아닌 Worker 런타임 설정입니다. `keep_vars: true`로 Dashboard에서 설정한 텍스트 변수를 다음 Wrangler 배포에서도 유지합니다. 키는 소스나 공개 파일에 포함하지 않습니다.
 
 [설정과 데이터 전달 형식](docs/openai-report.md)을 참고하세요.
+
+테스트 시작 안내의 **랜덤 답안 제출 · 실험용** 버튼은 A~D 중 무작위 30개 답안과 문항 기준시간의 60~140% 범위 가상 시간을 생성하여 즉시 결과로 이동합니다. 총 시간은 30분 미만으로 제한합니다. AI 보고서는 기존 전송 동의/생성 버튼으로 요청하며 서버와 모델에도 실험 데이터임을 전달합니다.
