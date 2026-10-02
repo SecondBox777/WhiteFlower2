@@ -1,3 +1,4 @@
+import { questions } from '../questions.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -8,7 +9,7 @@ import { join } from 'node:path';
 test('deployment contains only public assets and removes stale output', async () => {
   const fixture = await mkdtemp(join(tmpdir(), 'mindscope-build-'));
   const root = new URL('../', import.meta.url);
-  const assets = ['app.js', 'index.html', 'questions.js', 'style.css', ...Array.from({ length: 10 }, (_, i) => `Q${String(i + 1).padStart(2, '0')}.webp`)].sort();
+  const assets = ['app.js', 'index.html', 'questions.js', 'scoring.js', 'style.css', ...questions.map(q => q.image)].sort();
   try {
     await mkdir(join(fixture, 'scripts'));
     await copyFile(new URL('scripts/build.mjs', root), join(fixture, 'scripts/build.mjs'));

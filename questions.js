@@ -1,7 +1,6 @@
-// Set to 30 to reserve another ten question slots.
-export const TOTAL_QUESTIONS = 20;
+export const TOTAL_QUESTIONS = 30;
 
-const imageQuestions = Array.from({ length: 10 }, (_, index) => {
+export const questions = Array.from({ length: TOTAL_QUESTIONS }, (_, index) => {
   const id = `Q${String(index + 1).padStart(2, '0')}`;
   return {
     id,
@@ -16,17 +15,3 @@ const imageQuestions = Array.from({ length: 10 }, (_, index) => {
     explanation: null,
   };
 });
-
-export const questions = [
-  ...imageQuestions,
-  ...Array.from({ length: TOTAL_QUESTIONS - imageQuestions.length }, (_, index) => ({
-    id: `Q${String(imageQuestions.length + index + 1).padStart(2, '0')}`,
-    category: '준비 중',
-    title: '새로운 문제가 들어갈 자리예요.',
-    prompt: '문항 준비 중 · PLACEHOLDER\n아무 보기나 선택하면 다음 단계로 진행할 수 있어요.',
-    options: ['A', 'B', 'C', 'D'],
-    placeholder: true,
-    answer: null,
-    explanation: null,
-  })),
-];

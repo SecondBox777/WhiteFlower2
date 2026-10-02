@@ -1,9 +1,9 @@
 import http from 'node:http';
+import { questions } from './questions.js';
 import { readFile } from 'node:fs/promises';
 
-const files = { '/': ['index.html', 'text/html'], '/index.html': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'], '/app.js': ['app.js', 'text/javascript'], '/questions.js': ['questions.js', 'text/javascript'] };
-for (let i = 1; i <= 10; i++) {
-  const name = `Q${String(i).padStart(2, '0')}.webp`;
+const files = { '/scoring.js': ['scoring.js', 'text/javascript'], '/': ['index.html', 'text/html'], '/index.html': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'], '/app.js': ['app.js', 'text/javascript'], '/questions.js': ['questions.js', 'text/javascript'] };
+for (const { image: name } of questions) {
   files[`/${name}`] = [name, 'image/webp'];
 }
 const server = http.createServer(async (req, res) => {

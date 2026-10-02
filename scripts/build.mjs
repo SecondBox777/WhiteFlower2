@@ -1,10 +1,11 @@
+import { questions } from '../questions.js';
 import { mkdir, copyFile, rm, stat } from 'node:fs/promises';
 
 // Only public website assets belong in the deployment directory.
 // Never copy the repository root: it can contain dependencies and secrets.
 const root = new URL('../', import.meta.url);
 const output = new URL('dist/', root);
-const assets = ['index.html', 'style.css', 'app.js', 'questions.js', ...Array.from({ length: 10 }, (_, i) => `Q${String(i + 1).padStart(2, '0')}.webp`)];
+const assets = ['index.html', 'style.css', 'app.js', 'questions.js', 'scoring.js', ...questions.map(q => q.image)];
 
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
