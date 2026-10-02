@@ -7,7 +7,11 @@
     "dev": "node server.mjs",
     "start": "node server.mjs",
     "build": "node scripts/build.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "worker:dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

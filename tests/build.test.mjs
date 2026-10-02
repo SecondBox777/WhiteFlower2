@@ -28,7 +28,10 @@ test('deployment contains only public assets and removes stale output', async ()
     }
     const config = JSON.parse(await readFile(new URL('wrangler.jsonc', root), 'utf8'));
     assert.equal(config.assets.directory, './dist');
-    assert.equal(config.build.command, 'npm run build');
+    assert.equal(config.main, 'src/index.js');
+    assert.equal(config.assets.binding, 'ASSETS');
+    assert.deepEqual(config.assets.run_worker_first, ['/api/*']);
+    assert.equal(config.pages_build_output_dir, undefined);
   } finally {
     await rm(fixture, { recursive: true, force: true });
   }

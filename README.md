@@ -46,18 +46,9 @@ TEST 시작 시 30분을 측정합니다. 문항별 시간은 화면에 표시�
 
 ### Workers Git 연동
 
-- 루트 디렉터리: 저장소 루트
-- 빌드 명령: `npm run build`
-- 배포 명령: `npx wrangler deploy`
-- Worker 이름: `whiteflower2` (기존 Cloudflare 프로젝트 이름이 다르면 `wrangler.jsonc`의 `name`을 해당 이름으로 변경)
+기존 Workers 프로젝트와 GitHub 연결을 유지합니다. `wrangler.jsonc`의 `main`은 `src/index.js`이며 `dist`를 `ASSETS` binding으로 제공합니다. `/api/*`는 Worker가 먼저 처리합니다. 배포 명령은 `npx wrangler deploy`이며 Wrangler의 `build.command`가 `npm run build`를 실행합니다. Dashboard 빌드 명령은 비워도 되고 기존 `npm run build`를 유지해도 됩니다(후자는 빌드가 두 번 실행됩니다).
 
-`wrangler.jsonc`가 정적 에셋 디렉터리를 `./dist`로 지정합니다. Wrangler 자체 빌드 설정도 있으므로 빌드 명령을 비워 두더라도 `npx wrangler deploy`가 배포 전에 파일을 생성합니다. 빌드 명령을 별도로 설정하면 같은 빌드가 한 번 더 실행되어도 안전합니다.
-
-기존 배포 명령에 `--assets .` 또는 저장소 루트 경로가 있다면 반드시 제거하세요. CLI 인수로 잘못된 경로를 지정하면 설정 파일의 `dist` 경로를 덮어쓸 수 있습니다. `server.mjs`는 로컬 개발 전용이며 Workers에서는 실행하지 않습니다.
-
-### Cloudflare Pages를 사용하는 경우
-
-프레임워크는 None, 빌드 명령은 `npm run build`, 빌드 출력 디렉터리는 `dist`로 설정하세요.
+CLI 배포는 `npm run deploy`, 로컬 Worker 실행은 `npm run worker:dev`입니다. 기존 `npm run dev`는 정적 화면만 확인합니다. 실제 Dashboard 프로젝트 이름이 다르면 `wrangler.jsonc`의 `name`을 해당 이름과 맞추세요.
 
 ### 25 MiB 오류의 원인
 
@@ -65,6 +56,14 @@ TEST 시작 시 30분을 측정합니다. 문항별 시간은 화면에 표시�
 
 ## 테스트 버전의 범위
 
-현재는 결제·이메일 입력 없이 결과를 즉시 표시합니다. 응답은 브라우저 메모리에서만 유지되며 외부로 전송하지 않습니다. 답지는 체험용 클라이언트 모듈에 포함되어 있습니다. 실제 유료 서비스로 전환할 때는 서버 채점·세션 저장·결제 확인·이메일 발송을 구현해야 합니다.
+현재는 결제·이메일 입력 없이 결과를 즉시 표시합니다. 응답은 브라우저 메모리에서 유지되며, 사용자가 동의하고 AI 보고서를 요청하면 응답·시간·채점 통계를 OpenAI에 전송합니다. 답지는 체험용 클라이언트 모듈에 포함되어 있습니다. 실제 유료 서비스로 전환할 때는 서버 채점·세션 저장·결제 확인·이메일 발송을 구현해야 합니다.
 
 결과는 확률 모형으로 생성한 합성·예비 자료에 기반하며 검증된 IQ 규준이 아닙니다. 실제 사람이나 AI가 문항을 풀어 얻은 결과가 아니며, 현재 실행 중인 AI 모델이 응시자를 평가하는 방식도 아닙니다. 선형 회귀의 극단 점수 결과는 특히 해석이 제한됩니다. 소개 화면의 영역별 차트는 실제 결과와 무관한 예시입니다.
+
+## OpenAI AI 보고서 (Cloudflare Worker)
+
+브라우저 → `POST /api/analyze` → Worker → OpenAI Responses API로 연결됩니다. 전송 동의 후 한국어/영어 보고서를 생성하며 서버에서 다시 채점합니다. 강점·보완점·인지적 특성·업무 환경·직업 탐색·종합 분석을 제공합니다. 프롬프트와 출력 형식은 `lib/report.js`에서 수정합니다.
+
+먼저 Worker 코드를 배포한 뒤 Workers & Pages → 기존 Worker → Settings → Variables and Secrets에 `OPENAI_API_KEY`를 Secret으로, `OPENAI_MODEL`을 텍스트 변수로 추가하고 배포합니다. 빌드 환경변수가 아닌 Worker 런타임 설정입니다. `keep_vars: true`로 Dashboard에서 설정한 텍스트 변수를 다음 Wrangler 배포에서도 유지합니다. 키는 소스나 공개 파일에 포함하지 않습니다.
+
+[설정과 데이터 전달 형식](docs/openai-report.md)을 참고하세요.

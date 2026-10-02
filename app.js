@@ -14,6 +14,9 @@ let clock;
 let ticker;
 let result;
 let expired = false;
+let aiReport = null;
+let reportLoading = false;
+let reportController;
 
 // Keep decoded images alive for subsequent questions and backward navigation.
 const preloadedImages = new Map();
@@ -76,12 +79,14 @@ function finish(timedOut = false) {
 }
 function showResult() {
   const elapsed = Math.round(clock.seconds.reduce((a, b) => a + b, 0));
-  render(`<span class="demo-label">TEST RESULT · 합성 모형 기반</span><h2 class="flow-title center" id="flow-title">AI가 측정하는 당신의 IQ는...</h2><div class="iq-result"><span>예비 IQ 추정값</span><strong id="iq-result">${Math.round(result.iq)}</strong><small>합성 모집단의 선형 회귀 추정</small></div><p class="flow-text center">${expired ? '30분이 종료되어 자동 제출되었습니다. 제한에 도달한 문항과 미응답은 0점 처리했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>시간 보정 점수</span><strong id="score-result">${result.score.toFixed(2)} / 100</strong></div><div><span>정답 문항</span><strong>${result.correct} / 30</strong></div><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div><div class="flow-info">이 값은 실제 응시자 실험으로 검증되지 않은, AI에 의한 합성·예비 모형의 추정값입니다. 공인 IQ나 개인의 지능을 확정하는 값으로 해석할 수 없습니다.${result.score < 10 || result.score > 95 ? '<br>극단 점수에서는 선형 근사의 해석이 특히 제한됩니다.' : ''}</div><button class="button primary full" id="restart">다시 테스트하기 <span>↻</span></button><button class="button secondary full" id="finish" style="margin-top:10px">홈으로 돌아가기</button>`);
+  render(`<span class="demo-label">TEST RESULT · 합성 모형 기반</span><h2 class="flow-title center" id="flow-title">AI가 측정하는 당신의 IQ는...</h2><div class="iq-result"><span>예비 IQ 추정값</span><strong id="iq-result">${Math.round(result.iq)}</strong><small>합성 모집단의 선형 회귀 추정</small></div><p class="flow-text center">${expired ? '30분이 종료되어 자동 제출되었습니다. 제한에 도달한 문항과 미응답은 0점 처리했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>시간 보정 점수</span><strong id="score-result">${result.score.toFixed(2)} / 100</strong></div><div><span>정답 문항</span><strong>${result.correct} / 30</strong></div><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div><div class="flow-info">이 값은 실제 응시자 실험으로 검증되지 않은, AI에 의한 합성·예비 모형의 추정값입니다. 공인 IQ나 개인의 지능을 확정하는 값으로 해석할 수 없습니다.${result.score < 10 || result.score > 95 ? '<br>극단 점수에서는 선형 근사의 해석이 특히 제한됩니다.' : ''}</div><section class="ai-report-panel"><h3>AI 분석 보고서</h3><p class="flow-text">문항별 응답·시간·채점 통계를 OpenAI에 전송해 강점, 보완점과 탐색할 직업 분야를 분석합니다. 이름과 이메일은 전송하지 않습니다.</p><label class="report-consent"><input type="checkbox" id="report-consent"> 결과 데이터를 OpenAI에 전송하는 데 동의합니다.</label><label class="report-language">보고서 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label><button class="button secondary full" id="generate-report">AI 보고서 생성</button><p id="report-status" class="flow-text" role="status"></p><div id="ai-report"></div></section><button class="button primary full" id="restart">다시 테스트하기 <span>↻</span></button><button class="button secondary full" id="finish" style="margin-top:10px">홈으로 돌아가기</button>`);
+  setupReport();
   document.querySelector('#restart').onclick = () => { reset(); intro(); };
   document.querySelector('#finish').onclick = () => dialog.close();
 }
 function reset() {
   clearInterval(ticker);
+  reportController?.abort(); aiReport = null; reportLoading = false;
   answers = Array(questions.length).fill(null);
   current = 0; clock = null; result = null; expired = false;
 }
@@ -125,3 +130,55 @@ document.querySelector('#close-dialog').onclick = () => dialog.close();
 dialog.addEventListener('close', () => { content.replaceChildren(); lastTrigger?.focus(); });
 
 document.addEventListener('visibilitychange', updateTimer);
+
+function renderAIReport() {
+  const target = document.querySelector('#ai-report');
+  if (!target || !aiReport) return;
+  target.replaceChildren();
+  const paragraph = text => { const p = document.createElement('p'); p.textContent = text; target.append(p); };
+  paragraph(aiReport.summary);
+  for (const [key, label] of [['strengths','강점 · Strengths'], ['improvement_areas','보완점 · Improvement'], ['cognitive_characteristics','인지적 특성 · Cognitive characteristics'], ['work_environments','업무 환경 · Work environments'], ['careers','직업 탐색 · Career exploration']]) {
+    const heading = document.createElement('h4'); heading.textContent = label; target.append(heading);
+    for (const item of aiReport[key]) {
+      const title = document.createElement('strong'); title.textContent = item.title ?? item.field; target.append(title);
+      paragraph(item.evidence ?? item.reason); paragraph(item.advice ?? item.next_step);
+    }
+  }
+  paragraph(aiReport.limitations);
+}
+function setupReport() {
+  const button = document.querySelector('#generate-report');
+  button.disabled = reportLoading || Boolean(aiReport);
+  document.querySelector('#report-status').textContent = reportLoading ? 'AI 보고서를 작성하고 있습니다…' : '';
+  renderAIReport();
+  button.onclick = async () => {
+    if (reportLoading || aiReport) return;
+    const status = document.querySelector('#report-status');
+    if (!document.querySelector('#report-consent').checked) { status.textContent = '데이터 전송에 동의해 주세요.'; return; }
+    const controller = new AbortController(); reportController = controller;
+    const language = document.querySelector('#report-language').value;
+    reportLoading = true; button.disabled = true; status.textContent = 'AI 보고서를 작성하고 있습니다…';
+    try {
+      const response = await fetch('/api/analyze', {method:'POST', headers:{'Content-Type':'application/json'}, signal:controller.signal, body:JSON.stringify({answers, seconds:clock.seconds, expiredIndex:expired?current:null, language, consent:true})});
+      const data = await response.json().catch(() => ({error:'Cloudflare Worker 응답을 확인할 수 없습니다.'}));
+      if (!response.ok) throw new Error(data.error || '보고서 생성에 실패했습니다.');
+      if (!data.report || !data.result) throw new Error('보고서 형식이 올바르지 않습니다.');
+      if (reportController !== controller) return;
+      aiReport = data.report; result = data.result;
+      if (dialog.open && stage === 'done') {
+        document.querySelector('#score-result').textContent = `${result.score.toFixed(2)} / 100`;
+        document.querySelector('#iq-result').textContent = Math.round(result.iq);
+        renderAIReport();
+        document.querySelector('#report-status').textContent = '보고서가 완성되었습니다.';
+      }
+    } catch (error) {
+      if (reportController === controller && !controller.signal.aborted && dialog.open && stage === 'done') document.querySelector('#report-status').textContent = error.message;
+    } finally {
+      if (reportController === controller) {
+        reportLoading = false;
+        const activeButton = document.querySelector('#generate-report');
+        if (activeButton) activeButton.disabled = Boolean(aiReport);
+      }
+    }
+  };
+}
