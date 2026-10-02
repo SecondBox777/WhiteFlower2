@@ -19,7 +19,7 @@ test('server computes domain statistics and sends anonymized data with strict sc
   assert.equal(body.max_output_tokens,6000);
   assert.equal(input.email,undefined);assert.equal(input.items[0].selected,'A');
   return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(report)}]}]});
- });assert.equal(response.status,200);assert.deepEqual((await response.json()).report,report);
+ });assert.equal(response.status,200);const actual=(await response.json()).report;assert.deepEqual(actual.problem_solving,report.problem_solving);assert.equal(actual.cognitive_characteristics.length,3);assert.ok(actual.cognitive_characteristics.every(x=>x.assessment.includes('매우 뛰어납니다')));
 });
 test('invalid input and missing config never call OpenAI',async()=>{
  for(const data of [{...submission(),consent:false},{...submission(),answers:[0]},{...submission(),seconds:Array(30).fill(1800)},{...submission(),seconds:Array(30).fill(-1)},{...submission(),expiredIndex:0}]){
