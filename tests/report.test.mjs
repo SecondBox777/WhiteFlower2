@@ -13,6 +13,10 @@ test('server computes domain statistics and sends anonymized data with strict sc
   const body=JSON.parse(options.body),input=JSON.parse(body.input);
   assert.equal(body.store,false);assert.equal(body.text.format.strict,true);
   assert.ok(Math.abs(input.result.score-95)<1e-10);assert.equal(input.items.length,30);assert.equal(input.domains.length,3);
+  assert.equal(input.items[16].difficulty,5);assert.ok(input.items[16].task_description);
+  assert.equal(input.items[0].time_ratio,1);assert.ok(input.performance.by_subtype.length>3);
+  assert.ok(body.instructions.includes('relative time'));
+  assert.equal(body.max_output_tokens,6000);
   assert.equal(input.email,undefined);assert.equal(input.items[0].selected,'A');
   return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(report)}]}]});
  });assert.equal(response.status,200);assert.deepEqual((await response.json()).report,report);

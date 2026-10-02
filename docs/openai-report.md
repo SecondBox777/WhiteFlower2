@@ -29,7 +29,7 @@ npm run worker:dev
 - `wrangler.jsonc`: Worker entry point, 정적 에셋 경로/binding, API 우선 라우팅과 빌드 설정.
 - `src/index.js`: `/api/analyze`와 이전 `/api/report` 호환 경로 처리. 일반 요청은 `env.ASSETS.fetch(request)`로 전달하고 다른 API 경로는 JSON 404 반환.
 - `lib/analyze.js`: JSON 요청 검증, 서버 재채점, Secret을 통한 OpenAI 호출 및 오류 처리.
-- `lib/report.js`: 제출 형식/통계/프롬프트/출력 JSON schema. 분석 기준은 이 파일에서 조정.
+- `lib/report.js`: 제출 형식/통계 조립/출력 JSON schema. 프롬프트는 `lib/report-prompt.js`, 문항 분류는 `lib/item-metadata.js`, 지표는 `lib/performance.js`에서 조정.
 - `functions/api/report.js`: 기존 Pages용 호환 adapter이며 Workers 배포에는 사용되지 않음.
 
 ## 브라우저 → Worker
@@ -60,7 +60,7 @@ const { result, domains, report } = await response.json();
 
 ```js
 {
-  version: 'anchor110-speed05-v1',
+  version: 'anchor110-speed05-analysis-v2',
   language: 'ko',
   validity: 'synthetic_preliminary_not_validated',
   calibration: { /* IQ110 기준, 모집단 가정, 30분 제한, 규준의 한계 */ },
@@ -79,7 +79,7 @@ const { result, domains, report } = await response.json();
 
 `excluded`는 `too_fast`, `time_limit`, `unanswered` 또는 null입니다. 빠른 응답 제외는 문항 기준시간 5% 미만입니다. `correct`는 답지 일치 여부, 영역의 correct와 result.correct는 제외 문항을 뺀 유효 정답 수입니다.
 
-Function은 `https://api.openai.com/v1/responses`에 이 데이터를 `input: JSON.stringify(analysis)`로 보냅니다. 고정 instructions와 strict JSON Schema (`text.format`)를 함께 전달합니다. `store:false`, 출력 최대 4,000토큰, 요청 제한시간 60초입니다. 자동 재시도로 중복 API 비용을 발생시키지 않습니다.
+Function은 `https://api.openai.com/v1/responses`에 이 데이터를 `input: JSON.stringify(analysis)`로 보냅니다. 고정 instructions와 strict JSON Schema (`text.format`)를 함께 전달합니다. `store:false`, 출력 최대 6,000토큰, 요청 제한시간 60초입니다. 자동 재시도로 중복 API 비용을 발생시키지 않습니다.
 
 AI는 점수/IQ를 재계산하지 않고 다음 구조를 작성합니다.
 
@@ -96,6 +96,8 @@ AI는 점수/IQ를 재계산하지 않고 다음 구조를 작성합니다.
 ```
 
 관심·경력·기술 설문이 없으므로 직업은 일반적인 탐색 아이디어입니다. 문항 이미지/풀이를 보내지 않으므로 AI는 특정 오개념을 추측하지 않도록 지시했습니다. 모델 출력은 서버에서 형식을 검사하고 화면에서는 textContent로 표시합니다. 형식 검증이 내용의 사실성을 보장하지는 않습니다.
+
+문항별 과제 설명·유형·내부 난이도·작업 능력 태그와 `performance` 지표도 입력에 포함합니다. [30문항 분류 및 분석 지표](item-analysis.md)에 전체 내용과 공식이 있습니다.
 
 ## 운영 범위
 
