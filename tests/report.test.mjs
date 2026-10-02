@@ -4,7 +4,7 @@ import { handleReport } from '../lib/analyze.js';
 import { validateSubmission,buildAnalysis } from '../lib/report.js';
 import { scoringItems } from '../scoring.js';
 const submission=()=>({answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',consent:true});
-const report={summary:'Summary',strengths:[{title:'Strength',evidence:'Q01',advice:'Practice'}],improvement_areas:[],careers:[],cognitive_characteristics:[],work_environments:[],limitations:'Synthetic only'};
+const report={summary:'Summary',strengths:[{title:'Strength',evidence:'도형의 규칙을 찾는 문제',advice:'Practice'}],improvement_areas:[],careers:[],cognitive_characteristics:[],limitations:'Synthetic only'};
 const context=(data,env={OPENAI_API_KEY:'test-key',OPENAI_MODEL:'test-model'})=>({request:new Request('https://example.com/api/analyze',{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://example.com'},body:JSON.stringify(data)}),env});
 test('server computes domain statistics and sends anonymized data with strict schema',async()=>{
  const data=submission();data.score=999;data.email='private@example.com';

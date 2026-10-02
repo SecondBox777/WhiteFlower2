@@ -88,9 +88,11 @@ test('equal reference pace produces unit efficiency and matched comparisons are 
  }
 });
 
-test('report permits five careers but caps strengths at two', () => {
- const finding={title:'Pattern',evidence:'Q01 and Q02',advice:'Separate rules'};
- const report={summary:'Summary',strengths:[finding,finding],improvement_areas:[],cognitive_characteristics:[],work_environments:[],careers:Array.from({length:5},()=>({field:'Software QA',reason:'Constraint checking',next_step:'Review a test case'})),limitations:'Preliminary'};
+test('report caps careers and strengths at two and omits work environments', () => {
+ const finding={title:'Pattern',evidence:'도형의 규칙을 찾는 문제',advice:'Separate rules'};
+ const report={summary:'Summary',strengths:[finding,finding],improvement_areas:[],cognitive_characteristics:[],careers:Array.from({length:2},()=>({field:'Software QA',reason:'Constraint checking',next_step:'Review a test case'})),limitations:'Preliminary'};
  assert.equal(validReport(report),true);
+ assert.equal(validReport({...report,careers:[...report.careers,report.careers[0]]}),false);
+ assert.equal(validReport({...report,work_environments:[]}),false);
  assert.equal(validReport({...report,strengths:[finding,finding,finding]}),false);
 });

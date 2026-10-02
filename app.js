@@ -152,7 +152,7 @@ function renderAIReport() {
   target.replaceChildren();
   const paragraph = text => { const p = document.createElement('p'); p.textContent = text; target.append(p); };
   paragraph(aiReport.summary);
-  for (const [key, label] of [['strengths','강점 · Strengths'], ['improvement_areas','보완점 · Improvement'], ['cognitive_characteristics','인지적 특성 · Cognitive characteristics'], ['work_environments','업무 환경 · Work environments'], ['careers','직업 탐색 · Career exploration']]) {
+  for (const [key, label] of [['strengths','강점 · Strengths'], ['improvement_areas','보완점 · Improvement'], ['cognitive_characteristics','인지적 특성 · Cognitive characteristics'], ['careers','추천 직업 · Recommended careers']]) {
     const heading = document.createElement('h4'); heading.textContent = label; target.append(heading);
     for (const item of aiReport[key]) {
       const title = document.createElement('strong'); title.textContent = item.title ?? item.field; target.append(title);
