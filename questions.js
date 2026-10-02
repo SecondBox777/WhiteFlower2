@@ -5,6 +5,7 @@ export const questions = Array.from({ length: TOTAL_QUESTIONS }, (_, index) => {
   return {
     id,
     category: index < 10 ? '도형 추론' : index < 20 ? '논리 추론' : '공간 추론',
+    title: '문제를 보고 가장 알맞은 선택지를 고르세요.',
     image: `${id}.webp`,
     imageAlt: `Question ${index + 1}, options A, B, C, D`,
     options: ['A', 'B', 'C', 'D'],

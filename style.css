@@ -25,4 +25,9 @@ dialog.testing #flow-content{height:100%;display:flex;flex-direction:column;min-
 @media(max-width:600px){dialog.testing{width:calc(100vw - 12px);height:calc(100dvh - 12px);max-height:none;padding:32px 12px 12px;border-radius:14px}.testing .flow-title{font-size:17px}.testing .answer{gap:5px;padding:9px 3px;font-size:11px}.testing .answers{gap:5px}.testing .answer span{width:19px;height:19px}.testing .timer-label strong{font-size:16px}.testing .test-timer{padding-right:0}.testing .flow-actions .button{font-size:12px}}
 @media(max-height:560px){dialog.testing{padding:16px 22px}.testing .flow-eyebrow,.testing .progress-track,.testing .flow-footnote{display:none}.testing .flow-title{font-size:16px;margin:3px 0}.testing .test-timer{padding-bottom:5px}.testing .timer-label{margin-bottom:4px}.testing .answers{margin:4px 0}.testing .answer{padding:5px}.testing .flow-actions .button{padding:6px 14px}}
 
-.testing .question-number{font-size:13px;line-height:1.4;font-weight:600;letter-spacing:0;margin:0}.testing .answer{font-size:18px;font-weight:600}.testing .flow-actions .button{min-width:76px;font-size:22px}.testing .question-image-link>span{font-size:18px}
+/* Reserve a separate top row for the close control, above the timer. */
+.close-button{z-index:5;background:#fff;border-radius:50%}
+dialog.testing{padding-top:56px}
+.testing .test-timer{z-index:auto;padding-right:0}
+@media(max-width:600px){dialog.testing{padding-top:54px}}
+@media(max-height:560px){dialog.testing{padding-top:50px}}
