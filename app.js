@@ -94,7 +94,7 @@ function finish(timedOut = false) {
 }
 function showResult() {
   const elapsed = Math.round(clock.seconds.reduce((a, b) => a + b, 0));
-  render(`<span class="demo-label">TEST RESULT · 합성 모형 기반</span><h2 class="flow-title center" id="flow-title">AI가 측정하는 당신의 IQ는...</h2><div class="iq-result"><span>예비 IQ 추정값</span><strong id="iq-result">${Math.round(result.iq)}</strong><small>합성 모집단의 선형 회귀 추정</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안과 가상 풀이 시간으로 생성한 결과입니다.' : expired ? '30분이 종료되어 자동 제출되었습니다. 제한에 도달한 문항과 미응답은 0점 처리했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>시간 보정 점수</span><strong id="score-result">${result.score.toFixed(2)} / 100</strong></div><div><span>정답 문항</span><strong>${result.correct} / 30</strong></div><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div><div class="flow-info">이 값은 실제 응시자 실험으로 검증되지 않은, AI에 의한 합성·예비 모형의 추정값입니다. 공인 IQ나 개인의 지능을 확정하는 값으로 해석할 수 없습니다.${result.score < 10 || result.score > 95 ? '<br>극단 점수에서는 선형 근사의 해석이 특히 제한됩니다.' : ''}</div><section class="ai-report-panel"><h3>AI 분석 보고서</h3><p class="flow-text">문항별 응답·시간·채점 통계를 OpenAI에 전송해 강점, 보완점과 탐색할 직업 분야를 분석합니다. 이름과 이메일은 전송하지 않습니다.</p><label class="report-consent"><input type="checkbox" id="report-consent"> 결과 데이터를 OpenAI에 전송하는 데 동의합니다.</label><label class="report-language">보고서 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label><button class="button secondary full" id="generate-report">AI 보고서 생성</button><p id="report-status" class="flow-text" role="status"></p><div id="ai-report"></div></section><button class="button primary full" id="restart">다시 테스트하기 <span>↻</span></button><button class="button secondary full" id="finish" style="margin-top:10px">홈으로 돌아가기</button>`);
+  render(`<span class="demo-label">TEST RESULT · 합성 모형 기반</span><h2 class="flow-title center" id="flow-title">AI가 측정하는 당신의 IQ는...</h2><div class="iq-result"><span>예비 IQ 추정값</span><strong id="iq-result">${Math.round(result.iq)}</strong><small>합성 모집단의 선형 회귀 추정</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안과 가상 풀이 시간으로 생성한 결과입니다.' : expired ? '30분이 종료되어 자동 제출되었습니다. 제한에 도달한 문항과 미응답은 0점 처리했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>시간 보정 점수</span><strong id="score-result">${result.score.toFixed(2)} / 100</strong></div><div><span>정답 문항</span><strong>${result.correct} / 30</strong></div><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div><div class="flow-info">이 값은 실제 응시자 실험으로 검증되지 않은, AI에 의한 합성·예비 모형의 추정값입니다. 공인 IQ나 개인의 지능을 확정하는 값으로 해석할 수 없습니다.${result.score < 10 || result.score > 95 ? '<br>극단 점수에서는 선형 근사의 해석이 특히 제한됩니다.' : ''}</div><section class="ai-report-panel"><h3>AI 분석 보고서</h3><p class="flow-text">문항별 응답·시간·채점 통계를 OpenAI에 전송해 문제풀이 방법, 인지적 특성과 추천 직업을 분석합니다. 이름과 이메일은 전송하지 않습니다.</p><p class="flow-footnote">AI 보고서 생성을 요청하면 시험 결과를 OpenAI에 전송하는 데 동의한 것으로 간주합니다. 자세한 내용은 사이트 하단의 데이터 전송 안내를 참고하세요.</p><label class="report-language">보고서 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label><button class="button secondary full" id="generate-report">AI 보고서 생성</button><p id="report-status" class="flow-text" role="status"></p><div id="ai-report"></div></section><button class="button primary full" id="restart">다시 테스트하기 <span>↻</span></button><button class="button secondary full" id="finish" style="margin-top:10px">홈으로 돌아가기</button>`);
   setupReport();
   document.querySelector('#restart').onclick = () => { reset(); intro(); };
   document.querySelector('#finish').onclick = () => dialog.close();
@@ -152,11 +152,13 @@ function renderAIReport() {
   target.replaceChildren();
   const paragraph = text => { const p = document.createElement('p'); p.textContent = text; target.append(p); };
   paragraph(aiReport.summary);
-  for (const [key, label] of [['strengths','강점 · Strengths'], ['improvement_areas','보완점 · Improvement'], ['cognitive_characteristics','인지적 특성 · Cognitive characteristics'], ['careers','추천 직업 · Recommended careers']]) {
+  for (const [key, label] of [['problem_solving','문제풀이 · Problem solving'], ['cognitive_characteristics','인지적 특성 · Cognitive characteristics'], ['careers','추천 직업 · Recommended careers']]) {
     const heading = document.createElement('h4'); heading.textContent = label; target.append(heading);
     for (const item of aiReport[key]) {
       const title = document.createElement('strong'); title.textContent = item.title ?? item.field; target.append(title);
-      paragraph(item.evidence ?? item.reason); paragraph(item.advice ?? item.next_step);
+      if (key === 'careers') paragraph(item.required_abilities);
+      else if (key === 'cognitive_characteristics') { paragraph(item.assessment); paragraph(item.evidence); }
+      else { paragraph(item.evidence); paragraph(item.advice); }
     }
   }
   paragraph(aiReport.limitations);
@@ -169,7 +171,6 @@ function setupReport() {
   button.onclick = async () => {
     if (reportLoading || aiReport) return;
     const status = document.querySelector('#report-status');
-    if (!document.querySelector('#report-consent').checked) { status.textContent = '데이터 전송에 동의해 주세요.'; return; }
     const controller = new AbortController(); reportController = controller;
     const language = document.querySelector('#report-language').value;
     reportLoading = true; button.disabled = true; status.textContent = 'AI 보고서를 작성하고 있습니다…';

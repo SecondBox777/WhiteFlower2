@@ -88,11 +88,13 @@ test('equal reference pace produces unit efficiency and matched comparisons are 
  }
 });
 
-test('report caps careers and strengths at two and omits work environments', () => {
- const finding={title:'Pattern',evidence:'도형의 규칙을 찾는 문제',advice:'Separate rules'};
- const report={summary:'Summary',strengths:[finding,finding],improvement_areas:[],cognitive_characteristics:[],careers:Array.from({length:2},()=>({field:'Software QA',reason:'Constraint checking',next_step:'Review a test case'})),limitations:'Preliminary'};
+test('report combines three strategies and separates abilities from career demands', () => {
+ const finding={title:'Strategy',evidence:'도형의 규칙을 찾는 문제',advice:'Separate rules'};
+ const report={summary:'Summary',problem_solving:[finding,finding,finding],cognitive_characteristics:[{title:'패턴 인식',assessment:'이번 검사에서 돋보입니다.',evidence:'규칙을 찾는 문제에서 안정적인 결과'}],careers:Array.from({length:2},()=>({field:'Software QA',required_abilities:'Careful checking and logical reasoning'})),limitations:'Preliminary'};
  assert.equal(validReport(report),true);
  assert.equal(validReport({...report,careers:[...report.careers,report.careers[0]]}),false);
- assert.equal(validReport({...report,work_environments:[]}),false);
- assert.equal(validReport({...report,strengths:[finding,finding,finding]}),false);
+ assert.equal(validReport({...report,problem_solving:[...report.problem_solving,finding]}),false);
+ assert.equal(validReport({...report,strengths:[]}),false);
+ assert.equal(validReport({...report,improvement_areas:[]}),false);
+ assert.equal(validReport({...report,cognitive_characteristics:[{title:'Pattern',evidence:'Data',advice:'Practice'}]}),false);
 });

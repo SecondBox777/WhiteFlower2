@@ -10,7 +10,7 @@
 4. 변경 파일을 GitHub 배포 브랜치에 반영하여 먼저 Worker 코드와 정적 파일을 함께 배포합니다. 첫 배포는 Secret이 없어도 가능하며 API만 503을 반환하고 사이트는 정상 제공됩니다.
 5. 코드 배포 완료 후 Workers & Pages → 기존 Worker → Settings → Variables and Secrets → Add에서 Type **Secret**, 이름 **OPENAI_API_KEY**, 값 실제 키를 등록합니다. static assets only 메시지가 계속 보이면 최신 배포 로그에서 `src/index.js` 진입점을 포함했는지 확인하세요.
 6. 같은 런타임 설정에 `OPENAI_MODEL` 텍스트 변수를 추가합니다. 계정에서 사용 가능한 Responses API + Structured Outputs 지원 모델 ID를 입력합니다. Save/Deploy로 적용합니다. Build variables에만 입력하면 런타임 binding이 생기지 않습니다.
-7. 테스트 완료 → 전송 동의 → AI 보고서 생성으로 확인합니다. 실제 OpenAI 호출에는 API 비용이 발생합니다.
+7. 테스트 완료 → 전송 안내 확인 → AI 보고서 생성으로 확인합니다. 실제 OpenAI 호출에는 API 비용이 발생합니다.
 
 `keep_vars: true`는 Dashboard에서 입력한 일반 변수를 Git 재배포 시 유지합니다. Secret은 Wrangler vars에 선언하지 않습니다. 현재 작업에서는 Git push/실제 Cloudflare 배포/실제 OpenAI 호출을 수행하지 않았습니다.
 
@@ -86,11 +86,9 @@ AI는 점수/IQ를 재계산하지 않고 다음 구조를 작성합니다.
 ```js
 {
   summary: '전체 결과 해석',
-  strengths: [{ title: '상대적 강점', evidence: '문항/영역 통계 근거', advice: '활용 방법' }],
-  improvement_areas: [{ title: '보완할 부분', evidence: '근거', advice: '연습 방법' }],
-  careers: [{ field: '탐색할 직업 분야', reason: '탐색 이유', next_step: '직접 해볼 활동' }],
-  cognitive_characteristics: [{ title: '잠정적 관찰', evidence: '통계 근거', advice: '탐색 방법' }],
-  work_environments: [{ title: '탐색할 업무 환경', evidence: '통계 근거', advice: '확인 활동' }],
+  problem_solving: [{ title: '풀이 방법', evidence: '문제 유형을 쉬운 말로 설명한 근거', advice: '구체적인 풀이 방법' }],
+  cognitive_characteristics: [{ title: '인지 능력', assessment: '검사 내 상대적 강점/보완할 능력', evidence: '쉬운 말로 설명한 근거' }],
+  careers: [{ field: '추천 직업', required_abilities: '이 직업에서 특히 요구되는 능력' }],
   limitations: '합성 모형 및 해석 한계'
 }
 ```
