@@ -1,5 +1,7 @@
 // Source: supplied answer workbook and simulation/results.json (synthetic, preliminary).
 export const LIMIT_SECONDS = 1800;
+// Product rule, independent of the original synthetic calibration.
+export const MIN_RESPONSE_RATIO = 0.05;
 export const scoringItems = [
   {
     "answer": "A",
@@ -163,6 +165,8 @@ export function speedFactor(ratio) {
 export function scoreTest(answers, seconds, expiredIndex = null) {
   let score = 0, correct = 0;
   scoringItems.forEach((item, index) => {
+    const time = seconds[index];
+    if (!Number.isFinite(time) || time < item.referenceSeconds * MIN_RESPONSE_RATIO) return;
     if (index === expiredIndex || answers[index] !== 'ABCD'.indexOf(item.answer)) return;
     correct++;
     score += item.points * (0.8 + 0.2 * speedFactor((seconds[index] ?? 0) / item.referenceSeconds));
