@@ -4,6 +4,9 @@ import { LIMIT_SECONDS, scoreTest, scoringItems, TestClock } from './scoring.js'
 document.querySelectorAll('[data-question-count]').forEach(item => { item.textContent = questions.length; });
 document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. AI가 측정하는 당신의 IQ는... 합성 모형 기반 테스트.`;
 
+// Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
+const TESTING_PAUSED = true;
+
 const dialog = document.querySelector('#flow-dialog');
 const content = document.querySelector('#flow-content');
 let answers = Array(questions.length).fill(null);
@@ -133,7 +136,13 @@ function question() {
 }
 
 document.querySelectorAll('[data-start]').forEach(button => {
+  if (TESTING_PAUSED) {
+    button.disabled = true;
+    button.textContent = '테스트 일시 중지';
+    button.title = '테스트는 잠시 쉬고 있습니다.';
+  }
   button.onclick = () => {
+    if (TESTING_PAUSED) return;
     lastTrigger = button;
     dialog.showModal();
     if (stage === 'test') question();

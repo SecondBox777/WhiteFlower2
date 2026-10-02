@@ -71,3 +71,7 @@ CLI 배포는 `npm run deploy`, 로컬 Worker 실행은 `npm run worker:dev`입�
 테스트 시작 안내의 **랜덤 답안 제출 · 실험용** 버튼은 A~D 중 무작위 30개 답안과 문항 기준시간의 60~140% 범위 가상 시간을 생성하여 즉시 결과로 이동합니다. 총 시간은 30분 미만으로 제한합니다. AI 보고서는 생성 버튼으로 요청하며 서버와 모델에도 실험 데이터임을 전달합니다.
 
 보고서는 30문항의 검토된 과제 태그와 상대 풀이시간·난이도·정답 여부를 교차 분석합니다. [문항별 분류와 지표 정의](docs/item-analysis.md)를 참고하세요. 프롬프트는 `lib/report-prompt.js`, 내부 문항 분류는 `lib/item-metadata.js`, 지표 계산은 `lib/performance.js`에서 수정합니다.
+
+## 일시 중지 해제
+
+현재 테스트 시작 버튼과 AI 보고서 API를 일시 중지했습니다. 재개하려면 `app.js`의 `TESTING_PAUSED`를 `false`로, `wrangler.jsonc`의 `vars.TESTING_PAUSED`를 문자열 `"false"`로 변경하고 GitHub에 push합니다. 서버는 중지 상태에서 요청 본문을 읽거나 OpenAI를 호출하기 전에 503으로 응답하므로, 오래 열린 페이지나 직접 API 요청도 보고서를 생성하지 못합니다. API 키는 그대로 보관합니다.

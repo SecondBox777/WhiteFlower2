@@ -27,3 +27,14 @@ test('malformed, oversized and non-JSON bodies are rejected before OpenAI', asyn
     assert.equal(response.status, expected);
   }
 });
+
+test('temporary pause blocks both report routes before any OpenAI request', async () => {
+  for (const path of ['/api/analyze', '/api/report']) {
+    const request = new Request(`https://example.com${path}`, {method:'POST', body:'{}', headers:{'Content-Type':'application/json'}});
+    const response = await worker.fetch(request, {TESTING_PAUSED:'true'});
+    assert.equal(response.status,503);
+    assert.ok((await response.json()).error.includes('중지'));
+  }
+  const response=await handleReport({request:new Request('https://example.com/api/analyze'),env:{TESTING_PAUSED:'true'}},()=>{throw Error('Must not call OpenAI');});
+  assert.equal(response.status,503);
+});
