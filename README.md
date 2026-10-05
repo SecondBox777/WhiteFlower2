@@ -74,4 +74,4 @@ CLI 배포는 `npm run deploy`, 로컬 Worker 실행은 `npm run worker:dev`입�
 
 ## 일시 중지 해제
 
-현재 테스트 시작 버튼과 AI 보고서 API를 일시 중지했습니다. 재개하려면 `app.js`의 `TESTING_PAUSED`를 `false`로, `wrangler.jsonc`의 `vars.TESTING_PAUSED`를 문자열 `"false"`로 변경하고 GitHub에 push합니다. 서버는 중지 상태에서 요청 본문을 읽거나 OpenAI를 호출하기 전에 503으로 응답하므로, 오래 열린 페이지나 직접 API 요청도 보고서를 생성하지 못합니다. API 키는 그대로 보관합니다.
+현재 테스트 시작 버튼과 AI 보고서 API는 활성화되어 있습니다. 일시 중지하려면 `app.js`의 `TESTING_PAUSED`를 `true`로, `wrangler.jsonc`의 `vars.TESTING_PAUSED`를 문자열 `"true"`로 변경하고 GitHub에 push합니다. 재개할 때는 두 값을 다시 `false`로 변경하고 push합니다. 서버는 중지 상태에서 요청 본문을 읽거나 OpenAI를 호출하기 전에 503으로 응답하므로, 오래 열린 페이지나 직접 API 요청도 보고서를 생성하지 못합니다. API 키는 그대로 보관합니다.
