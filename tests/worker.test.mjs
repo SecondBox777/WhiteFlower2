@@ -14,7 +14,7 @@ test('ordinary requests delegate unchanged to the asset binding', async () => {
 });
 test('API routes never fall through to static assets', async () => {
   const env = {ASSETS: {fetch: () => {throw Error('Unexpected asset request');}}};
-  for (const path of ['/api/analyze', '/api/report']) {
+  for (const path of ['/api/analyze', '/api/report', '/api/email-report']) {
     assert.equal((await worker.fetch(new Request(`https://example.com${path}`), env)).status, 405);
   }
   assert.equal((await worker.fetch(new Request('https://example.com/api/missing'), env)).status, 404);
@@ -29,7 +29,7 @@ test('malformed, oversized and non-JSON bodies are rejected before OpenAI', asyn
 });
 
 test('temporary pause blocks both report routes before any OpenAI request', async () => {
-  for (const path of ['/api/analyze', '/api/report']) {
+  for (const path of ['/api/analyze', '/api/report', '/api/email-report']) {
     const request = new Request(`https://example.com${path}`, {method:'POST', body:'{}', headers:{'Content-Type':'application/json'}});
     const response = await worker.fetch(request, {TESTING_PAUSED:'true'});
     assert.equal(response.status,503);
@@ -42,7 +42,7 @@ test('temporary pause blocks both report routes before any OpenAI request', asyn
 test('report-only pause blocks both APIs before body reads or OpenAI calls while assets stay available', async () => {
   const env = {TESTING_PAUSED:'false', REPORTS_PAUSED:'true', ASSETS:{fetch:()=>new Response('test available')}};
   assert.equal(await (await worker.fetch(new Request('https://example.com/'),env)).text(),'test available');
-  for (const path of ['/api/analyze','/api/report']) {
+  for (const path of ['/api/analyze','/api/report','/api/email-report']) {
     const request = new Request(`https://example.com${path}`,{method:'POST',body:'malformed'});
     assert.equal((await worker.fetch(request,env)).status,503);
     assert.equal(request.bodyUsed,false);

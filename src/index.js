@@ -1,8 +1,10 @@
 import { handleReport } from '../lib/analyze.js';
+import { handleReportEmail } from '../lib/report-email.js';
 
 export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname;
+    if (path === '/api/email-report') return handleReportEmail({request,env});
     if (path === '/api/analyze' || path === '/api/report') {
       return handleReport({ request, env });
     }
