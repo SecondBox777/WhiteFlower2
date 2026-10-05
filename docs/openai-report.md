@@ -1,5 +1,7 @@
 # Workers + Static Assets로 AI 보고서 생성
 
+프롬프트 수정은 [`lib/report-prompt.js`](../lib/report-prompt.js)에서 합니다. 지시문과 입력 지표의 설명 문장은 한국어이며, 코드와 연결되는 JSON 필드명·분류 식별자는 유지합니다. [가상 응시 결과와 전송 전문](examples/openai-report-full.md)에 한글 지시문, 30문항 입력 데이터, 출력 스키마를 생략 없이 기록했습니다. [요청 본문 JSON](examples/openai-request.json)은 실제 전송 형식이며, `node scripts/export-report-example.mjs`로 외부 호출 없이 다시 생성할 수 있습니다. 예시는 실험 데이터로 표시되고 운영 보고서 차단은 유지됩니다.
+
 ## 기존 GitHub 자동 배포 유지
 
 현재 커밋의 원래 설정은 `whiteflower2` Workers 정적 배포입니다. Pages 설정 대신 Worker entry point를 추가했습니다. Dashboard 자체의 Git 연결/배포 명령은 저장소에서 조회할 수 없으므로 아래 항목을 확인하세요.
