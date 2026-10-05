@@ -6,6 +6,8 @@ document.querySelector('meta[name="description"]').content = `${questions.length
 
 // Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
 const TESTING_PAUSED = false;
+// Set false together with wrangler.jsonc REPORTS_PAUSED to resume reports.
+const REPORTS_PAUSED = true;
 
 const dialog = document.querySelector('#flow-dialog');
 const content = document.querySelector('#flow-content');
@@ -174,11 +176,11 @@ function renderAIReport() {
 }
 function setupReport() {
   const button = document.querySelector('#generate-report');
-  button.disabled = reportLoading || Boolean(aiReport);
-  document.querySelector('#report-status').textContent = reportLoading ? 'AI 보고서를 작성하고 있습니다…' : '';
+  button.disabled = REPORTS_PAUSED || reportLoading || Boolean(aiReport);
+  document.querySelector('#report-status').textContent = REPORTS_PAUSED ? 'AI 보고서 생성은 잠시 중지되었습니다. 테스트 결과는 확인할 수 있습니다.' : reportLoading ? 'AI 보고서를 작성하고 있습니다…' : '';
   renderAIReport();
   button.onclick = async () => {
-    if (reportLoading || aiReport) return;
+    if (REPORTS_PAUSED || reportLoading || aiReport) return;
     const status = document.querySelector('#report-status');
     const controller = new AbortController(); reportController = controller;
     const language = document.querySelector('#report-language').value;
@@ -202,7 +204,7 @@ function setupReport() {
       if (reportController === controller) {
         reportLoading = false;
         const activeButton = document.querySelector('#generate-report');
-        if (activeButton) activeButton.disabled = Boolean(aiReport);
+        if (activeButton) activeButton.disabled = REPORTS_PAUSED || Boolean(aiReport);
       }
     }
   };

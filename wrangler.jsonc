@@ -15,6 +15,7 @@
   "keep_vars": true,
   "vars": {
     "OPENAI_MODEL": "gpt-6-sol",
-    "TESTING_PAUSED": "false"
+    "TESTING_PAUSED": "false",
+    "REPORTS_PAUSED": "true"
   }
 }

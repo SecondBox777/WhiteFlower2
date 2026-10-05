@@ -38,3 +38,15 @@ test('temporary pause blocks both report routes before any OpenAI request', asyn
   const response=await handleReport({request:new Request('https://example.com/api/analyze'),env:{TESTING_PAUSED:'true'}},()=>{throw Error('Must not call OpenAI');});
   assert.equal(response.status,503);
 });
+
+test('report-only pause blocks both APIs before body reads or OpenAI calls while assets stay available', async () => {
+  const env = {TESTING_PAUSED:'false', REPORTS_PAUSED:'true', ASSETS:{fetch:()=>new Response('test available')}};
+  assert.equal(await (await worker.fetch(new Request('https://example.com/'),env)).text(),'test available');
+  for (const path of ['/api/analyze','/api/report']) {
+    const request = new Request(`https://example.com${path}`,{method:'POST',body:'malformed'});
+    assert.equal((await worker.fetch(request,env)).status,503);
+    assert.equal(request.bodyUsed,false);
+  }
+  const response = await handleReport({request:new Request('https://example.com/api/analyze'),env},()=>{throw Error('Must not call OpenAI');});
+  assert.equal(response.status,503);
+});
