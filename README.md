@@ -76,4 +76,4 @@ CLI 배포는 `npm run deploy`, 로컬 Worker 실행은 `npm run worker:dev`입�
 
 결과 화면에서 생성된 AI 보고서를 이메일로 받을 수 있는 Resend 연동을 구현했습니다. [Resend 계정·도메인·Worker 설정 안내](docs/resend-email.md)를 따라 `RESEND_API_KEY`, `RESEND_FROM`, `REPORT_EMAIL_SECRET`을 등록하세요. 보고서 중지 설정은 이메일 API에도 적용됩니다. 이메일 전송은 이미 생성된 보고서를 사용하므로 OpenAI를 다시 호출하지 않습니다.
 
-현재 테스트와 점수 확인은 활성화되어 있고 AI 보고서 생성만 중지되어 있습니다. 보고서를 재개하려면 `app.js`의 `REPORTS_PAUSED`를 `false`로, `wrangler.jsonc`의 `vars.REPORTS_PAUSED`를 문자열 `"false"`로 변경하고 GitHub에 push합니다. 전체 테스트를 중지하려면 두 파일의 `TESTING_PAUSED`를 각각 `true`와 문자열 `"true"`로 설정합니다. 서버는 중지 상태에서 요청 본문을 읽거나 OpenAI를 호출하기 전에 503으로 응답하므로, 오래 열린 페이지나 직접 API 요청도 보고서를 생성하지 못합니다. API 키는 그대로 보관합니다.
+현재 테스트·점수 확인·AI 보고서 생성·이메일 발송이 활성화되어 있습니다. 보고서와 이메일 발송을 중지하려면 `app.js`의 `REPORTS_PAUSED`를 `true`로, `wrangler.jsonc`의 `vars.REPORTS_PAUSED`를 문자열 `"true"`로 변경하고 GitHub에 push합니다. 전체 테스트를 중지하려면 두 파일의 `TESTING_PAUSED`를 각각 `true`와 문자열 `"true"`로 설정합니다. 서버는 중지 상태에서 요청 본문을 읽거나 OpenAI를 호출하기 전에 503으로 응답하므로, 오래 열린 페이지나 직접 API 요청도 보고서를 생성하지 못합니다. API 키는 그대로 보관합니다.

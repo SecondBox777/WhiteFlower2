@@ -17,6 +17,6 @@
     "OPENAI_MODEL": "gpt-6-sol",
     "RESEND_FROM": "Mindscope <reports@mindscope.online>",
     "TESTING_PAUSED": "false",
-    "REPORTS_PAUSED": "true"
+    "REPORTS_PAUSED": "false"
   }
 }

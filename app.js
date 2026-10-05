@@ -7,7 +7,7 @@ document.querySelector('meta[name="description"]').content = `${questions.length
 // Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
 const TESTING_PAUSED = false;
 // Set false together with wrangler.jsonc REPORTS_PAUSED to resume reports.
-const REPORTS_PAUSED = true;
+const REPORTS_PAUSED = false;
 
 const dialog = document.querySelector('#flow-dialog');
 const content = document.querySelector('#flow-content');
