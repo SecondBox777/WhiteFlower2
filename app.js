@@ -58,7 +58,7 @@ function render(markup) {
 function intro() {
   stage = 'intro';
   preloadQuestions(0, 4);
-  render(`<span class="flow-eyebrow">AI IQ TEST · PREVIEW</span><h2 class="flow-title" id="flow-title">AI가 측정하는 당신의 IQ는...</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>AI 기반 분석 모형으로 당신의 IQ 추정값을 바로 확인합니다.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button><button class="button secondary full" id="random-submit" style="margin-top:10px">랜덤 답안 제출 · 실험용</button><p class="flow-footnote">실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 새로고침하면 초기화됩니다.</p>`);
+  render(`<span class="flow-eyebrow">AI IQ TEST · PREVIEW</span><h2 class="flow-title" id="flow-title">AI가 측정하는 당신의 IQ는...</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>AI 기반 분석 모형으로 만든 결과 리포트를 이메일로 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button><button class="button secondary full" id="random-submit" style="margin-top:10px">랜덤 답안 제출 · 실험용</button><p class="flow-footnote">실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 새로고침하면 초기화됩니다.</p>`);
   document.querySelector('#random-submit').onclick = () => {
     reset();
     experimental = true;
@@ -105,8 +105,7 @@ function finish(timedOut = false) {
 }
 function showResult() {
   const elapsed = Math.round(clock.seconds.reduce((a, b) => a + b, 0));
-  render(`<span class="demo-label">TEST RESULT · 합성 모형 기반</span><h2 class="flow-title center" id="flow-title">AI가 측정하는 당신의 IQ는...</h2><div class="iq-result"><span>예비 IQ 추정값</span><strong id="iq-result">${Math.round(result.iq)}</strong><small>합성 모집단의 선형 회귀 추정</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안과 가상 풀이 시간으로 생성한 결과입니다.' : expired ? '30분이 종료되어 자동 제출되었습니다. 제한에 도달한 문항과 미응답은 0점 처리했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>시간 보정 점수</span><strong id="score-result">${result.score.toFixed(2)} / 100</strong></div><div><span>정답 문항</span><strong>${result.correct} / 30</strong></div><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div><div class="flow-info">이 값은 실제 응시자 실험으로 검증되지 않은, AI에 의한 합성·예비 모형의 추정값입니다. 공인 IQ나 개인의 지능을 확정하는 값으로 해석할 수 없습니다.${result.score < 10 || result.score > 95 ? '<br>극단 점수에서는 선형 근사의 해석이 특히 제한됩니다.' : ''}</div><section class="ai-report-panel"><h3>AI 분석 보고서</h3><label class="report-language">보고서 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label><button class="button secondary full" id="generate-report">AI 보고서 생성</button><p id="report-status" class="flow-text" role="status"></p><div id="ai-report"></div><form id="email-report-form" class="report-email-form"><label class="checkout-label" for="report-email">보고서를 받을 이메일</label><input class="email-input" id="report-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required><p class="flow-footnote">먼저 AI 보고서를 생성한 뒤 본인의 이메일로 보내세요. 발송 시 이메일 주소와 보고서를 이메일 발송 서비스에 전달합니다.</p><button class="button secondary full" id="email-report" type="submit">AI 보고서 이메일로 받기</button><p id="email-report-status" class="flow-text" role="status"></p></form></section><button class="button primary full" id="restart">다시 테스트하기 <span>↻</span></button><button class="button secondary full" id="finish" style="margin-top:10px">홈으로 돌아가기</button>`);
-  setupReport();
+  render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">AI가 추정하는 당신의 IQ는...</h2><div class="iq-result"><strong id="iq-result">??</strong><small>결과 리포트에서 확인하세요</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안으로 테스트를 완료했습니다.' : expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div><form id="email-report-form" class="report-email-form"><label class="checkout-label" for="report-email">결과 리포트를 받을 이메일</label><input class="email-input" id="report-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required aria-describedby="email-notice"><button class="button primary full" id="email-report" type="submit">결과 리포트 받아보기</button><p class="flow-footnote" id="email-notice">이메일 주소 오입력으로 인한 미수신에 대해서는 책임지지 않습니다.<br>발송 시 이메일 주소와 리포트를 이메일 발송 서비스에 전달합니다.</p><label class="report-language">리포트 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label><p id="email-report-status" class="flow-text" role="status" aria-live="polite"></p></form><div class="result-actions"><button class="button secondary" id="restart">다시 테스트하기</button><button class="button secondary" id="finish">홈으로</button></div>`);
   setupReportEmail();
   document.querySelector('#restart').onclick = () => { reset(); intro(); };
   document.querySelector('#finish').onclick = () => dialog.close();
@@ -166,67 +165,16 @@ dialog.addEventListener('close', () => { content.replaceChildren(); lastTrigger?
 
 document.addEventListener('visibilitychange', updateTimer);
 
-function renderAIReport() {
-  const target = document.querySelector('#ai-report');
-  if (!target || !aiReport) return;
-  target.replaceChildren();
-  const paragraph = text => { const p = document.createElement('p'); p.textContent = text; target.append(p); };
-  paragraph(aiReport.summary);
-  for (const [key, label] of [['problem_solving','문제풀이 · Problem solving'], ['cognitive_characteristics','인지적 특성 · Cognitive characteristics'], ['careers','추천 직업 · Recommended careers']]) {
-    const heading = document.createElement('h4'); heading.textContent = label; target.append(heading);
-    for (const item of aiReport[key]) {
-      const title = document.createElement('strong'); title.textContent = item.title ?? item.field; target.append(title);
-      if (key === 'careers') paragraph(item.required_abilities);
-      else if (key === 'cognitive_characteristics') { paragraph(item.assessment); paragraph(item.evidence); }
-      else { paragraph(item.evidence); paragraph(item.advice); }
-    }
-  }
-  paragraph(aiReport.limitations);
-}
-function setupReport() {
-  const button = document.querySelector('#generate-report');
-  button.disabled = REPORTS_PAUSED || reportLoading || Boolean(aiReport);
-  document.querySelector('#report-status').textContent = REPORTS_PAUSED ? 'AI 보고서 생성은 잠시 중지되었습니다. 테스트 결과는 확인할 수 있습니다.' : reportLoading ? 'AI 보고서를 작성하고 있습니다…' : '';
-  renderAIReport();
-  button.onclick = async () => {
-    if (REPORTS_PAUSED || reportLoading || aiReport) return;
-    const status = document.querySelector('#report-status');
-    const controller = new AbortController(); reportController = controller;
-    const language = document.querySelector('#report-language').value;
-    reportLoading = true; button.disabled = true; status.textContent = 'AI 보고서를 작성하고 있습니다…';
-    try {
-      const response = await fetch('/api/analyze', {method:'POST', headers:{'Content-Type':'application/json'}, signal:controller.signal, body:JSON.stringify({answers, seconds:clock.seconds, expiredIndex:expired?current:null, language, consent:true, experimental})});
-      const data = await response.json().catch(() => ({error:'Cloudflare Worker 응답을 확인할 수 없습니다.'}));
-      if (!response.ok) throw new Error(data.error || '보고서 생성에 실패했습니다.');
-      if (!data.report || !data.result) throw new Error('보고서 형식이 올바르지 않습니다.');
-      if (reportController !== controller) return;
-      aiReport = data.report; result = data.result; reportEmailToken = data.emailToken ?? null;
-      if (dialog.open && stage === 'done') {
-        document.querySelector('#score-result').textContent = `${result.score.toFixed(2)} / 100`;
-        document.querySelector('#iq-result').textContent = Math.round(result.iq);
-        renderAIReport();
-        updateReportEmail();
-        document.querySelector('#report-status').textContent = '보고서가 완성되었습니다.';
-      }
-    } catch (error) {
-      if (reportController === controller && !controller.signal.aborted && dialog.open && stage === 'done') document.querySelector('#report-status').textContent = error.message;
-    } finally {
-      if (reportController === controller) {
-        reportLoading = false;
-        const activeButton = document.querySelector('#generate-report');
-        if (activeButton) activeButton.disabled = REPORTS_PAUSED || Boolean(aiReport);
-      }
-    }
-  };
-}
-
 function updateReportEmail() {
   const button = document.querySelector('#email-report');
   if (!button) return;
-  button.disabled = REPORTS_PAUSED || !aiReport || !reportEmailToken || emailLoading || emailSent;
-  button.textContent = emailLoading ? '이메일을 보내고 있습니다…' : emailSent ? '이메일 발송 요청 완료' : 'AI 보고서 이메일로 받기';
-  document.querySelector('#report-email').disabled = emailLoading || emailSent;
-  document.querySelector('#email-report-status').textContent = REPORTS_PAUSED ? 'AI 보고서 생성과 이메일 발송은 잠시 중지되어 있습니다.' : emailStatus || (!aiReport ? 'AI 보고서를 생성하면 이메일로 받을 수 있습니다.' : !reportEmailToken ? '이메일 발송이 아직 준비되지 않았습니다.' : '보고서 생성 후 30분 이내에 보내세요.');
+  const busy = reportLoading || emailLoading;
+  button.disabled = REPORTS_PAUSED || busy || emailSent;
+  button.textContent = reportLoading ? '리포트를 작성하고 있습니다…' : emailLoading ? '이메일을 보내고 있습니다…' : emailSent ? '이메일 발송 요청 완료' : '결과 리포트 받아보기';
+  document.querySelector('#report-email').disabled = busy || emailSent;
+  document.querySelector('#report-language').disabled = busy || Boolean(reportEmailToken) || emailSent;
+  document.querySelector('#email-report-form').setAttribute('aria-busy', String(busy));
+  document.querySelector('#email-report-status').textContent = REPORTS_PAUSED ? '리포트 발송은 잠시 중지되어 있습니다.' : emailStatus;
 }
 function setupReportEmail() {
   const input = document.querySelector('#report-email');
@@ -235,28 +183,37 @@ function setupReportEmail() {
   updateReportEmail();
   document.querySelector('#email-report-form').onsubmit = async event => {
     event.preventDefault();
-    if (REPORTS_PAUSED || !aiReport || !reportEmailToken || emailLoading || emailSent) return;
-    if (!input.reportValidity()) return;
-    emailAddress = input.value.trim();
+    if (REPORTS_PAUSED || reportLoading || emailLoading || emailSent) return;
+    const activeInput = document.querySelector('#report-email');
+    if (!activeInput.reportValidity()) return;
+    emailAddress = activeInput.value.trim();
+    const language = document.querySelector('#report-language').value;
     const controller = new AbortController(); emailController = controller;
-    emailLoading = true; emailStatus = ''; updateReportEmail();
+    emailStatus = '';
     try {
+      if (!reportEmailToken) {
+        reportLoading = true; updateReportEmail();
+        const response = await fetch('/api/analyze', {method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({answers,seconds:clock.seconds,expiredIndex:expired?current:null,language,consent:true,experimental})});
+        const data = await response.json().catch(() => ({error:'리포트 생성 응답을 확인할 수 없습니다.'}));
+        if (emailController !== controller) return;
+        if (!response.ok) throw new Error(data.error || '리포트 생성에 실패했습니다.');
+        if (!data.report || !data.result) throw new Error('리포트 형식이 올바르지 않습니다.');
+        if (!data.emailToken) throw new Error('이메일 발송 설정이 준비되지 않았습니다. 관리자에게 문의해 주세요.');
+        aiReport = data.report; reportEmailToken = data.emailToken;
+        reportLoading = false;
+      }
+      emailLoading = true; updateReportEmail();
       const response = await fetch('/api/email-report', {method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({email:emailAddress,token:reportEmailToken,consent:true})});
       const data = await response.json().catch(() => ({error:'이메일 발송 응답을 확인할 수 없습니다.'}));
       if (emailController !== controller) return;
-      if (data.code === 'invalid_report_token') {
-        reportEmailToken = null; aiReport = null;
-        const generateButton = document.querySelector('#generate-report');
-        if (generateButton) { generateButton.disabled = REPORTS_PAUSED; generateButton.textContent = 'AI 보고서 다시 생성'; }
-      }
+      if (data.code === 'invalid_report_token') { reportEmailToken = null; aiReport = null; }
       if (!response.ok) throw new Error(data.error || '이메일 발송에 실패했습니다.');
-      if (emailController !== controller) return;
       emailSent = true;
       emailStatus = '발송 요청이 접수되었습니다. 받은편지함과 스팸함을 확인해 주세요.';
     } catch (error) {
       if (emailController === controller && !controller.signal.aborted) emailStatus = error.message;
     } finally {
-      if (emailController === controller) { emailLoading = false; updateReportEmail(); }
+      if (emailController === controller) { reportLoading = false; emailLoading = false; updateReportEmail(); }
     }
   };
 }

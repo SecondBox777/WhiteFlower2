@@ -33,3 +33,5 @@ dialog.testing{padding-top:56px}
 @media(max-height:560px){dialog.testing{padding-top:50px}}
 
 .ai-report-panel{border-top:1px solid var(--line);margin:24px 0;padding-top:16px}.report-consent,.report-language{display:block;font-size:12px;line-height:1.8;margin:14px 0}.report-consent input{accent-color:var(--purple)}.report-language select{margin-left:12px;padding:7px;border:1px solid var(--line);border-radius:6px}#ai-report{font-size:13px;line-height:1.9;overflow-wrap:anywhere}#ai-report h4{color:var(--purple);margin:22px 0 12px}.report-email-form{border-top:1px solid var(--line);margin-top:24px;padding-top:8px}.report-email-form .flow-footnote{text-align:left}
+
+.report-email-form .checkout-label{margin-top:12px}.report-email-form .email-input{margin-bottom:12px}.report-email-form .report-language{color:var(--muted);font-size:11px}.result-actions{display:flex;justify-content:center;gap:12px;margin-top:24px}.result-actions .button{font-size:12px;padding:11px 16px}.report-email-form #email-report-status:empty{display:none}
