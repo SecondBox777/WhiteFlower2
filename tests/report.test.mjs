@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { handleReport } from '../lib/analyze.js';
 import { validateSubmission,buildAnalysis } from '../lib/report.js';
 import { scoringItems } from '../scoring.js';
-const submission=()=>({answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',consent:true});
+const submission=()=>({answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',consent:true,adultConfirmed:true});
 const report={summary:'Summary',problem_solving:[{title:'Strategy',evidence:'도형의 규칙을 찾는 문제',advice:'Practice'}],careers:[],cognitive_characteristics:[],limitations:'Synthetic only'};
 const context=(data,env={OPENAI_API_KEY:'test-key',OPENAI_MODEL:'test-model'})=>({request:new Request('https://example.com/api/analyze',{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://example.com'},body:JSON.stringify(data)}),env});
 test('server computes domain statistics and sends anonymized data with strict schema',async()=>{
@@ -52,4 +52,12 @@ test('experimental submissions are marked as random integration data', () => {
  assert.equal(buildAnalysis(data).experimental, true);
  assert.equal(buildAnalysis(validateSubmission(submission())).experimental, false);
  assert.throws(() => validateSubmission({...submission(), experimental:'true'}));
+});
+
+test('AI report requires explicit adult confirmation before external requests', async () => {
+ for (const adultConfirmed of [undefined,false,'true',1]) {
+  const response=await handleReport(context({...submission(),adultConfirmed}),()=>{throw Error('Must not call OpenAI');});
+  assert.equal(response.status,400);
+  assert.ok((await response.json()).error.includes('만 18세 이상'));
+ }
 });

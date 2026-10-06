@@ -23,7 +23,7 @@ test('signed report is sent through Resend with stable per-report idempotency an
   const token=await issueReportEmailToken(data,secret);
   let idempotency;
   for(let i=0;i<2;i++){
-    const response=await handleReportEmail(context({email:'reader@example.com',token,consent:true}),async(url,options)=>{
+    const response=await handleReportEmail(context({email:'reader@example.com',token,consent:true,adultConfirmed:true}),async(url,options)=>{
       assert.equal(url,'https://api.resend.com/emails');assert.equal(options.headers.Authorization,'Bearer test-resend-key');
       const body=JSON.parse(options.body);
       assert.equal(body.from,env.RESEND_FROM);assert.deepEqual(body.to,['reader@example.com']);
@@ -41,10 +41,10 @@ test('pause, malformed requests, cross-origin, missing setup and invalid tokens 
     const ctx=context({}, {[flag]:'true'});
     assert.equal((await handleReportEmail(ctx,noSend)).status,503);assert.equal(ctx.request.bodyUsed,false);
   }
-  for(const body of [{},{email:'bad',token:'x',consent:true},{email:'a@example.com,b@example.com',token:'x',consent:true},{email:'a@example.com',token:'x',consent:false},{email:'a@example.com',token:'x',consent:true}]){
+  for(const body of [{},{email:'bad',token:'x',consent:true,adultConfirmed:true},{email:'a@example.com,b@example.com',token:'x',consent:true,adultConfirmed:true},{email:'a@example.com',token:'x',consent:false},{email:'a@example.com',token:'x',consent:true,adultConfirmed:true}]){
     assert.equal((await handleReportEmail(context(body),noSend)).status,400);
   }
-  assert.equal((await handleReportEmail(context({email:'a@example.com',token:'x',consent:true},{}),noSend)).status,503);
+  assert.equal((await handleReportEmail(context({email:'a@example.com',token:'x',consent:true,adultConfirmed:true},{}),noSend)).status,503);
   const ctx=context({});ctx.request=new Request(ctx.request,{headers:{Origin:'https://other.com','Content-Type':'application/json'}});
   assert.equal((await handleReportEmail(ctx,noSend)).status,403);
   for(const [body,type,status] of [['{','application/json',400],['x'.repeat(200001),'application/json',413],['{}','text/plain',415]]){
@@ -54,15 +54,15 @@ test('pause, malformed requests, cross-origin, missing setup and invalid tokens 
 test('Resend failures are recoverable and do not expose provider secrets',async()=>{
   const token=await issueReportEmailToken(data,secret);
   for(const [upstream,status] of [[401,502],[409,409],[429,429],[500,502]]){
-    const response=await handleReportEmail(context({email:'reader@example.com',token,consent:true}),async()=>new Response('private-provider-details',{status:upstream}));
+    const response=await handleReportEmail(context({email:'reader@example.com',token,consent:true,adultConfirmed:true}),async()=>new Response('private-provider-details',{status:upstream}));
     assert.equal(response.status,status);assert.ok(!(await response.text()).includes('private-provider-details'));
   }
-  assert.equal((await handleReportEmail(context({email:'reader@example.com',token,consent:true}),async()=>{throw Error('timeout');})).status,502);
-  assert.equal((await handleReportEmail(context({email:'reader@example.com',token,consent:true}),async()=>Response.json({}))).status,502);
+  assert.equal((await handleReportEmail(context({email:'reader@example.com',token,consent:true,adultConfirmed:true}),async()=>{throw Error('timeout');})).status,502);
+  assert.equal((await handleReportEmail(context({email:'reader@example.com',token,consent:true,adultConfirmed:true}),async()=>Response.json({}))).status,502);
   assert.ok(renderReportEmail({...data,language:'en'}).subject.includes('Your AI report'));
 });
 test('OpenAI response issues email token without sending recipient email to OpenAI',async()=>{
-  const submission={answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',consent:true,email:'private@example.com'};
+  const submission={answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',consent:true,adultConfirmed:true,email:'private@example.com'};
   const response=await handleReport({request:new Request('https://example.com/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(submission)}),env:{...env,OPENAI_API_KEY:'test-key',OPENAI_MODEL:'test-model'}},async(url,options)=>{
     assert.ok(!options.body.includes('private@example.com'));
     return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(data.report)}]}]});
@@ -70,4 +70,13 @@ test('OpenAI response issues email token without sending recipient email to Open
   assert.equal(response.status,200);
   const body=await response.json();const signed=await verifyReportEmailToken(body.emailToken,secret);
   assert.deepEqual(signed.report,body.report);assert.deepEqual(signed.result,body.result);
+});
+
+test('email report requires explicit adult confirmation even with a valid token', async () => {
+ const token=await issueReportEmailToken(data,secret);
+ for (const adultConfirmed of [undefined,false,'true',1]) {
+  const response=await handleReportEmail(context({email:'reader@example.com',token,consent:true,adultConfirmed}),noSend);
+  assert.equal(response.status,400);
+  assert.ok((await response.json()).error.includes('만 18세 이상'));
+ }
 });

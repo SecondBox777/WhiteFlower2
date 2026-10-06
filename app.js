@@ -28,6 +28,7 @@ let emailLoading = false;
 let emailSent = false;
 let emailAddress = '';
 let emailStatus = '';
+let adultConfirmed = false;
 let emailController;
 
 // Keep decoded images alive for subsequent questions and backward navigation.
@@ -105,7 +106,7 @@ function finish(timedOut = false) {
 }
 function showResult() {
   const elapsed = Math.round(clock.seconds.reduce((a, b) => a + b, 0));
-  render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">AI가 추정하는 당신의 IQ는...</h2><div class="iq-result"><strong id="iq-result">??</strong><small>결과 리포트에서 확인하세요</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안으로 테스트를 완료했습니다.' : expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div><form id="email-report-form" class="report-email-form"><label class="checkout-label" for="report-email">결과 리포트를 받을 이메일</label><input class="email-input" id="report-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required aria-describedby="email-notice"><button class="button primary full" id="email-report" type="submit">결과 리포트 받아보기</button><p class="flow-footnote" id="email-notice">이메일 주소 오입력으로 인한 미수신에 대해서는 책임지지 않습니다.<br>발송 시 이메일 주소와 리포트를 이메일 발송 서비스에 전달합니다.</p><label class="report-language">리포트 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label><p id="email-report-status" class="flow-text" role="status" aria-live="polite"></p></form><div class="result-actions"><button class="button secondary" id="restart">다시 테스트하기</button><button class="button secondary" id="finish">홈으로</button></div>`);
+  render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">AI가 추정하는 당신의 IQ는...</h2><div class="iq-result"><strong id="iq-result">??</strong><small>결과 리포트에서 확인하세요</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안으로 테스트를 완료했습니다.' : expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div><form id="email-report-form" class="report-email-form"><label class="checkout-label" for="report-email">결과 리포트를 받을 이메일</label><input class="email-input" id="report-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required aria-describedby="email-notice"><label class="report-consent adult-confirmation" for="report-adult-confirm"><input id="report-adult-confirm" type="checkbox" required><span><span lang="en">I confirm that I am 18 years of age or older.</span><br>본인은 만 18세 이상임을 확인합니다.</span></label><button class="button primary full" id="email-report" type="submit" disabled>결과 리포트 받아보기</button><p class="flow-footnote" id="email-notice">이메일 주소 오입력으로 인한 미수신에 대해서는 책임지지 않습니다.<br>발송 시 이메일 주소와 리포트를 이메일 발송 서비스에 전달합니다.</p><label class="report-language">리포트 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label><p id="email-report-status" class="flow-text" role="status" aria-live="polite"></p></form><div class="result-actions"><button class="button secondary" id="restart">다시 테스트하기</button><button class="button secondary" id="finish">홈으로</button></div>`);
   setupReportEmail();
   document.querySelector('#restart').onclick = () => { reset(); intro(); };
   document.querySelector('#finish').onclick = () => dialog.close();
@@ -114,7 +115,7 @@ function reset() {
   clearInterval(ticker);
   reportController?.abort(); reportController = null; aiReport = null; reportLoading = false;
   emailController?.abort(); emailController = null; reportEmailToken = null;
-  emailLoading = false; emailSent = false; emailAddress = ''; emailStatus = '';
+  emailLoading = false; emailSent = false; emailAddress = ''; emailStatus = ''; adultConfirmed = false;
   answers = Array(questions.length).fill(null);
   current = 0; clock = null; result = null; expired = false; experimental = false;
 }
@@ -169,7 +170,8 @@ function updateReportEmail() {
   const button = document.querySelector('#email-report');
   if (!button) return;
   const busy = reportLoading || emailLoading;
-  button.disabled = REPORTS_PAUSED || busy || emailSent;
+  button.disabled = REPORTS_PAUSED || busy || emailSent || !adultConfirmed;
+  document.querySelector('#report-adult-confirm').disabled = busy || emailSent;
   button.textContent = reportLoading ? '리포트를 작성하고 있습니다…' : emailLoading ? '이메일을 보내고 있습니다…' : emailSent ? '이메일 발송 요청 완료' : '결과 리포트 받아보기';
   document.querySelector('#report-email').disabled = busy || emailSent;
   document.querySelector('#report-language').disabled = busy || Boolean(reportEmailToken) || emailSent;
@@ -178,12 +180,15 @@ function updateReportEmail() {
 }
 function setupReportEmail() {
   const input = document.querySelector('#report-email');
+  const adultInput = document.querySelector('#report-adult-confirm');
+  adultInput.checked = adultConfirmed;
+  adultInput.onchange = () => { adultConfirmed = adultInput.checked; updateReportEmail(); };
   input.value = emailAddress;
   input.oninput = () => { emailAddress = input.value; };
   updateReportEmail();
   document.querySelector('#email-report-form').onsubmit = async event => {
     event.preventDefault();
-    if (REPORTS_PAUSED || reportLoading || emailLoading || emailSent) return;
+    if (REPORTS_PAUSED || reportLoading || emailLoading || emailSent || !adultConfirmed || !adultInput.checked) return;
     const activeInput = document.querySelector('#report-email');
     if (!activeInput.reportValidity()) return;
     emailAddress = activeInput.value.trim();
@@ -193,7 +198,7 @@ function setupReportEmail() {
     try {
       if (!reportEmailToken) {
         reportLoading = true; updateReportEmail();
-        const response = await fetch('/api/analyze', {method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({answers,seconds:clock.seconds,expiredIndex:expired?current:null,language,consent:true,experimental})});
+        const response = await fetch('/api/analyze', {method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({answers,seconds:clock.seconds,expiredIndex:expired?current:null,language,consent:true,adultConfirmed,experimental})});
         const data = await response.json().catch(() => ({error:'리포트 생성 응답을 확인할 수 없습니다.'}));
         if (emailController !== controller) return;
         if (!response.ok) throw new Error(data.error || '리포트 생성에 실패했습니다.');
@@ -203,7 +208,7 @@ function setupReportEmail() {
         reportLoading = false;
       }
       emailLoading = true; updateReportEmail();
-      const response = await fetch('/api/email-report', {method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({email:emailAddress,token:reportEmailToken,consent:true})});
+      const response = await fetch('/api/email-report', {method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({email:emailAddress,token:reportEmailToken,consent:true,adultConfirmed})});
       const data = await response.json().catch(() => ({error:'이메일 발송 응답을 확인할 수 없습니다.'}));
       if (emailController !== controller) return;
       if (data.code === 'invalid_report_token') { reportEmailToken = null; aiReport = null; }
