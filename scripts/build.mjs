@@ -5,7 +5,7 @@ import { mkdir, copyFile, rm, stat } from 'node:fs/promises';
 // Never copy the repository root: it can contain dependencies and secrets.
 const root = new URL('../', import.meta.url);
 const output = new URL('dist/', root);
-const assets = ['index.html', 'style.css', 'app.js', 'questions.js', 'scoring.js', ...questions.map(q => q.image)];
+const assets = ['index.html', 'favicon.svg', 'style.css', 'app.js', 'questions.js', 'scoring.js', ...questions.map(q => q.image)];
 
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });

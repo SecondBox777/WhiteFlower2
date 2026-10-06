@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Mindscope smiling flower</title>
+  <rect width="64" height="64" rx="18" fill="#f1edff"/>
+  <path d="M32 9C40 3 47 11 44 20C54 17 61 27 53 33C60 41 52 50 43 46C44 57 32 62 27 52C18 58 9 50 14 41C3 39 3 26 14 24C10 14 21 6 27 13Z" fill="#8871df"/>
+  <circle cx="32" cy="33" r="15" fill="#cbbdff"/>
+  <ellipse cx="26" cy="31" rx="2" ry="2.6" fill="#352558"/>
+  <ellipse cx="38" cy="31" rx="2" ry="2.6" fill="#352558"/>
+  <path d="M27 37Q32 42 37 37" fill="none" stroke="#352558" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="22" cy="36" rx="3" ry="2" fill="#f2a9c9"/>
+  <ellipse cx="42" cy="36" rx="3" ry="2" fill="#f2a9c9"/>
+</svg>
