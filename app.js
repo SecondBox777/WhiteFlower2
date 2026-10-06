@@ -5,9 +5,9 @@ document.querySelectorAll('[data-question-count]').forEach(item => { item.textCo
 document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. 성인용 퍼즐 연습. 점수는 이 퍼즐에서의 수행만 나타냅니다.`;
 
 // Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
-const TESTING_PAUSED = true;
+const TESTING_PAUSED = false;
 // Set false together with wrangler.jsonc REPORTS_PAUSED to resume reports.
-const REPORTS_PAUSED = true;
+const REPORTS_PAUSED = false;
 
 const dialog = document.querySelector('#flow-dialog');
 const content = document.querySelector('#flow-content');
