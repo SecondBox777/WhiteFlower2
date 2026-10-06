@@ -27,7 +27,7 @@ test('signed report is sent through Resend with stable per-report idempotency an
       assert.equal(url,'https://api.resend.com/emails');assert.equal(options.headers.Authorization,'Bearer test-resend-key');
       const body=JSON.parse(options.body);
       assert.equal(body.from,env.RESEND_FROM);assert.deepEqual(body.to,['reader@example.com']);
-      assert.ok(body.text.includes('124'));assert.ok(body.text.includes('64.52'));assert.ok(body.text.includes('분석 능력'));
+      assert.ok(!body.text.includes('124'));assert.ok(body.text.includes('64.52'));assert.ok(!body.text.includes('연구원'));
       assert.ok(!body.html.includes('<script>'));assert.ok(body.html.includes('&lt;script&gt;'));
       if(idempotency)assert.equal(options.headers['Idempotency-Key'],idempotency);
       idempotency=options.headers['Idempotency-Key'];
@@ -62,7 +62,7 @@ test('Resend failures are recoverable and do not expose provider secrets',async(
   assert.ok(renderReportEmail({...data,language:'en'}).subject.includes('Your AI report'));
 });
 test('OpenAI response issues email token without sending recipient email to OpenAI',async()=>{
-  const submission={answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',consent:true,email:'private@example.com'};
+  const submission={answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',adultConfirmed:true,consent:true,email:'private@example.com'};
   const response=await handleReport({request:new Request('https://example.com/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(submission)}),env:{...env,OPENAI_API_KEY:'test-key',OPENAI_MODEL:'test-model'}},async(url,options)=>{
     assert.ok(!options.body.includes('private@example.com'));
     return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(data.report)}]}]});

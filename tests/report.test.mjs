@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { handleReport } from '../lib/analyze.js';
 import { validateSubmission,buildAnalysis } from '../lib/report.js';
 import { scoringItems } from '../scoring.js';
-const submission=()=>({answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',consent:true});
+const submission=()=>({answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',adultConfirmed:true,consent:true});
 const report={summary:'Summary',problem_solving:[{title:'Strategy',evidence:'도형의 규칙을 찾는 문제',advice:'Practice'}],careers:[],cognitive_characteristics:[],limitations:'Synthetic only'};
 const context=(data,env={OPENAI_API_KEY:'test-key',OPENAI_MODEL:'test-model'})=>({request:new Request('https://example.com/api/analyze',{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://example.com'},body:JSON.stringify(data)}),env});
 test('server computes domain statistics and sends anonymized data with strict schema',async()=>{
@@ -19,7 +19,7 @@ test('server computes domain statistics and sends anonymized data with strict sc
   assert.equal(body.max_output_tokens,6000);
   assert.equal(input.email,undefined);assert.equal(input.items[0].selected,'A');
   return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(report)}]}]});
- });assert.equal(response.status,200);const actual=(await response.json()).report;assert.deepEqual(actual.problem_solving,report.problem_solving);assert.equal(actual.cognitive_characteristics.length,3);assert.ok(actual.cognitive_characteristics.every(x=>x.assessment.includes('매우 뛰어납니다')));
+ });assert.equal(response.status,200);const actual=(await response.json()).report;assert.deepEqual(actual.problem_solving,report.problem_solving);assert.equal(actual.cognitive_characteristics.length,3);assert.ok(actual.cognitive_characteristics.every(x=>x.assessment.includes('10개 정답')));
 });
 test('invalid input and missing config never call OpenAI',async()=>{
  for(const data of [{...submission(),consent:false},{...submission(),answers:[0]},{...submission(),seconds:Array(30).fill(1800)},{...submission(),seconds:Array(30).fill(-1)},{...submission(),expiredIndex:0}]){
@@ -52,4 +52,23 @@ test('experimental submissions are marked as random integration data', () => {
  assert.equal(buildAnalysis(data).experimental, true);
  assert.equal(buildAnalysis(validateSubmission(submission())).experimental, false);
  assert.throws(() => validateSubmission({...submission(), experimental:'true'}));
+});
+
+test('adult confirmation is required before any external request', async () => {
+ for (const adultConfirmed of [undefined, false, 'true']) {
+  assert.equal((await handleReport(context({...submission(),adultConfirmed}),()=>{throw Error('Must not call');})).status,400);
+ }
+});
+test('reports exclude synthetic IQ and suppress model career recommendations', async () => {
+ const response=await handleReport(context(submission()),async (_url,options)=>{
+  const input=JSON.parse(JSON.parse(options.body).input);
+  assert.equal(input.result.iq,undefined);
+  assert.equal(input.calibration,undefined);
+  return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify({...report,careers:[{field:'Doctor',required_abilities:'High IQ'}],limitations:'Untrusted model disclaimer'})}]}]});
+ });
+ const body=await response.json();
+ assert.equal(response.status,200);
+ assert.equal(body.result.iq,undefined);
+ assert.deepEqual(body.report.careers,[]);
+ assert.ok(body.report.limitations.includes('직업 적합성을 측정하지 않습니다'));
 });
