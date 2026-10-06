@@ -7,9 +7,9 @@ document.querySelectorAll('[data-question-count]').forEach(item => { item.textCo
 document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. AI가 측정하는 당신의 IQ는... 합성 모형 기반 테스트.`;
 
 // Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
-const TESTING_PAUSED = false;
+const TESTING_PAUSED = true;
 // Set false together with wrangler.jsonc REPORTS_PAUSED to resume reports.
-const REPORTS_PAUSED = false;
+const REPORTS_PAUSED = true;
 
 const dialog = document.querySelector('#flow-dialog');
 const content = document.querySelector('#flow-content');
@@ -195,6 +195,8 @@ function updateReportActions() {
   const button = document.querySelector('#generate-report');
   if (!button) return;
   const busy = reportLoading || emailLoading;
+  document.querySelector('#save-report-photo').disabled = REPORTS_PAUSED;
+  document.querySelector('#share-report').disabled = REPORTS_PAUSED;
   button.disabled = REPORTS_PAUSED || busy || Boolean(aiReport) || !adultConfirmed;
   button.textContent = reportLoading ? 'AI가 리포트를 생성하고 있습니다…' : aiReport ? '리포트 생성 완료' : '결과 리포트 받아보기';
   document.querySelector('#report-adult-confirm').disabled = busy || Boolean(aiReport);
@@ -312,7 +314,7 @@ function setExportStatus(message) {
   if (status) status.textContent = message;
 }
 async function saveReportPhoto() {
-  if (exportBusy || !reportData) return;
+  if (REPORTS_PAUSED || exportBusy || !reportData) return;
   const source = reportData;
   exportBusy = true; setExportStatus('리포트를 사진으로 만들고 있습니다…');
   try {
@@ -332,7 +334,7 @@ async function saveReportPhoto() {
   finally { if (reportData === source) exportBusy = false; }
 }
 async function shareReport() {
-  if (exportBusy || !reportData) return;
+  if (REPORTS_PAUSED || exportBusy || !reportData) return;
   const source = reportData;
   const {subject,text} = renderReportDocument(source);
   exportBusy = true;

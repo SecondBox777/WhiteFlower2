@@ -16,7 +16,7 @@
   "vars": {
     "OPENAI_MODEL": "gpt-6-sol",
     "RESEND_FROM": "Mindscope <reports@mindscope.online>",
-    "TESTING_PAUSED": "false",
-    "REPORTS_PAUSED": "false"
+    "TESTING_PAUSED": "true",
+    "REPORTS_PAUSED": "true"
   }
 }

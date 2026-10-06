@@ -3,5 +3,5 @@ OPENAI_MODEL=replace-with-a-structured-outputs-compatible-model
 RESEND_API_KEY=replace-with-your-resend-key
 RESEND_FROM=Mindscope <reports@your-verified-domain.com>
 REPORT_EMAIL_SECRET=replace-with-a-random-secret-of-at-least-32-characters
-TESTING_PAUSED=false
-REPORTS_PAUSED=false
+TESTING_PAUSED=true
+REPORTS_PAUSED=true
