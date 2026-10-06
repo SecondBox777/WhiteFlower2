@@ -77,7 +77,3 @@ CLI 배포는 `npm run deploy`, 로컬 Worker 실행은 `npm run worker:dev`입�
 결과 화면에서 생성된 AI 보고서를 이메일로 받을 수 있는 Resend 연동을 구현했습니다. [Resend 계정·도메인·Worker 설정 안내](docs/resend-email.md)를 따라 `RESEND_API_KEY`, `RESEND_FROM`, `REPORT_EMAIL_SECRET`을 등록하세요. 보고서 중지 설정은 이메일 API에도 적용됩니다. 이메일 전송은 이미 생성된 보고서를 사용하므로 OpenAI를 다시 호출하지 않습니다.
 
 현재 테스트·결과 리포트 생성·이메일 발송의 일시 중지를 해제했습니다. `app.js`의 `TESTING_PAUSED`와 `REPORTS_PAUSED`는 모두 `false`이며, `wrangler.jsonc`의 대응 변수도 모두 문자열 `"false"`입니다. 보고서와 이메일 발송을 중지하려면 `app.js`의 `REPORTS_PAUSED`를 `true`로, `wrangler.jsonc`의 `vars.REPORTS_PAUSED`를 문자열 `"true"`로 변경하고 GitHub에 push합니다. 전체 테스트를 중지하려면 두 파일의 `TESTING_PAUSED`를 각각 `true`와 문자열 `"true"`로 설정합니다. 서버는 중지 상태에서 요청 본문을 읽거나 OpenAI를 호출하기 전에 503으로 응답하므로, 오래 열린 페이지나 직접 API 요청도 보고서를 생성하지 못합니다. API 키는 그대로 보관합니다.
-
-## Polar 정책 대응 (2026-10-06)
-
-현재 공개 문구와 리포트는 성인용 퍼즐 연습으로 수정했습니다. IQ는 기존 채점 실험 코드에만 남아 있으며 리포트 API 결과·AI 입력·이메일에는 포함하지 않습니다. 직업 추천은 제공하지 않습니다. 성인 확인과 외부 정보 전송 동의를 추가했고 테스트·리포트 일시 중지는 해제했습니다. 위의 이전 프로토타입 설명보다 이 설명을 우선합니다. 판매 승인, 문항 이용 권리 및 실제 운영 정책에 관한 남은 조건은 [Polar 정책 점검](docs/polar-policy.md)을 확인하세요.

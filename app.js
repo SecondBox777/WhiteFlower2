@@ -2,7 +2,7 @@ import { questions } from './questions.js';
 import { LIMIT_SECONDS, scoreTest, scoringItems, TestClock } from './scoring.js';
 
 document.querySelectorAll('[data-question-count]').forEach(item => { item.textContent = questions.length; });
-document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. 성인용 퍼즐 연습. 점수는 이 퍼즐에서의 수행만 나타냅니다.`;
+document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. AI가 측정하는 당신의 IQ는... 합성 모형 기반 테스트.`;
 
 // Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
 const TESTING_PAUSED = false;
@@ -58,9 +58,8 @@ function render(markup) {
 function intro() {
   stage = 'intro';
   preloadQuestions(0, 4);
-  render(`<span class="flow-eyebrow">PUZZLE PRACTICE · ADULTS ONLY</span><h2 class="flow-title" id="flow-title">도형·논리 퍼즐 연습</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>AI 기반 분석 모형으로 만든 결과 리포트를 이메일로 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><label class="flow-footnote"><input type="checkbox" id="adult-confirm"> 만 18세 이상이며 거주 지역의 성년 기준을 충족합니다.</label><button class="button primary full" id="begin">TEST 시작 <span>→</span></button><button class="button secondary full" id="random-submit" style="margin-top:10px">랜덤 답안 제출 · 실험용</button><p class="flow-footnote">실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 새로고침하면 초기화됩니다.</p>`);
+  render(`<span class="flow-eyebrow">AI IQ TEST · PREVIEW</span><h2 class="flow-title" id="flow-title">AI가 측정하는 당신의 IQ는...</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>AI 기반 분석 모형으로 만든 결과 리포트를 이메일로 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button><button class="button secondary full" id="random-submit" style="margin-top:10px">랜덤 답안 제출 · 실험용</button><p class="flow-footnote">실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 새로고침하면 초기화됩니다.</p>`);
   document.querySelector('#random-submit').onclick = () => {
-    if (!document.querySelector("#adult-confirm").checked) return;
     reset();
     experimental = true;
     answers = questions.map(() => Math.floor(Math.random() * 4));
@@ -75,7 +74,6 @@ function intro() {
     showResult();
   };
   document.querySelector('#begin').onclick = () => {
-    if (!document.querySelector('#adult-confirm').checked) { document.querySelector('#adult-confirm').focus(); return; }
     clock = new TestClock(performance.now());
     stage = 'test';
     ticker = setInterval(updateTimer, 100);
@@ -107,7 +105,7 @@ function finish(timedOut = false) {
 }
 function showResult() {
   const elapsed = Math.round(clock.seconds.reduce((a, b) => a + b, 0));
-  render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">퍼즐 풀이를 완료했습니다</h2><div class="iq-result"><strong id="iq-result">${result.score.toFixed(1)}</strong><small>퍼즐 점수 / 100 · 지능 측정값이 아닙니다</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안으로 테스트를 완료했습니다.' : expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div><form id="email-report-form" class="report-email-form"><label class="checkout-label" for="report-email">결과 리포트를 받을 이메일</label><input class="email-input" id="report-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required aria-describedby="email-notice"><label class="flow-footnote"><input id="data-consent" type="checkbox" required> 답안·풀이시간·점수의 OpenAI 전송 및 이메일 주소·리포트의 Resend 전송에 동의합니다.</label><button class="button primary full" id="email-report" type="submit">결과 리포트 받아보기</button><p class="flow-footnote" id="email-notice">이메일 주소를 확인해 주세요. 전송 실패 시 안내에 따라 다시 시도할 수 있습니다.<br>발송 시 이메일 주소와 리포트를 이메일 발송 서비스에 전달합니다.</p><label class="report-language">리포트 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label><p id="email-report-status" class="flow-text" role="status" aria-live="polite"></p></form><div class="result-actions"><button class="button secondary" id="restart">다시 테스트하기</button><button class="button secondary" id="finish">홈으로</button></div>`);
+  render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">AI가 추정하는 당신의 IQ는...</h2><div class="iq-result"><strong id="iq-result">??</strong><small>결과 리포트에서 확인하세요</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안으로 테스트를 완료했습니다.' : expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div><form id="email-report-form" class="report-email-form"><label class="checkout-label" for="report-email">결과 리포트를 받을 이메일</label><input class="email-input" id="report-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required aria-describedby="email-notice"><button class="button primary full" id="email-report" type="submit">결과 리포트 받아보기</button><p class="flow-footnote" id="email-notice">이메일 주소 오입력으로 인한 미수신에 대해서는 책임지지 않습니다.<br>발송 시 이메일 주소와 리포트를 이메일 발송 서비스에 전달합니다.</p><label class="report-language">리포트 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label><p id="email-report-status" class="flow-text" role="status" aria-live="polite"></p></form><div class="result-actions"><button class="button secondary" id="restart">다시 테스트하기</button><button class="button secondary" id="finish">홈으로</button></div>`);
   setupReportEmail();
   document.querySelector('#restart').onclick = () => { reset(); intro(); };
   document.querySelector('#finish').onclick = () => dialog.close();
@@ -187,7 +185,7 @@ function setupReportEmail() {
     event.preventDefault();
     if (REPORTS_PAUSED || reportLoading || emailLoading || emailSent) return;
     const activeInput = document.querySelector('#report-email');
-    if (!activeInput.reportValidity() || !document.querySelector("#data-consent").reportValidity()) return;
+    if (!activeInput.reportValidity()) return;
     emailAddress = activeInput.value.trim();
     const language = document.querySelector('#report-language').value;
     const controller = new AbortController(); emailController = controller;
@@ -195,7 +193,7 @@ function setupReportEmail() {
     try {
       if (!reportEmailToken) {
         reportLoading = true; updateReportEmail();
-        const response = await fetch('/api/analyze', {method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({answers,seconds:clock.seconds,expiredIndex:expired?current:null,language,adultConfirmed:true,consent:true,experimental})});
+        const response = await fetch('/api/analyze', {method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({answers,seconds:clock.seconds,expiredIndex:expired?current:null,language,consent:true,experimental})});
         const data = await response.json().catch(() => ({error:'리포트 생성 응답을 확인할 수 없습니다.'}));
         if (emailController !== controller) return;
         if (!response.ok) throw new Error(data.error || '리포트 생성에 실패했습니다.');
