@@ -9,7 +9,7 @@ import { join } from 'node:path';
 test('deployment contains only public assets and removes stale output', async () => {
   const fixture = await mkdtemp(join(tmpdir(), 'mindscope-build-'));
   const root = new URL('../', import.meta.url);
-  const assets = ['app.js', 'favicon.svg', 'index.html', 'questions.js', 'scoring.js', 'style.css', ...questions.map(q => q.image)].sort();
+  const assets = ['app.js', 'favicon.svg', 'report-content.js', 'report-export.js', 'index.html', 'questions.js', 'scoring.js', 'style.css', ...questions.map(q => q.image)].sort();
   try {
     await mkdir(join(fixture, 'scripts'));
     await copyFile(new URL('scripts/build.mjs', root), join(fixture, 'scripts/build.mjs'));

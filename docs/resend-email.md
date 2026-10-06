@@ -32,7 +32,7 @@ Cloudflare → Workers & Pages → `whiteflower2` → Settings → Variables and
 
 설정을 마친 뒤 사용자가 보고서 재개를 요청하면 `app.js`의 `REPORTS_PAUSED=false`와 `wrangler.jsonc`의 `vars.REPORTS_PAUSED="false"`를 함께 반영하여 배포합니다. 전체 테스트는 `TESTING_PAUSED=false`를 유지합니다.
 
-테스트 완료 → 본인 이메일 입력 → 언어 선택 → 결과 리포트 받아보기 순서로 확인합니다. 보고서 생성은 OpenAI API 비용이 발생합니다. 보고서 생성 후 30분 이내에 이메일을 요청해야 합니다. 설정을 추가하기 전에 생성한 보고서는 이메일 발송 토큰이 없으므로 새로 생성해야 합니다.
+테스트 완료 → 언어 선택 → 성인 확인 → 결과 리포트 받아보기 → 화면 보고서 확인 → 이메일 입력 → 이메일로 리포트 받기 순서로 확인합니다. 생성·완료 상태는 화면에 표시되며, 이메일 발송은 별도 요청입니다. 보고서 생성은 OpenAI API 비용이 발생합니다. 보고서 생성 후 30분 이내에 이메일을 요청해야 합니다. 설정을 추가하기 전에 생성한 보고서는 이메일 발송 토큰이 없으므로 새로 생성해야 합니다.
 
 성공 메시지는 Resend가 발송 요청을 접수했다는 의미입니다. 최종 수신 여부는 Resend Emails 화면에서 확인하고 받은편지함·스팸함을 확인하세요. 실제 수신 완료를 화면에서 추적하는 웹훅은 아직 구현하지 않았습니다.
 
@@ -40,7 +40,7 @@ Cloudflare → Workers & Pages → `whiteflower2` → Settings → Variables and
 
 - `lib/analyze.js`: 서버가 검증한 최종 보고서에 이메일 발송용 HMAC 서명을 발급합니다. 이메일 설정이 준비되지 않으면 화면 보고서는 정상 반환하고 이메일 발송 버튼은 사용할 수 없습니다. 이메일 주소는 OpenAI에 전달하지 않습니다.
 - `lib/report-email.js`: 서명·만료시간을 검증하고 서버가 생성한 보고서만 `POST https://api.resend.com/emails`로 발송합니다. HTML의 특수문자를 이스케이프하고 일반 텍스트 본문도 제공합니다. [공식 발송 API](https://resend.com/docs/api-reference/emails/send-email).
-- `POST /api/email-report`: `{email, token, consent:true}`를 받습니다. 임의의 보고서 본문이나 제목을 직접 전송할 수 없습니다. 30분 제한·200KB 본문 제한·Origin 검증·중지 설정을 적용합니다.
+- `POST /api/email-report`: `{email, token, consent:true, adultConfirmed:true}`를 받습니다. 임의의 보고서 본문이나 제목을 직접 전송할 수 없습니다. 30분 제한·200KB 본문 제한·Origin 검증·중지 설정을 적용합니다.
 - 같은 보고서 토큰에는 같은 Resend `Idempotency-Key`를 사용합니다. 같은 주소로 재시도하면 중복 발송을 방지하며, 같은 토큰으로 수신 주소를 바꾸면 Resend가 409로 거절합니다. Resend는 이 키를 24시간 유지하며 토큰은 30분만 유효합니다. [중복 방지 안내](https://resend.com/changelog/idempotency-keys).
 
 이메일 발송에는 OpenAI 토큰이 추가로 들지 않지만 Resend의 이메일 발송 한도는 적용됩니다. 새 보고서 생성 자체를 제한하는 사용자 인증이나 요청 횟수 제한은 기존과 같이 별도 구현이 필요합니다.
