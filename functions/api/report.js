@@ -1,4 +1,3 @@
 // Compatibility adapter for older Pages deployments; Workers uses src/index.js.
-import { handleReport } from '../../lib/analyze.js';
-export { handleReport };
-export const onRequest = context => handleReport(context);
+import { handlePayment } from '../../lib/payment.js';
+export const onRequest = context => handlePayment(context);

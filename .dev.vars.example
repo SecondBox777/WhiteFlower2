@@ -5,3 +5,6 @@ RESEND_FROM=Mindscope <reports@your-verified-domain.com>
 REPORT_EMAIL_SECRET=replace-with-a-random-secret-of-at-least-32-characters
 TESTING_PAUSED=false
 REPORTS_PAUSED=false
+POLAR_ACCESS_TOKEN=replace-with-your-polar-organization-access-token
+POLAR_PRODUCT_ID=a2fae7e7-f650-4109-87f7-f1f46e46b9be
+POLAR_ENVIRONMENT=production

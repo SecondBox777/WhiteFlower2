@@ -1,0 +1,112 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import worker from '../src/index.js';
+import {PaymentSession,PRODUCT_ID,paidCheckout,readPaymentBody,polarRequest} from '../lib/payment.js';
+import {scoringItems} from '../scoring.js';
+
+const sessionId='12345678-1234-4123-8123-123456789012';
+const submission=()=>({answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',consent:true,adultConfirmed:true});
+const env={POLAR_ACCESS_TOKEN:'private-polar',OPENAI_API_KEY:'private-ai',OPENAI_MODEL:'test-model'};
+const request=(path,body=submission(),headers={})=>new Request(`https://example.com${path}`,{method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Session':sessionId,...headers},body:JSON.stringify(body)});
+function fixture() {
+  const values=new Map(); let alarm=null;
+  const state={storage:{get:async key=>values.get(key),put:async(key,value)=>values.set(key,value),setAlarm:async when=>{alarm=when;},deleteAll:async()=>values.clear()}};
+  return {object:new PaymentSession(state,env),values,state,get alarm(){return alarm;}};
+}
+function record() { return {sessionId,checkoutId:'checkout-1',productId:PRODUCT_ID,submission:submission(),createdAt:Date.now()}; }
+function checkout(status='succeeded') { return {id:'checkout-1',status,product_id:PRODUCT_ID,metadata:{mindscope_session:sessionId},url:'https://polar.sh/checkout/test'}; }
+
+test('only succeeded checkouts bound to this product and purchase are accepted',()=>{
+  assert.equal(paidCheckout(checkout(),record()),true);
+  for(const status of ['open','confirmed','expired','failed']) assert.equal(paidCheckout(checkout(status),record()),false);
+  for(const changed of [{id:'stolen-checkout'},{product_id:'other-product'},{metadata:{}},{metadata:{mindscope_session:'other-session'}}]) assert.equal(paidCheckout({...checkout(),...changed},record()),false);
+});
+test('both public report routes require a purchase and never fall back to free analysis',async()=>{
+  for(const path of ['/api/report','/api/analyze']) {
+    const response=await worker.fetch(request(path),{...env,PAYMENT_SESSIONS:{get:()=>{throw Error('No purchase should reach storage');}}});
+    assert.equal(response.status,402);
+  }
+});
+test('checkout guards reject foreign origins, missing configuration and unsupported methods',async()=>{
+  assert.equal((await worker.fetch(request('/api/checkout',submission(),{Origin:'https://attacker.example'}),env)).status,403);
+  assert.equal((await worker.fetch(request('/api/checkout'),env)).status,503);
+  assert.equal((await worker.fetch(new Request('https://example.com/api/checkout'),env)).status,405);
+  assert.equal((await worker.fetch(request('/api/checkout'),{...env,PAYMENT_SESSIONS:{},OPENAI_API_KEY:''})).status,503);
+});
+test('checkout stores validated answers and redirects only to the Polar product with a private cookie',async t=>{
+  const f=fixture();
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    assert.equal(url,'https://api.polar.sh/v1/checkouts/');
+    const body=JSON.parse(options.body);
+    assert.deepEqual(body.products,[PRODUCT_ID]);assert.equal(body.allow_trial,false);
+    assert.equal(body.success_url,'https://example.com/?payment=return');
+    assert.equal(body.return_url,'https://example.com/?payment=cancelled');
+    assert.ok(!JSON.stringify(body).includes('answers'));
+    return Response.json({...checkout('open'),metadata:body.metadata});
+  });
+  const bindings={idFromName:id=>id,get:()=>({fetch:req=>f.object.fetch(req)})};
+  const response=await worker.fetch(request('/api/checkout'),{...env,PAYMENT_SESSIONS:bindings});
+  assert.equal(response.status,200);
+  assert.match(response.headers.get('Set-Cookie'),/HttpOnly; Secure; SameSite=Lax/);
+  const stored=f.values.get('purchase');
+  assert.deepEqual(stored.submission.answers,submission().answers);
+  assert.ok(f.alarm>Date.now());assert.equal(stored.productId,PRODUCT_ID);
+});
+test('checkout validation and unexpected provider URLs cannot produce a payable redirect',async t=>{
+  const f=fixture();let calls=0;
+  t.mock.method(globalThis,'fetch',async()=>{calls++;return Response.json({...checkout('open'),url:'https://attacker.example/checkout'});});
+  for(const body of [null,{...submission(),adultConfirmed:false},{...submission(),answers:[0]}]) assert.equal((await f.object.fetch(request('/api/checkout',body))).status,400);
+  assert.equal(calls,0);
+  assert.equal((await f.object.fetch(request('/api/checkout'))).status,502);
+  assert.equal(f.values.has('purchase'),false);
+});
+test('unpaid or mismatched sessions cannot call OpenAI; failed lookups stay closed',async t=>{
+  const f=fixture();f.values.set('purchase',record());let calls=0;
+  const mock=t.mock.method(globalThis,'fetch',async()=>{calls++;return Response.json(checkout('confirmed'));});
+  assert.equal((await f.object.fetch(request('/api/analyze'))).status,402);
+  assert.equal(calls,1);
+  mock.mock.mockImplementation(async()=>Response.json({...checkout(),product_id:'wrong'}));
+  assert.equal((await f.object.fetch(request('/api/analyze'))).status,402);
+  mock.mock.mockImplementation(async()=>new Response('private-provider-detail',{status:401}));
+  const failure=await f.object.fetch(request('/api/analyze'));
+  assert.equal(failure.status,502);assert.ok(!(await failure.text()).includes('private-provider-detail'));
+});
+test('return restores the saved submission and never trusts the success query as proof',async t=>{
+  const f=fixture();f.values.set('purchase',record());
+  t.mock.method(globalThis,'fetch',async()=>Response.json(checkout('open')));
+  const response=await f.object.fetch(new Request('https://example.com/api/payment/status?payment=success'));
+  const data=await response.json();assert.equal(data.status,'open');assert.deepEqual(data.submission,submission());
+});
+test('paid concurrent requests generate one report from saved answers and reuse it after object restart',async t=>{
+  const f=fixture();f.values.set('purchase',record());let aiCalls=0;
+  const report={summary:'Summary',problem_solving:[],careers:[],cognitive_characteristics:[],limitations:'Synthetic only'};
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    if(url.startsWith('https://api.polar.sh/')) return Response.json(checkout());
+    assert.equal(url,'https://api.openai.com/v1/responses');aiCalls++;
+    const analysis=JSON.parse(JSON.parse(options.body).input);
+    assert.equal(analysis.items[0].selected,'A');assert.equal(analysis.language,'ko');
+    await new Promise(resolve=>setTimeout(resolve,10));
+    return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(report)}]}]});
+  });
+  const incoming=()=>request('/api/analyze',{...submission(),answers:Array(30).fill(3),language:'en'});
+  const responses=await Promise.all([f.object.fetch(incoming()),f.object.fetch(incoming())]);
+  assert.ok(responses.every(r=>r.status===200));assert.equal(aiCalls,1);
+  const restarted=new PaymentSession(f.state,env);
+  assert.equal((await restarted.fetch(incoming())).status,200);assert.equal(aiCalls,1);
+  await restarted.alarm();assert.equal(f.values.size,0);
+});
+test('report provider failures allow retry without a second payment',async t=>{
+  const f=fixture();f.values.set('purchase',record());let attempts=0;
+  t.mock.method(globalThis,'fetch',async url=>{
+    if(url.startsWith('https://api.polar.sh/'))return Response.json(checkout());
+    attempts++;return new Response('',{status:429});
+  });
+  assert.equal((await f.object.fetch(request('/api/analyze'))).status,429);
+  assert.equal((await f.object.fetch(request('/api/analyze'))).status,429);
+  assert.equal(attempts,2);assert.equal(f.values.has('report'),false);
+});
+test('bounded request reads and sandbox routing do not expose credentials',async()=>{
+  await assert.rejects(readPaymentBody(request('/api/checkout','x'.repeat(12001))),/Request too large/);
+  await assert.rejects(readPaymentBody(request('/api/checkout',{}, {'Content-Type':'text/plain'})),/JSON required/);
+  await polarRequest({...env,POLAR_ENVIRONMENT:'sandbox'},'/checkouts/id',undefined,async url=>{assert.equal(url,'https://sandbox-api.polar.sh/v1/checkouts/id');return Response.json({});});
+});

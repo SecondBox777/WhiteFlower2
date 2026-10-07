@@ -1,4 +1,5 @@
 node_modules/
+polar.txt
 dist/
 .wrangler/
 .env

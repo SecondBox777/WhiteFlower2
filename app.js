@@ -39,6 +39,9 @@ let imageFiles = null;
 let imagePromise = null;
 let exportUrls = [];
 let exportBusy = false;
+let paymentPaid = false;
+let checkoutLoading = false;
+let checkoutUrl = null;
 
 // Keep decoded images alive for subsequent questions and backward navigation.
 const preloadedImages = new Map();
@@ -68,7 +71,7 @@ function render(markup) {
 function intro() {
   stage = 'intro';
   preloadQuestions(0, 4);
-  render(`<span class="flow-eyebrow">AI IQ TEST · PREVIEW</span><h2 class="flow-title" id="flow-title">AI가 측정하는 당신의 IQ는...</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>AI 기반 분석 모형으로 만든 결과 리포트를 화면에서 확인하고 이메일로도 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button><button class="button secondary full" id="random-submit" style="margin-top:10px">랜덤 답안 제출 · 실험용</button><p class="flow-footnote">실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 새로고침하면 초기화됩니다.</p>`);
+  render(`<span class="flow-eyebrow">AI IQ TEST · PREVIEW</span><h2 class="flow-title" id="flow-title">AI가 측정하는 당신의 IQ는...</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>AI 기반 분석 모형으로 만든 결과 리포트를 화면에서 확인하고 이메일로도 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button><button class="button secondary full" id="random-submit" style="margin-top:10px">랜덤 답안 제출 · 실험용</button><p class="flow-footnote">실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 실험용 리포트도 결제가 필요합니다.</p>`);
   document.querySelector('#random-submit').onclick = () => {
     reset();
     experimental = true;
@@ -120,7 +123,7 @@ function showResult() {
     <label class="report-language">리포트 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label>
     <label class="report-consent adult-confirmation" for="report-adult-confirm"><input id="report-adult-confirm" type="checkbox" required><span><span lang="en">I confirm that I am 18 years of age or older.</span><br>본인은 만 18세 이상임을 확인합니다.</span></label>
     <button class="button primary full" id="generate-report" type="submit" disabled>결과 리포트 받아보기</button>
-    <p class="flow-footnote">요청하면 답안·풀이 시간·채점 통계를 OpenAI에 전송해 리포트를 생성합니다. 이메일 주소 없이도 이 화면에서 확인할 수 있습니다.</p>
+    <p class="flow-footnote">AI 리포트는 1회 결제 상품입니다. 가격·통화·세금은 결제 페이지에서 확인하세요. 결제 완료 후 답안·풀이 시간·채점 통계를 OpenAI에 전송해 리포트를 생성합니다. 화면 확인·사진 저장·공유·이메일 발송이 포함됩니다.</p>
   </form>
   <div id="report-progress" class="report-progress" role="status" aria-live="polite" aria-atomic="true"><span class="report-spinner" aria-hidden="true" hidden></span><div><strong id="report-progress-title"></strong><p id="report-progress-detail"></p></div></div>
   <section id="completed-report" class="completed-report" hidden aria-label="AI 결과 리포트">
@@ -138,6 +141,7 @@ function reset() {
   clearInterval(ticker);
   reportController?.abort(); reportController = null; aiReport = null; reportLoading = false;
   emailController?.abort(); emailController = null; reportEmailToken = null;
+  paymentPaid = false; checkoutLoading = false; checkoutUrl = null;
   emailLoading = false; emailSent = false; emailAddress = ''; emailStatus = ''; adultConfirmed = false;
   reportLanguage = 'ko'; reportStatus = ''; reportData = null; imageFiles = null; imagePromise = null; exportBusy = false;
   clearExportUrls();
@@ -194,14 +198,15 @@ document.addEventListener('visibilitychange', updateTimer);
 function updateReportActions() {
   const button = document.querySelector('#generate-report');
   if (!button) return;
-  const busy = reportLoading || emailLoading;
+  const busy = reportLoading || emailLoading || checkoutLoading;
   document.querySelector('#save-report-photo').disabled = REPORTS_PAUSED;
   document.querySelector('#share-report').disabled = REPORTS_PAUSED;
   button.disabled = REPORTS_PAUSED || busy || Boolean(aiReport) || !adultConfirmed;
-  button.textContent = reportLoading ? 'AI가 리포트를 생성하고 있습니다…' : aiReport ? '리포트 생성 완료' : '결과 리포트 받아보기';
-  document.querySelector('#report-adult-confirm').disabled = busy || Boolean(aiReport);
-  document.querySelector('#report-language').disabled = busy || Boolean(aiReport);
-  document.querySelector('#generate-report-form').setAttribute('aria-busy', String(reportLoading));
+  button.textContent = reportLoading ? 'AI가 리포트를 생성하고 있습니다…' : aiReport ? '리포트 생성 완료' : checkoutLoading ? '결제 페이지를 준비하고 있습니다…' : paymentPaid ? '결과 리포트 받아보기' : checkoutUrl ? '결제 계속하기' : '결제하고 AI 리포트 받기';
+  document.querySelector('#report-adult-confirm').disabled = busy || Boolean(aiReport) || paymentPaid || Boolean(checkoutUrl);
+  document.querySelector('#report-language').disabled = busy || Boolean(aiReport) || paymentPaid || Boolean(checkoutUrl);
+  document.querySelector('#generate-report-form').setAttribute('aria-busy', String(reportLoading || checkoutLoading));
+  document.querySelector('#restart').disabled = busy;
   const progress = document.querySelector('#report-progress');
   progress.hidden = !reportLoading && !aiReport && !reportStatus && !REPORTS_PAUSED;
   progress.classList.toggle('is-loading', reportLoading);
@@ -241,9 +246,10 @@ function setupReportActions() {
   document.querySelector('#share-report').onclick = shareReport;
 }
 async function generateReport(event) {
-  event.preventDefault();
-  if (REPORTS_PAUSED || reportLoading || emailLoading || aiReport || !adultConfirmed || !document.querySelector('#report-adult-confirm').checked) return;
+  event?.preventDefault();
+  if (REPORTS_PAUSED || checkoutLoading || reportLoading || emailLoading || aiReport || !adultConfirmed || !document.querySelector('#report-adult-confirm').checked) return;
   reportLanguage = document.querySelector('#report-language').value;
+  if (!paymentPaid) { await startCheckout(); return; }
   const controller = new AbortController(); reportController = controller;
   const timeout = setTimeout(() => controller.abort(), 75000);
   reportStatus = ''; reportLoading = true; updateReportActions();
@@ -360,3 +366,54 @@ async function shareReport() {
     }
   } finally { if (reportData === source) exportBusy = false; }
 }
+
+function submissionForCheckout() {
+  return {answers,seconds:clock.seconds,expiredIndex:expired?current:null,language:reportLanguage,consent:true,adultConfirmed,experimental};
+}
+async function startCheckout() {
+  if (checkoutUrl) { window.location.assign(checkoutUrl); return; }
+  checkoutLoading = true; reportStatus = ''; updateReportActions();
+  try {
+    const response = await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(submissionForCheckout()),signal:AbortSignal.timeout(25000)});
+    const data = await response.json();
+    if (!response.ok || !data.url) throw Error(data.error || '결제 페이지를 열 수 없습니다.');
+    window.location.assign(data.url);
+  } catch (error) { reportStatus = error.message; }
+  finally { checkoutLoading=false; if (document.querySelector('#generate-report')) updateReportActions(); }
+}
+async function restorePurchase(force = false) {
+  const returning = force || new URLSearchParams(location.search).has('payment');
+  try {
+    const response = await fetch('/api/payment/status',{signal:AbortSignal.timeout(20000)});
+    const data = await response.json();
+    if (!response.ok || !data.submission || data.status === 'none') {
+      if (returning) throw Error(data.error || '결제 내역을 복원할 수 없습니다. 같은 브라우저에서 다시 확인해 주세요.');
+      return;
+    }
+    // A delayed restoration must not overwrite a test already started by the user.
+    if (stage !== 'intro' || clock || (!returning && dialog.open)) return;
+    reset();
+    const saved=data.submission;
+    answers=saved.answers; clock=new TestClock(performance.now()); clock.seconds=saved.seconds;
+    expired=saved.expiredIndex!==null; current=saved.expiredIndex??0;
+    experimental=saved.experimental; reportLanguage=saved.language; adultConfirmed=true;
+    result=scoreTest(answers,clock.seconds,saved.expiredIndex);
+    paymentPaid=data.status==='paid'; checkoutUrl=data.checkoutUrl;
+    reportStatus=paymentPaid?'결제가 확인되었습니다. 리포트를 불러오고 있습니다.':data.status==='confirmed'?'결제를 확인 중입니다. 잠시 후 결제 상태를 다시 확인해 주세요.':data.status==='expired'?'결제 시간이 만료되었습니다. 다시 결제해 주세요.':'결제가 완료되지 않았습니다. 결제를 계속하거나 새로 시작할 수 있습니다.';
+    stage='done'; if (!dialog.open) dialog.showModal(); showResult();
+    if (paymentPaid) await generateReport();
+    else if (data.status==='confirmed') {
+      const button=document.querySelector('#generate-report');
+      button.textContent='결제 상태 다시 확인';
+      document.querySelector('#generate-report-form').onsubmit=event=>{event.preventDefault(); stage='intro';clock=null;restorePurchase(true);};
+    }
+  } catch (error) {
+    if (returning) {
+      const notice=document.createElement('p'); notice.className='flow-text'; notice.setAttribute('role','alert');
+      notice.textContent=error.message; document.querySelector('main').prepend(notice);
+    }
+  } finally {
+    if (returning) { const url=new URL(location.href);url.searchParams.delete('payment');history.replaceState(null,'',url); }
+  }
+}
+restorePurchase();

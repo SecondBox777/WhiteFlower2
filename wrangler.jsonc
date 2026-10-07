@@ -13,9 +13,15 @@
     ]
   },
   "keep_vars": true,
+  "durable_objects": {
+    "bindings": [{ "name": "PAYMENT_SESSIONS", "class_name": "PaymentSession" }]
+  },
+  "migrations": [{ "tag": "payment-sessions-v1", "new_sqlite_classes": ["PaymentSession"] }],
   "vars": {
     "OPENAI_MODEL": "gpt-6-sol",
     "RESEND_FROM": "Mindscope <reports@mindscope.online>",
+    "POLAR_PRODUCT_ID": "a2fae7e7-f650-4109-87f7-f1f46e46b9be",
+    "POLAR_ENVIRONMENT": "production",
     "TESTING_PAUSED": "false",
     "REPORTS_PAUSED": "false"
   }
