@@ -76,7 +76,7 @@ CLI 배포는 `npm run deploy`, 로컬 Worker 실행은 `npm run worker:dev`입�
 
 결제 전에 입력한 이메일로 생성된 AI 보고서를 자동 발송하는 Resend 연동을 구현했습니다. [Resend 계정·도메인·Worker 설정 안내](docs/resend-email.md)를 따라 `RESEND_API_KEY`, `RESEND_FROM`, `REPORT_EMAIL_SECRET`을 등록하세요. 보고서 중지 설정은 이메일 API에도 적용됩니다. 이메일 전송은 이미 생성된 보고서를 사용하므로 OpenAI를 다시 호출하지 않습니다.
 
-현재 테스트·결과 리포트 생성·이메일 발송·사진 저장·공유를 모두 재개했습니다. `app.js`의 `TESTING_PAUSED`와 `REPORTS_PAUSED`는 모두 `false`이며, `wrangler.jsonc`의 대응 변수도 모두 문자열 `"false"`입니다. 보고서와 이메일 발송을 중지하려면 `app.js`의 `REPORTS_PAUSED`를 `true`로, `wrangler.jsonc`의 `vars.REPORTS_PAUSED`를 문자열 `"true"`로 변경하고 GitHub에 push합니다. 전체 테스트를 중지하려면 두 파일의 `TESTING_PAUSED`를 각각 `true`와 문자열 `"true"`로 설정합니다. 재개하려면 두 파일의 대응 값을 모두 `false`와 문자열 `"false"`로 변경하고 배포합니다. 서버는 중지 상태에서 요청 본문을 읽거나 OpenAI를 호출하기 전에 503으로 응답하므로, 오래 열린 페이지나 직접 API 요청도 보고서를 생성하지 못합니다. API 키는 그대로 보관합니다.
+현재 테스트·결제·결과 리포트 생성·이메일 발송·사진 저장·공유를 모두 일시 중지했습니다. 서버의 자동 생성·이메일·환불 재시도도 중지 상태를 따릅니다. `app.js`의 `TESTING_PAUSED`와 `REPORTS_PAUSED`는 모두 `true`이며, `wrangler.jsonc`의 대응 변수도 모두 문자열 `"true"`입니다. 보고서와 이메일 발송을 중지하려면 `app.js`의 `REPORTS_PAUSED`를 `true`로, `wrangler.jsonc`의 `vars.REPORTS_PAUSED`를 문자열 `"true"`로 변경하고 GitHub에 push합니다. 전체 테스트를 중지하려면 두 파일의 `TESTING_PAUSED`를 각각 `true`와 문자열 `"true"`로 설정합니다. 재개하려면 두 파일의 대응 값을 모두 `false`와 문자열 `"false"`로 변경하고 배포합니다. 서버는 중지 상태에서 요청 본문을 읽거나 OpenAI를 호출하기 전에 503으로 응답하므로, 오래 열린 페이지나 직접 API 요청도 보고서를 생성하지 못합니다. API 키는 그대로 보관합니다.
 
 보고서 요청 직전에 기본 해제된 만 18세 이상 확인란을 제공합니다. 확인 전에는 보고서 버튼이 비활성화되고, 리포트 생성·이메일 API도 `adultConfirmed: true`가 없는 요청을 거절합니다. 테스트 소개와 시작 화면에는 연령 확인을 추가하지 않았습니다. 하단 이용약관에는 성인 대상, 18세 미만 이용·구매 제한 및 오락·자기 탐색 목적을 명시했습니다.
 

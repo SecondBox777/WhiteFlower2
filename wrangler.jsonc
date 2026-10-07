@@ -22,7 +22,7 @@
     "RESEND_FROM": "Mindscope <reports@mindscope.online>",
     "POLAR_PRODUCT_ID": "a2fae7e7-f650-4109-87f7-f1f46e46b9be",
     "POLAR_ENVIRONMENT": "sandbox",
-    "TESTING_PAUSED": "false",
-    "REPORTS_PAUSED": "false"
+    "TESTING_PAUSED": "true",
+    "REPORTS_PAUSED": "true"
   }
 }

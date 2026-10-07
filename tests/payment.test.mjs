@@ -217,3 +217,15 @@ test('email retries stop before the provider idempotency window expires',async t
  t.mock.method(globalThis,'fetch',async()=>{throw Error('Must not resend after window');});
  assert.equal((await f.object.sendAutomaticEmail(f.values.get('purchase'),{})).status,'failed');
 });
+
+test('pause blocks checkout, payment restoration and background report/email/refund work',async t=>{
+ let calls=0;t.mock.method(globalThis,'fetch',async()=>{calls++;throw Error('Must not call providers while paused');});
+ for(const flag of ['TESTING_PAUSED','REPORTS_PAUSED']) {
+   const pausedEnv={...env,[flag]:'true'};
+   for(const path of ['/api/checkout','/api/analyze','/api/report'])assert.equal((await worker.fetch(request(path),pausedEnv)).status,503);
+   assert.equal((await worker.fetch(new Request('https://example.com/api/payment/status'),pausedEnv)).status,503);
+   const f=fixture();f.object.env=pausedEnv;f.values.set('purchase',record());f.values.set('attempts',3);f.values.set('reportUrl','https://example.com/api/analyze');
+   await f.object.alarm();assert.equal(f.values.has('refund'),false);assert.equal(f.values.has('emailDelivery'),false);
+ }
+ assert.equal(calls,0);
+});

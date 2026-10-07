@@ -7,9 +7,9 @@ document.querySelectorAll('[data-question-count]').forEach(item => { item.textCo
 document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. AI가 측정하는 당신의 IQ는... 합성 모형 기반 테스트.`;
 
 // Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
-const TESTING_PAUSED = false;
+const TESTING_PAUSED = true;
 // Set false together with wrangler.jsonc REPORTS_PAUSED to resume reports.
-const REPORTS_PAUSED = false;
+const REPORTS_PAUSED = true;
 
 const dialog = document.querySelector('#flow-dialog');
 const content = document.querySelector('#flow-content');
@@ -361,6 +361,7 @@ async function startCheckout() {
   finally { checkoutLoading=false; if (document.querySelector('#generate-report')) updateReportActions(); }
 }
 async function restorePurchase(force = false) {
+  if (TESTING_PAUSED || REPORTS_PAUSED) return;
   const paymentReturn = new URLSearchParams(location.search).get('payment');
   const returning = force || ['return', 'cancelled'].includes(paymentReturn);
   if (!returning) return;
