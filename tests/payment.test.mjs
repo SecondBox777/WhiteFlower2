@@ -6,8 +6,8 @@ import {scoringItems} from '../scoring.js';
 
 const sessionId='12345678-1234-4123-8123-123456789012';
 const submission=()=>({answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',consent:true,adultConfirmed:true});
-const env={POLAR_ENVIRONMENT:'sandbox',POLAR_ACCESS_TOKEN:'private-polar',OPENAI_API_KEY:'private-ai',OPENAI_MODEL:'test-model'};
-const request=(path,body=submission(),headers={})=>new Request(`https://example.com${path}`,{method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Session':sessionId,...headers},body:JSON.stringify(body)});
+const env={POLAR_ENVIRONMENT:'sandbox',POLAR_ACCESS_TOKEN:'private-polar',OPENAI_API_KEY:'private-ai',OPENAI_MODEL:'test-model',RESEND_API_KEY:'test-resend',RESEND_FROM:'Mindscope <reports@example.com>',REPORT_EMAIL_SECRET:'a-test-secret-that-is-at-least-32-characters'};
+const request=(path,body=path==='/api/checkout'?{...submission(),email:'reader@example.com'}:submission(),headers={})=>new Request(`https://example.com${path}`,{method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Session':sessionId,...headers},body:JSON.stringify(body)});
 function fixture() {
   const values=new Map(); let alarm=null;
   const state={storage:{get:async key=>values.get(key),put:async(key,value)=>values.set(key,value),setAlarm:async when=>{alarm=when;},deleteAll:async()=>values.clear()}};
@@ -44,6 +44,7 @@ test('checkout stores validated answers and redirects only to the Polar product 
     assert.deepEqual(body.products,[PRODUCT_ID]);assert.equal(body.allow_trial,false);
     assert.equal(body.success_url,'https://example.com/?payment=return');
     assert.equal(body.return_url,'https://example.com/?payment=cancelled');
+    assert.equal(body.customer_email,'reader@example.com');
     assert.ok(!JSON.stringify(body).includes('answers'));
     return Response.json({...checkout('open'),metadata:body.metadata});
   });
@@ -53,7 +54,7 @@ test('checkout stores validated answers and redirects only to the Polar product 
   assert.match(response.headers.get('Set-Cookie'),/HttpOnly; Secure; SameSite=Lax/);
   const stored=f.values.get('purchase');
   assert.deepEqual(stored.submission.answers,submission().answers);
-  assert.ok(f.alarm>Date.now());assert.equal(stored.productId,PRODUCT_ID);
+  assert.ok(f.alarm>Date.now());assert.equal(stored.productId,PRODUCT_ID);assert.equal(stored.email,'reader@example.com');
 });
 test('checkout validation and unexpected provider URLs cannot produce a payable redirect',async t=>{
   const f=fixture();let calls=0;
@@ -176,4 +177,43 @@ test('missing order or refund read permission blocks checkout before a customer 
 test('unspecified environment fails closed and production is only used explicitly',async()=>{
  await assert.rejects(polarRequest({...env,POLAR_ENVIRONMENT:undefined},'/checkouts/id'),/environment/);
  await polarRequest({...env,POLAR_ENVIRONMENT:'production'},'/checkouts/id',undefined,async url=>{assert.equal(url,'https://api.polar.sh/v1/checkouts/id');return Response.json({});});
+});
+
+test('automatic email sends the saved recipient once and never shares it with OpenAI',async t=>{
+ const f=fixture();f.values.set('purchase',{...record(),email:'reader@example.com'});let ai=0,sends=0;
+ const report={summary:'Summary',problem_solving:[],careers:[],cognitive_characteristics:[],limitations:'Synthetic only'};
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+   if(url==='https://api.resend.com/emails'){
+     sends++;assert.equal(options.headers['Idempotency-Key'],`report/${sessionId}`);assert.deepEqual(JSON.parse(options.body).to,['reader@example.com']);return Response.json({id:'email-1'});
+   }
+   if(url.includes('openai')){
+     ai++;assert.ok(!options.body.includes('reader@example.com'));
+     return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(report)}]}]});
+   }
+   return Response.json(polarData(url));
+ });
+ const result=await f.object.fetch(request('/api/analyze'));assert.equal((await result.json()).emailDelivery.status,'sent');
+ const restarted=new PaymentSession(f.state,env);
+ await restarted.fetch(request('/api/analyze'));await restarted.alarm();assert.equal(sends,1);assert.equal(ai,1);
+});
+test('email failures retry the saved report without regenerating or refunding it',async t=>{
+ const f=fixture();f.values.set('purchase',{...record(),email:'reader@example.com'});let sends=0,ai=0;
+ const report={summary:'Summary',problem_solving:[],careers:[],cognitive_characteristics:[],limitations:'Synthetic only'};
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+   if(url==='https://api.resend.com/emails')return ++sends===1?new Response('',{status:429}):Response.json({id:'email-2'});
+   if(url.includes('openai')){ai++;return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(report)}]}]});}
+   assert.equal(options.method,'GET');return Response.json(polarData(url));
+ });
+ const response=await f.object.fetch(request('/api/analyze'));assert.equal(response.status,200);assert.equal((await response.json()).emailDelivery.status,'pending');
+ await f.object.alarm();assert.equal(f.values.get('emailDelivery').status,'sent');assert.equal(sends,2);assert.equal(ai,1);assert.equal(f.values.has('refund'),false);
+});
+test('checkout rejects missing or invalid email and missing delivery configuration before payment',async t=>{
+ const f=fixture();let called=0;t.mock.method(globalThis,'fetch',async()=>{called++;throw Error('Unexpected provider call');});
+ for(const email of [undefined,'','invalid','a@example.com,other@example.com'])assert.equal((await f.object.fetch(request('/api/checkout',{...submission(),email}))).status,400);
+ f.object.env={...env,RESEND_API_KEY:''};assert.equal((await f.object.fetch(request('/api/checkout'))).status,503);assert.equal(called,0);
+});
+test('email retries stop before the provider idempotency window expires',async t=>{
+ const f=fixture();f.values.set('purchase',{...record(),email:'reader@example.com'});f.values.set('emailDelivery',{status:'pending',attempts:1,startedAt:Date.now()-24*60*60*1000});
+ t.mock.method(globalThis,'fetch',async()=>{throw Error('Must not resend after window');});
+ assert.equal((await f.object.sendAutomaticEmail(f.values.get('purchase'),{})).status,'failed');
 });
