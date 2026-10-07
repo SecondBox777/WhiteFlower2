@@ -42,6 +42,7 @@ let exportBusy = false;
 let paymentPaid = false;
 let checkoutLoading = false;
 let checkoutUrl = null;
+let paymentTerminal = '';
 
 // Keep decoded images alive for subsequent questions and backward navigation.
 const preloadedImages = new Map();
@@ -125,6 +126,7 @@ function showResult() {
     <button class="button primary full" id="generate-report" type="submit" disabled>결과 리포트 받아보기</button>
     <p class="flow-footnote">AI 리포트는 1회 결제 상품입니다. 가격·통화·세금은 결제 페이지에서 확인하세요. 결제 완료 후 답안·풀이 시간·채점 통계를 OpenAI에 전송해 리포트를 생성합니다. 화면 확인·사진 저장·공유·이메일 발송이 포함됩니다.</p>
   </form>
+  <button class="button secondary full" id="refresh-payment" type="button" hidden>결제·환불 상태 다시 확인</button>
   <div id="report-progress" class="report-progress" role="status" aria-live="polite" aria-atomic="true"><span class="report-spinner" aria-hidden="true" hidden></span><div><strong id="report-progress-title"></strong><p id="report-progress-detail"></p></div></div>
   <section id="completed-report" class="completed-report" hidden aria-label="AI 결과 리포트">
     <article id="ai-report" class="report-document"></article>
@@ -141,7 +143,7 @@ function reset() {
   clearInterval(ticker);
   reportController?.abort(); reportController = null; aiReport = null; reportLoading = false;
   emailController?.abort(); emailController = null; reportEmailToken = null;
-  paymentPaid = false; checkoutLoading = false; checkoutUrl = null;
+  paymentPaid = false; checkoutLoading = false; checkoutUrl = null; paymentTerminal = '';
   emailLoading = false; emailSent = false; emailAddress = ''; emailStatus = ''; adultConfirmed = false;
   reportLanguage = 'ko'; reportStatus = ''; reportData = null; imageFiles = null; imagePromise = null; exportBusy = false;
   clearExportUrls();
@@ -201,8 +203,10 @@ function updateReportActions() {
   const busy = reportLoading || emailLoading || checkoutLoading;
   document.querySelector('#save-report-photo').disabled = REPORTS_PAUSED;
   document.querySelector('#share-report').disabled = REPORTS_PAUSED;
-  button.disabled = REPORTS_PAUSED || busy || Boolean(aiReport) || !adultConfirmed;
+  button.disabled = REPORTS_PAUSED || busy || Boolean(aiReport) || !adultConfirmed || Boolean(paymentTerminal);
   button.textContent = reportLoading ? 'AI가 리포트를 생성하고 있습니다…' : aiReport ? '리포트 생성 완료' : checkoutLoading ? '결제 페이지를 준비하고 있습니다…' : paymentPaid ? '결과 리포트 받아보기' : checkoutUrl ? '결제 계속하기' : '결제하고 AI 리포트 받기';
+  if (paymentTerminal) button.textContent = paymentTerminal==='refunded' ? '환불 완료' : paymentTerminal==='refund_pending' ? '환불 처리 중' : '환불 상태 확인 필요';
+  document.querySelector('#refresh-payment').hidden = !paymentTerminal;
   document.querySelector('#report-adult-confirm').disabled = busy || Boolean(aiReport) || paymentPaid || Boolean(checkoutUrl);
   document.querySelector('#report-language').disabled = busy || Boolean(aiReport) || paymentPaid || Boolean(checkoutUrl);
   document.querySelector('#generate-report-form').setAttribute('aria-busy', String(reportLoading || checkoutLoading));
@@ -242,6 +246,7 @@ function setupReportActions() {
   updateReportActions();
   document.querySelector('#generate-report-form').onsubmit = generateReport;
   document.querySelector('#email-report-form').onsubmit = sendReportEmail;
+  document.querySelector('#refresh-payment').onclick = () => { stage='intro';clock=null;restorePurchase(true); };
   document.querySelector('#save-report-photo').onclick = saveReportPhoto;
   document.querySelector('#share-report').onclick = shareReport;
 }
@@ -258,7 +263,10 @@ async function generateReport(event) {
     const response = await fetch('/api/analyze', {method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({answers,seconds:clock.seconds,expiredIndex:expired?current:null,language:reportLanguage,consent:true,adultConfirmed,experimental})});
     const data = await response.json().catch(() => ({error:'리포트 생성 응답을 확인할 수 없습니다.'}));
     if (reportController !== controller) return;
-    if (!response.ok) throw new Error(data.error || '리포트 생성에 실패했습니다.');
+    if (!response.ok) {
+      if (['refunded','refund_pending','refund_failed','partially_refunded'].includes(data.paymentStatus)) paymentTerminal=data.paymentStatus;
+      throw new Error(data.error || '리포트 생성에 실패했습니다.');
+    }
     if (!data.report || !data.result) throw new Error('리포트 형식이 올바르지 않습니다.');
     // Prepare the document before committing the successful state.
     renderReportDocument({report:data.report,result:data.result,language:reportLanguage});
@@ -399,7 +407,9 @@ async function restorePurchase(force = false) {
     experimental=saved.experimental; reportLanguage=saved.language; adultConfirmed=true;
     result=scoreTest(answers,clock.seconds,saved.expiredIndex);
     paymentPaid=data.status==='paid'; checkoutUrl=data.checkoutUrl;
+    if (['refunded','refund_pending','refund_failed','partially_refunded'].includes(data.status)) paymentTerminal=data.status;
     reportStatus=paymentPaid?'결제가 확인되었습니다. 리포트를 불러오고 있습니다.':data.status==='confirmed'?'결제를 확인 중입니다. 잠시 후 결제 상태를 다시 확인해 주세요.':data.status==='expired'?'결제 시간이 만료되었습니다. 다시 결제해 주세요.':'결제가 완료되지 않았습니다. 결제를 계속하거나 새로 시작할 수 있습니다.';
+    if (paymentTerminal) reportStatus=paymentTerminal==='refunded'?'환불이 완료되었습니다.':paymentTerminal==='refund_pending'?'리포트 제공에 실패하여 환불 처리 중입니다.':'환불 상태 확인이 필요합니다. 고객 지원에 문의해 주세요.';
     stage='done'; if (!dialog.open) dialog.showModal(); showResult();
     if (paymentPaid) await generateReport();
     else if (data.status==='confirmed') {

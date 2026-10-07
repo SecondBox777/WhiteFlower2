@@ -6,7 +6,7 @@ import {scoringItems} from '../scoring.js';
 
 const sessionId='12345678-1234-4123-8123-123456789012';
 const submission=()=>({answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',consent:true,adultConfirmed:true});
-const env={POLAR_ACCESS_TOKEN:'private-polar',OPENAI_API_KEY:'private-ai',OPENAI_MODEL:'test-model'};
+const env={POLAR_ENVIRONMENT:'sandbox',POLAR_ACCESS_TOKEN:'private-polar',OPENAI_API_KEY:'private-ai',OPENAI_MODEL:'test-model'};
 const request=(path,body=submission(),headers={})=>new Request(`https://example.com${path}`,{method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Session':sessionId,...headers},body:JSON.stringify(body)});
 function fixture() {
   const values=new Map(); let alarm=null;
@@ -14,7 +14,9 @@ function fixture() {
   return {object:new PaymentSession(state,env),values,state,get alarm(){return alarm;}};
 }
 function record() { return {sessionId,checkoutId:'checkout-1',productId:PRODUCT_ID,submission:submission(),createdAt:Date.now()}; }
-function checkout(status='succeeded') { return {id:'checkout-1',status,product_id:PRODUCT_ID,metadata:{mindscope_session:sessionId},url:'https://polar.sh/checkout/test'}; }
+function order(extra={}) {return {id:'order-1',checkout_id:'checkout-1',product_id:PRODUCT_ID,metadata:{mindscope_session:sessionId},paid:true,status:'paid',net_amount:900,refunded_amount:0,...extra};}
+function polarData(url) {const path=new URL(url).pathname;return path.includes('/orders/')?{items:[order()]}:path.includes('/refunds/')?{items:[]}:checkout();}
+function checkout(status='succeeded') { return {id:'checkout-1',status,product_id:PRODUCT_ID,metadata:{mindscope_session:sessionId},url:'https://sandbox.polar.sh/checkout/test'}; }
 
 test('only succeeded checkouts bound to this product and purchase are accepted',()=>{
   assert.equal(paidCheckout(checkout(),record()),true);
@@ -36,7 +38,8 @@ test('checkout guards reject foreign origins, missing configuration and unsuppor
 test('checkout stores validated answers and redirects only to the Polar product with a private cookie',async t=>{
   const f=fixture();
   t.mock.method(globalThis,'fetch',async(url,options)=>{
-    assert.equal(url,'https://api.polar.sh/v1/checkouts/');
+    if (!url.endsWith('/checkouts/')) return Response.json({items:[]});
+    assert.equal(url,'https://sandbox-api.polar.sh/v1/checkouts/');
     const body=JSON.parse(options.body);
     assert.deepEqual(body.products,[PRODUCT_ID]);assert.equal(body.allow_trial,false);
     assert.equal(body.success_url,'https://example.com/?payment=return');
@@ -81,7 +84,7 @@ test('paid concurrent requests generate one report from saved answers and reuse 
   const f=fixture();f.values.set('purchase',record());let aiCalls=0;
   const report={summary:'Summary',problem_solving:[],careers:[],cognitive_characteristics:[],limitations:'Synthetic only'};
   t.mock.method(globalThis,'fetch',async(url,options)=>{
-    if(url.startsWith('https://api.polar.sh/')) return Response.json(checkout());
+    if(url.startsWith('https://sandbox-api.polar.sh/')) return Response.json(polarData(url));
     assert.equal(url,'https://api.openai.com/v1/responses');aiCalls++;
     const analysis=JSON.parse(JSON.parse(options.body).input);
     assert.equal(analysis.items[0].selected,'A');assert.equal(analysis.language,'ko');
@@ -93,12 +96,13 @@ test('paid concurrent requests generate one report from saved answers and reuse 
   assert.ok(responses.every(r=>r.status===200));assert.equal(aiCalls,1);
   const restarted=new PaymentSession(f.state,env);
   assert.equal((await restarted.fetch(incoming())).status,200);assert.equal(aiCalls,1);
+  f.values.set('purchase',{...record(),createdAt:Date.now()-31*24*60*60*1000});
   await restarted.alarm();assert.equal(f.values.size,0);
 });
 test('report provider failures allow retry without a second payment',async t=>{
   const f=fixture();f.values.set('purchase',record());let attempts=0;
   t.mock.method(globalThis,'fetch',async url=>{
-    if(url.startsWith('https://api.polar.sh/'))return Response.json(checkout());
+    if(url.startsWith('https://sandbox-api.polar.sh/'))return Response.json(polarData(url));
     attempts++;return new Response('',{status:429});
   });
   assert.equal((await f.object.fetch(request('/api/analyze'))).status,429);
@@ -109,4 +113,67 @@ test('bounded request reads and sandbox routing do not expose credentials',async
   await assert.rejects(readPaymentBody(request('/api/checkout','x'.repeat(12001))),/Request too large/);
   await assert.rejects(readPaymentBody(request('/api/checkout',{}, {'Content-Type':'text/plain'})),/JSON required/);
   await polarRequest({...env,POLAR_ENVIRONMENT:'sandbox'},'/checkouts/id',undefined,async url=>{assert.equal(url,'https://sandbox-api.polar.sh/v1/checkouts/id');return Response.json({});});
+});
+
+test('three report failures automatically refund the verified net amount once and poll completion',async t=>{
+ const f=fixture();f.values.set('purchase',record());let ai=0,posts=0,refund=null;
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+   if(url.startsWith('https://api.openai.com/')){ai++;return new Response('',{status:429});}
+   if(new URL(url).pathname==='/v1/refunds/' && options.method==='POST'){
+     posts++;const body=JSON.parse(options.body);assert.equal(body.order_id,'order-1');assert.equal(body.amount,900);assert.equal(body.reason,'service_disruption');
+     refund={id:'refund-1',order_id:'order-1',status:'pending',metadata:body.metadata};return Response.json(refund);
+   }
+   if(new URL(url).pathname==='/v1/refunds/')return Response.json({items:refund?[refund]:[]});
+   return Response.json(polarData(url));
+ });
+ assert.equal((await f.object.fetch(request('/api/analyze'))).status,429);
+ await f.object.alarm();await f.object.alarm();assert.equal(ai,3);assert.equal(posts,1);
+ const restarted=new PaymentSession(f.state,env);
+ await restarted.alarm();assert.equal(posts,1);assert.equal(ai,3);
+ refund.status='succeeded';
+ const status=await restarted.fetch(new Request('https://example.com/api/payment/status'));
+ assert.equal((await status.json()).status,'refunded');
+ assert.equal((await restarted.fetch(request('/api/analyze'))).status,402);assert.equal(posts,1);
+});
+test('an ambiguous refund POST is reconciled after restart without posting a duplicate',async t=>{
+ const f=fixture();f.values.set('purchase',record());f.values.set('attempts',3);let posts=0;
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+   if(new URL(url).pathname==='/v1/refunds/' && options.method==='POST'){posts++;throw Error('Connection lost after submission');}
+   return Response.json(polarData(url));
+ });
+ const response=await f.object.fetch(request('/api/analyze'));assert.equal((await response.json()).paymentStatus,'refund_pending');
+ const restarted=new PaymentSession(f.state,env);
+ assert.equal((await restarted.fetch(request('/api/analyze'))).status,402);
+ await restarted.alarm();assert.equal(posts,1);
+});
+test('refunded, unpaid and mismatched orders never generate reports or trigger refunds',async t=>{
+ const f=fixture();f.values.set('purchase',record());let active=order({paid:false});
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+   assert.equal(options.method,'GET');assert.ok(!url.includes('openai'));
+   if(new URL(url).pathname==='/v1/orders/')return Response.json({items:[active]});
+   return Response.json(polarData(url));
+ });
+ for(const changed of [{paid:false},{checkout_id:'other'},{product_id:'other'},{metadata:{}},{status:'refunded',refunded_amount:900},{status:'partially_refunded',refunded_amount:100}]){
+   active=order(changed);assert.equal((await f.object.fetch(request('/api/analyze'))).status,402);
+ }
+});
+test('a successful retry cancels refund scheduling and preserves the paid report',async t=>{
+ const f=fixture();f.values.set('purchase',record());let ai=0;
+ const report={summary:'Summary',problem_solving:[],careers:[],cognitive_characteristics:[],limitations:'Synthetic only'};
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+   if(!url.includes('openai')){assert.equal(options.method,'GET');return Response.json(polarData(url));}
+   if(++ai===1)return new Response('',{status:429});
+   return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(report)}]}]});
+ });
+ await f.object.fetch(request('/api/analyze'));await f.object.alarm();await f.object.alarm();
+ assert.equal(ai,2);assert.ok(f.values.has('report'));assert.equal(f.values.has('refund'),false);
+});
+test('missing order or refund read permission blocks checkout before a customer can pay',async t=>{
+ const f=fixture();let created=0;
+ t.mock.method(globalThis,'fetch',async(url,options)=>{if(options.method==='POST')created++;return new Response('',{status:403});});
+ assert.equal((await f.object.fetch(request('/api/checkout'))).status,502);assert.equal(created,0);
+});
+test('unspecified environment fails closed and production is only used explicitly',async()=>{
+ await assert.rejects(polarRequest({...env,POLAR_ENVIRONMENT:undefined},'/checkouts/id'),/environment/);
+ await polarRequest({...env,POLAR_ENVIRONMENT:'production'},'/checkouts/id',undefined,async url=>{assert.equal(url,'https://api.polar.sh/v1/checkouts/id');return Response.json({});});
 });

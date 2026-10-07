@@ -88,4 +88,4 @@ CLI 배포는 `npm run deploy`, 로컬 Worker 실행은 `npm run worker:dev`입�
 
 ## Polar 결제
 
-Product ID `a2fae7e7-f650-4109-87f7-f1f46e46b9be`를 사용합니다. [런타임 설정과 결제 검증 안내](docs/polar-payment.md)를 참고하세요.
+현재 Polar Sandbox 환경이며 Product ID `a2fae7e7-f650-4109-87f7-f1f46e46b9be`를 사용합니다. 결제 및 주문 상태를 확인하고 리포트 생성이 3회 실패하면 자동 환불을 요청합니다. [런타임 설정과 결제 검증 안내](docs/polar-payment.md)를 참고하세요.
