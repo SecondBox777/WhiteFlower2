@@ -361,7 +361,9 @@ async function startCheckout() {
   finally { checkoutLoading=false; if (document.querySelector('#generate-report')) updateReportActions(); }
 }
 async function restorePurchase(force = false) {
-  const returning = force || new URLSearchParams(location.search).has('payment');
+  const paymentReturn = new URLSearchParams(location.search).get('payment');
+  const returning = force || ['return', 'cancelled'].includes(paymentReturn);
+  if (!returning) return;
   const restoreVersion = ++purchaseRestoreVersion;
   try {
     const response = await fetch('/api/payment/status',{signal:AbortSignal.timeout(20000)});
