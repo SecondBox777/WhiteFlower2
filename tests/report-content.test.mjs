@@ -1,9 +1,12 @@
+import { scoringItems } from '../scoring.js';
+import { buildReport, buildAnalysis } from '../lib/report.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { renderReportDocument, reportBlocks } from '../report-content.js';
 import { renderReportEmail } from '../lib/report-email.js';
 import { wrapText } from '../report-export.js';
-const data={language:'ko',result:{iq:124.47,score:64.52,correct:22},report:{summary:'강점 <script>alert(1)</script> & 비교',problem_solving:[{title:'문제 전략',evidence:'근거',advice:'방법'}],cognitive_characteristics:[{title:'논리',assessment:'내부 분류',evidence:'조건 비교'}],careers:[{field:'연구원',required_abilities:'분석 능력'}],limitations:'합성·예비 모형이며 임상 검사가 아닙니다.'}};
+const data={language:'ko',result:{iq:124.47,score:64.52,correct:22},report:buildReport(buildAnalysis({answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko'}))};
+data.report.summary += ' <script>alert(1)</script>';
 test('screen and email share the exact same escaped report document in both languages',()=>{
  for(const language of ['ko','en']) {
   const input={...data,language};

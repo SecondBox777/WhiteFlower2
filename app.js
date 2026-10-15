@@ -4,12 +4,12 @@ import { questions } from './questions.js';
 import { LIMIT_SECONDS, scoreTest, scoringItems, TestClock } from './scoring.js';
 
 document.querySelectorAll('[data-question-count]').forEach(item => { item.textContent = questions.length; });
-document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. AI가 측정하는 당신의 IQ는... 합성 모형 기반 테스트.`;
+document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. 재미로 보는 당신의 IQ는... 오락 전용 IQ 테마 퍼즐 게임.`;
 
 // Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
-const TESTING_PAUSED = true;
+const TESTING_PAUSED = false;
 // Set false together with wrangler.jsonc REPORTS_PAUSED to resume reports.
-const REPORTS_PAUSED = true;
+const REPORTS_PAUSED = false;
 
 const dialog = document.querySelector('#flow-dialog');
 const content = document.querySelector('#flow-content');
@@ -22,7 +22,7 @@ let ticker;
 let result;
 let expired = false;
 let experimental = false;
-let aiReport = null;
+let puzzleReport = null;
 let reportLoading = false;
 let reportController;
 let emailAddress = '';
@@ -70,7 +70,7 @@ function render(markup) {
 function intro() {
   stage = 'intro';
   preloadQuestions(0, 4);
-  render(`<span class="flow-eyebrow">AI IQ TEST · PREVIEW</span><h2 class="flow-title" id="flow-title">AI가 측정하는 당신의 IQ는...</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>AI 기반 분석 모형으로 만든 결과 리포트를 화면에서 확인하고 이메일로도 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button><button class="button secondary full" id="random-submit" style="margin-top:10px">랜덤 답안 제출 · 실험용</button><p class="flow-footnote">실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 실험용 리포트도 결제가 필요합니다.</p>`);
+  render(`<span class="flow-eyebrow">IQ PUZZLE GAME · FOR FUN</span><h2 class="flow-title" id="flow-title">재미로 보는 당신의 IQ는...</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>정답과 풀이 시간으로 만든 결과 리포트를 화면에서 확인하고 이메일로도 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button><button class="button secondary full" id="random-submit" style="margin-top:10px">랜덤 답안 제출 · 실험용</button><p class="flow-footnote">실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 실험용 리포트도 결제가 필요합니다.</p>`);
   document.querySelector('#random-submit').onclick = () => {
     reset();
     experimental = true;
@@ -117,18 +117,18 @@ function finish(timedOut = false) {
 }
 function showResult() {
   const elapsed = Math.round(clock.seconds.reduce((a, b) => a + b, 0));
-  render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">AI가 추정하는 당신의 IQ는...</h2><div class="iq-result"><strong id="iq-result">${aiReport ? Math.round(result.iq) : '??'}</strong><small>${aiReport ? 'AI 분석 리포트가 완성되었습니다' : '결과 리포트에서 확인하세요'}</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안으로 테스트를 완료했습니다.' : expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div>
+  render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">재미로 보는 당신의 IQ는...</h2><div class="iq-result"><strong id="iq-result">${puzzleReport ? Math.round(result.iq) : '??'}</strong><small>${puzzleReport ? '퍼즐 결과 리포트가 완성되었습니다' : '결과 리포트에서 확인하세요'}</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안으로 테스트를 완료했습니다.' : expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div>
   <form id="generate-report-form" class="report-email-form">
     <label class="report-language">리포트 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label>
     <label class="report-consent adult-confirmation" for="report-adult-confirm"><input id="report-adult-confirm" type="checkbox" required><span><span lang="en">I confirm that I am 18 years of age or older.</span><br>본인은 만 18세 이상임을 확인합니다.</span></label>
     <label class="checkout-label" for="report-email">리포트를 받을 이메일</label><input class="email-input" id="report-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
     <button class="button primary full" id="generate-report" type="submit" disabled>결과 리포트 받아보기</button>
-    <p class="flow-footnote">AI 리포트는 1회 결제 상품입니다. 가격·통화·세금은 결제 페이지에서 확인하세요.</p>
+    <p class="flow-footnote">오락 전용 게임입니다. 공인 IQ 검사가 아니며 추정값은 과학적으로 검증된 IQ 또는 실제 지능을 나타내지 않습니다. 교육·채용·의료 결정에 사용할 수 없습니다. 다른 사람과의 우열을 평가하지 않습니다.</p><p class="flow-footnote">퍼즐 리포트는 1회 결제 상품입니다. 가격·통화·세금은 결제 페이지에서 확인하세요.</p>
   </form>
   <p id="email-report-status" class="flow-footnote" role="status" aria-live="polite"></p>
   <div id="report-progress" class="report-progress" role="status" aria-live="polite" aria-atomic="true"><span class="report-spinner" aria-hidden="true" hidden></span><div><strong id="report-progress-title"></strong><p id="report-progress-detail"></p></div></div>
-  <section id="completed-report" class="completed-report" hidden aria-label="AI 결과 리포트">
-    <article id="ai-report" class="report-document"></article>
+  <section id="completed-report" class="completed-report" hidden aria-label="퍼즐 결과 리포트">
+    <article id="puzzle-report" class="report-document"></article>
     <div class="report-tools"><button class="button secondary" id="save-report-photo" type="button">사진으로 저장</button><button class="button secondary" id="share-report" type="button">공유</button></div>
     <p id="report-export-status" class="flow-footnote" role="status" aria-live="polite"></p><div id="report-downloads" class="report-downloads"></div>
     <div id="share-fallback" hidden><label class="checkout-label" for="share-report-text">공유할 보고서 내용</label><textarea id="share-report-text" readonly rows="8"></textarea></div>
@@ -140,7 +140,7 @@ function showResult() {
 }
 function reset() {
   clearInterval(ticker);
-  reportController?.abort(); reportController = null; aiReport = null; reportLoading = false;
+  reportController?.abort(); reportController = null; puzzleReport = null; reportLoading = false;
   paymentPaid = false; checkoutLoading = false; checkoutUrl = null; paymentTerminal = ''; paymentPending = false;
   purchaseRestoreVersion++;
   emailAddress = ''; emailStatus = ''; adultConfirmed = false;
@@ -202,31 +202,31 @@ function updateReportActions() {
   const busy = reportLoading || checkoutLoading;
   document.querySelector('#save-report-photo').disabled = REPORTS_PAUSED;
   document.querySelector('#share-report').disabled = REPORTS_PAUSED;
-  button.disabled = REPORTS_PAUSED || busy || Boolean(aiReport) || !adultConfirmed || Boolean(paymentTerminal);
-  button.textContent = reportLoading ? 'AI가 리포트를 생성하고 있습니다…' : aiReport ? '리포트 생성 완료' : checkoutLoading ? '결제 페이지를 준비하고 있습니다…' : paymentPending ? '결제 상태 확인' : paymentPaid ? '결과 리포트 받아보기' : checkoutUrl ? '결제 계속하기' : '결제하고 AI 리포트 받기';
+  button.disabled = REPORTS_PAUSED || busy || Boolean(puzzleReport) || !adultConfirmed || Boolean(paymentTerminal);
+  button.textContent = reportLoading ? '리포트를 만들고 있습니다…' : puzzleReport ? '리포트 생성 완료' : checkoutLoading ? '결제 페이지를 준비하고 있습니다…' : paymentPending ? '결제 상태 확인' : paymentPaid ? '결과 리포트 받아보기' : checkoutUrl ? '결제 계속하기' : '결제하고 퍼즐 리포트 받기';
   if (paymentTerminal) button.textContent = paymentTerminal==='refunded' ? '환불 완료' : paymentTerminal==='refund_pending' ? '환불 처리 중' : '환불 상태 확인 필요';
-  document.querySelector('#report-adult-confirm').disabled = busy || Boolean(aiReport) || paymentPaid || Boolean(checkoutUrl);
-  document.querySelector('#report-language').disabled = busy || Boolean(aiReport) || paymentPaid || Boolean(checkoutUrl);
+  document.querySelector('#report-adult-confirm').disabled = busy || Boolean(puzzleReport) || paymentPaid || Boolean(checkoutUrl);
+  document.querySelector('#report-language').disabled = busy || Boolean(puzzleReport) || paymentPaid || Boolean(checkoutUrl);
   document.querySelector('#generate-report-form').setAttribute('aria-busy', String(reportLoading || checkoutLoading));
   document.querySelector('#restart').disabled = busy;
   const progress = document.querySelector('#report-progress');
-  progress.hidden = !reportLoading && !aiReport && !reportStatus && !REPORTS_PAUSED;
+  progress.hidden = !reportLoading && !puzzleReport && !reportStatus && !REPORTS_PAUSED;
   progress.classList.toggle('is-loading', reportLoading);
-  progress.classList.toggle('is-complete', Boolean(aiReport));
+  progress.classList.toggle('is-complete', Boolean(puzzleReport));
   progress.querySelector('.report-spinner').hidden = !reportLoading;
-  document.querySelector('#report-progress-title').textContent = reportLoading ? 'AI가 리포트를 생성하고 있습니다.' : aiReport ? '리포트 생성이 완료되었습니다.' : REPORTS_PAUSED ? '리포트 생성은 잠시 중지되어 있습니다.' : '리포트를 생성하지 못했습니다.';
-  document.querySelector('#report-progress-detail').textContent = reportLoading ? '답안과 풀이 시간을 분석하고 있어요. 잠시만 기다려 주세요.' : aiReport ? '아래에서 전체 보고서를 확인하고, 저장하거나 이메일로 받아보세요.' : reportStatus;
-  document.querySelector('#report-email').disabled = busy || Boolean(aiReport) || Boolean(checkoutUrl) || (paymentPaid && Boolean(emailAddress));
+  document.querySelector('#report-progress-title').textContent = reportLoading ? '리포트를 만들고 있습니다.' : puzzleReport ? '리포트 생성이 완료되었습니다.' : REPORTS_PAUSED ? '리포트 생성은 잠시 중지되어 있습니다.' : '리포트를 생성하지 못했습니다.';
+  document.querySelector('#report-progress-detail').textContent = reportLoading ? '답안과 풀이 시간을 분석하고 있어요. 잠시만 기다려 주세요.' : puzzleReport ? '아래에서 전체 보고서를 확인하고, 저장하거나 이메일로 받아보세요.' : reportStatus;
+  document.querySelector('#report-email').disabled = busy || Boolean(puzzleReport) || Boolean(checkoutUrl) || (paymentPaid && Boolean(emailAddress));
   document.querySelector('#email-report-status').textContent = emailStatus;
 }
 function displayReport() {
-  if (!reportData || !document.querySelector('#ai-report')) return;
+  if (!reportData || !document.querySelector('#puzzle-report')) return;
   const reportDocument = renderReportDocument(reportData);
   // The shared renderer escapes all model-provided text before inserting HTML.
-  document.querySelector('#ai-report').innerHTML = new DOMParser().parseFromString(reportDocument.html, 'text/html').querySelector('main').innerHTML;
+  document.querySelector('#puzzle-report').innerHTML = new DOMParser().parseFromString(reportDocument.html, 'text/html').querySelector('main').innerHTML;
   document.querySelector('#completed-report').hidden = false;
   document.querySelector('#iq-result').textContent = Math.round(result.iq);
-  document.querySelector('.iq-result small').textContent = 'AI 분석 리포트가 완성되었습니다';
+  document.querySelector('.iq-result small').textContent = '퍼즐 결과 리포트가 완성되었습니다';
 }
 function setupReportActions() {
   const adultInput = document.querySelector('#report-adult-confirm');
@@ -244,7 +244,7 @@ function setupReportActions() {
 }
 async function generateReport(event) {
   event?.preventDefault();
-  if (REPORTS_PAUSED || checkoutLoading || reportLoading || aiReport || !adultConfirmed || !document.querySelector('#report-adult-confirm').checked) return;
+  if (REPORTS_PAUSED || checkoutLoading || reportLoading || puzzleReport || !adultConfirmed || !document.querySelector('#report-adult-confirm').checked) return;
   reportLanguage = document.querySelector('#report-language').value;
   if (!document.querySelector('#report-email').reportValidity()) return;
   emailAddress = document.querySelector('#report-email').value.trim();
@@ -265,9 +265,9 @@ async function generateReport(event) {
     if (!data.report || !data.result) throw new Error('리포트 형식이 올바르지 않습니다.');
     // Prepare the document before committing the successful state.
     renderReportDocument({report:data.report,result:data.result,language:reportLanguage});
-    aiReport = data.report; result = data.result;
+    puzzleReport = data.report; result = data.result;
     emailStatus = data.emailDelivery?.status==='sent' ? '입력하신 이메일로 리포트를 발송했습니다. 받은편지함과 스팸함을 확인해 주세요.' : data.emailDelivery?.status==='pending' ? '이메일 발송을 다시 시도하고 있습니다.' : '이메일 발송을 완료하지 못했습니다. 화면에서 리포트를 확인해 주세요.';
-    reportData = {report:aiReport,result,language:reportLanguage};
+    reportData = {report:puzzleReport,result,language:reportLanguage};
     displayReport();
     // Prepare images in advance so native sharing can run directly on the next click.
     prepareReportImages().catch(() => {});

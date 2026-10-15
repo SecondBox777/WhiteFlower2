@@ -1,3 +1,4 @@
+import { buildReport, buildAnalysis } from '../lib/report.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { handleReportEmail, issueReportEmailToken, verifyReportEmailToken, renderReportEmail } from '../lib/report-email.js';
@@ -6,7 +7,8 @@ import { scoringItems } from '../scoring.js';
 
 const secret='test-only-secret-longer-than-thirty-two-characters';
 const env={RESEND_API_KEY:'test-resend-key',RESEND_FROM:'Mindscope <reports@example.com>',REPORT_EMAIL_SECRET:secret};
-const data={result:{score:64.52,correct:22,iq:124.4787},language:'ko',report:{summary:'강점 <script>alert(1)</script>',problem_solving:[{title:'조건 비교',evidence:'조건 연결',advice:'비교 연습'}],cognitive_characteristics:[{title:'논리추론',assessment:'뛰어납니다',evidence:'정답 패턴'}],careers:[{field:'연구원',required_abilities:'분석 능력'}],limitations:'합성 모형의 예비 결과입니다.'}};
+const data={language:'ko',result:{iq:124.47,score:64.52,correct:22},report:buildReport(buildAnalysis({answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko'}))};
+data.report.summary += ' <script>alert(1)</script>';
 const context=(body,bindings=env)=>({request:new Request('https://example.com/api/email-report',{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://example.com'},body:JSON.stringify(body)}),env:bindings});
 const noSend=()=>{throw Error('Unexpected external API call');};
 
@@ -27,7 +29,7 @@ test('signed report is sent through Resend with stable per-report idempotency an
       assert.equal(url,'https://api.resend.com/emails');assert.equal(options.headers.Authorization,'Bearer test-resend-key');
       const body=JSON.parse(options.body);
       assert.equal(body.from,env.RESEND_FROM);assert.deepEqual(body.to,['reader@example.com']);
-      assert.ok(body.text.includes('124'));assert.ok(body.text.includes('64.52'));assert.ok(body.text.includes('분석 능력'));
+      assert.ok(body.text.includes('124'));assert.ok(body.text.includes('64.52'));assert.ok(body.text.includes('패턴인식능력'));
       assert.ok(!body.html.includes('<script>'));assert.ok(body.html.includes('&lt;script&gt;'));
       if(idempotency)assert.equal(options.headers['Idempotency-Key'],idempotency);
       idempotency=options.headers['Idempotency-Key'];
@@ -59,14 +61,11 @@ test('Resend failures are recoverable and do not expose provider secrets',async(
   }
   assert.equal((await handleReportEmail(context({email:'reader@example.com',token,consent:true,adultConfirmed:true}),async()=>{throw Error('timeout');})).status,502);
   assert.equal((await handleReportEmail(context({email:'reader@example.com',token,consent:true,adultConfirmed:true}),async()=>Response.json({}))).status,502);
-  assert.ok(renderReportEmail({...data,language:'en'}).subject.includes('Your AI report'));
+  assert.ok(renderReportEmail({...data,language:'en'}).subject.includes('Your puzzle results'));
 });
-test('OpenAI response issues email token without sending recipient email to OpenAI',async()=>{
+test('internal report issues a signed email token without any external request',async()=>{
   const submission={answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',consent:true,adultConfirmed:true,email:'private@example.com'};
-  const response=await handleReport({request:new Request('https://example.com/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(submission)}),env:{...env,OPENAI_API_KEY:'test-key',OPENAI_MODEL:'test-model'}},async(url,options)=>{
-    assert.ok(!options.body.includes('private@example.com'));
-    return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(data.report)}]}]});
-  });
+  const response=await handleReport({request:new Request('https://example.com/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(submission)}),env},()=>{throw Error('No external AI request allowed');});
   assert.equal(response.status,200);
   const body=await response.json();const signed=await verifyReportEmailToken(body.emailToken,secret);
   assert.deepEqual(signed.report,body.report);assert.deepEqual(signed.result,body.result);
