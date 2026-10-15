@@ -7,9 +7,9 @@ document.querySelectorAll('[data-question-count]').forEach(item => { item.textCo
 document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. 가볍게 즐기는 엔터테인먼트용 IQ 테마 테스트.`;
 
 // Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
-const TESTING_PAUSED = false;
+const TESTING_PAUSED = true;
 // Set false together with wrangler.jsonc REPORTS_PAUSED to resume reports.
-const REPORTS_PAUSED = false;
+const REPORTS_PAUSED = true;
 
 const dialog = document.querySelector('#flow-dialog');
 const content = document.querySelector('#flow-content');
