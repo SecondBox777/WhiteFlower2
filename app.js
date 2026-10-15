@@ -4,7 +4,7 @@ import { questions } from './questions.js';
 import { LIMIT_SECONDS, scoreTest, scoringItems, TestClock } from './scoring.js';
 
 document.querySelectorAll('[data-question-count]').forEach(item => { item.textContent = questions.length; });
-document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. 가볍게 즐기는 IQ 테스트 오락 전용 IQ 테마 퍼즐 게임.`;
+document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. 가볍게 즐기는 엔터테인먼트용 IQ 테마 테스트.`;
 
 // Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
 const TESTING_PAUSED = false;
