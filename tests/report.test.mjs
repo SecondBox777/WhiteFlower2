@@ -12,7 +12,7 @@ test('reports are deterministic, internally scored and never contact external AI
  assert.equal(response.status,200);
  const body=await response.json();
  assert.ok(Math.abs(body.result.score-95)<1e-10);
- assert.equal(body.report.abilities.length,3);assert.equal(body.report.items.length,30);
+ assert.equal(body.report.abilities.length,3);assert.equal(body.report.items,undefined);
  assert.ok(body.report.abilities.every(a=>a.level===5));
  assert.equal(body.report.careers,undefined);assert.equal(body.report.problem_solving,undefined);
  assert.deepEqual((await (await handleReport(context(data,{}))).json()).report,body.report);
@@ -48,6 +48,6 @@ test('bars respond to correct-answer pace and exclude invalid responses without 
  assert.ok(fast.abilities.every((a,i)=>a.level>slow.abilities[i].level));
  const invalid=buildReport(buildAnalysis({...data,seconds:Array(30).fill(0)}));
  assert.ok(invalid.abilities.every(a=>a.level===0));
- assert.ok(invalid.items.every(q=>!q.correct && q.excluded==='too_fast'));
+ assert.ok(invalid.abilities.every(a=>!a.evidence.includes('정답')));
  assert.ok(fast.limitations.includes('백분위가 아닙니다'));
 });

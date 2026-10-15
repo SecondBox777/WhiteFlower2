@@ -1,20 +1,23 @@
 // Shared content for the page, Resend email and image export.
 const escape = text => String(text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export function abilityAssessment(level, language) {
+  const band = level <= 2 ? 0 : level - 2;
+  return language === 'en'
+    ? ['Relative to our internal benchmark, there is room for improvement.','Relative to our internal benchmark, performance is average.','Relative to our internal benchmark, performance is strong.','Relative to our internal benchmark, performance is very strong.'][band]
+    : ['내부적으로 산정된 기준에 비해 보완이 필요합니다.','내부적으로 산정된 기준에 비해 평범한 편입니다.','내부적으로 산정된 기준에 비해 우수한 편입니다.','내부적으로 산정된 기준에 비해 매우 우수한 편입니다.'][band];
+}
 export function reportBlocks({report,result,language}) {
   const en=language==='en';
   const blocks=[
     {kind:'title',text:en?'Your puzzle results':'나의 퍼즐 결과 보고서'},
     {kind:'muted',text:report.limitations},
-    {kind:'iq',text:`${en?'Your IQ-style score, just for fun':'재미로 보는 당신의 IQ'}: ${Math.round(result.iq)}`},
-    {kind:'body',text:`${en?'Score':'점수'}: ${result.score.toFixed(2)}/100 · ${en?'Correct':'정답'}: ${result.correct}/30`},
+    {kind:'iq',text:`${en?'Your IQ-style score':'나의 IQ 스타일 점수'}: ${Math.round(result.iq)}`},
+    {kind:'body',text:`${en?'Score':'점수'}: ${result.score.toFixed(2)}/100`},
     {kind:'body',text:report.summary},
     {kind:'heading',text:en?'Three puzzle areas':'세 가지 퍼즐 영역'},
     {kind:'body',text:en?'Bars show approximate game performance, not intelligence or ranking. Weighted correct answers contribute 80%; pace on correct answers contributes up to 20%, using internal reference times. Unanswered, timed-out and implausibly fast responses earn no points.':'막대는 이 게임에서의 대략적인 수행 기록이며 실제 능력이나 타인과의 순위가 아닙니다. 난이도별 정답 점수 80%와 정답 풀이의 내부 기준시간 대비 속도 점수 최대 20%를 합산합니다. 미응답·시간 초과·지나치게 빠른 응답은 점수에서 제외합니다.'}
   ];
-  for(const a of report.abilities ?? []) blocks.push({kind:'subheading',text:a.title},{kind:'body',text:`${'■'.repeat(a.level)}${'□'.repeat(5-a.level)} (${a.level}/5)\n${a.evidence}`});
-  blocks.push({kind:'heading',text:en?'Answers and approximate times':'정답과 대략적인 풀이 시간'});
-  for(const q of report.items ?? []) blocks.push({kind:'body',text:en?`Q${q.position}: answer ${q.answer} · your answer ${q.selected??'—'} · ${q.excluded?'excluded':q.correct?'correct':'incorrect'} · ~${q.seconds}s`:`${q.position}번: 정답 ${q.answer} · 선택 ${q.selected??'—'} · ${q.excluded?'채점 제외':q.correct?'정답':'오답'} · 약 ${q.seconds}초`});
-  blocks.push({kind:'muted',text:report.limitations});
+  for(const a of report.abilities ?? []) blocks.push({kind:'subheading',text:a.title},{kind:'body',text:`${'■'.repeat(a.level)}${'□'.repeat(5-a.level)} (${a.level}/5)\n${abilityAssessment(a.level,language)}\n${a.evidence}`});
   return blocks;
 }
 export function renderReportDocument(data) {

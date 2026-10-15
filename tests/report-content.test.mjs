@@ -2,7 +2,7 @@ import { scoringItems } from '../scoring.js';
 import { buildReport, buildAnalysis } from '../lib/report.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { renderReportDocument, reportBlocks } from '../report-content.js';
+import { renderReportDocument, reportBlocks, abilityAssessment } from '../report-content.js';
 import { renderReportEmail } from '../lib/report-email.js';
 import { wrapText } from '../report-export.js';
 const data={language:'ko',result:{iq:124.47,score:64.52,correct:22},report:buildReport(buildAnalysis({answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko'}))};
@@ -28,4 +28,19 @@ test('image wrapping preserves Korean, emoji and long words without clipping or 
   assert.equal(lines.join('').replace(/\s/g,''),text.replace(/\s/g,''));
  }
  assert.deepEqual(wrapText('first\n\nlast',measure,10),['first','','last']);
+});
+
+test('reports omit answer counts and item details and use internal benchmark assessments',()=>{
+ for(const language of ['ko','en']) {
+  const rendered=renderReportDocument({...data,language});
+  assert.ok(!rendered.text.includes('/30'));
+  assert.ok(!rendered.text.includes('유효 정답'));
+  assert.ok(!rendered.text.includes('1번:'));
+  assert.ok(!rendered.text.includes('your answer'));
+  assert.ok(!rendered.text.includes('Q1:'));
+ }
+ for(const level of [0,1,2]) assert.match(abilityAssessment(level,'ko'),/보완이 필요합니다/);
+ assert.match(abilityAssessment(3,'ko'),/평범한 편입니다/);
+ assert.match(abilityAssessment(4,'ko'),/기준에 비해 우수한 편입니다/);
+ assert.match(abilityAssessment(5,'ko'),/매우 우수한 편입니다/);
 });

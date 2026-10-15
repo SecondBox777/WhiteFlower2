@@ -4,7 +4,7 @@ import { questions } from './questions.js';
 import { LIMIT_SECONDS, scoreTest, scoringItems, TestClock } from './scoring.js';
 
 document.querySelectorAll('[data-question-count]').forEach(item => { item.textContent = questions.length; });
-document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. 재미로 보는 당신의 IQ는... 오락 전용 IQ 테마 퍼즐 게임.`;
+document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. 가볍게 즐기는 IQ 테스트 오락 전용 IQ 테마 퍼즐 게임.`;
 
 // Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
 const TESTING_PAUSED = false;
@@ -70,7 +70,7 @@ function render(markup) {
 function intro() {
   stage = 'intro';
   preloadQuestions(0, 4);
-  render(`<span class="flow-eyebrow">IQ PUZZLE GAME · FOR FUN</span><h2 class="flow-title" id="flow-title">재미로 보는 당신의 IQ는...</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>정답과 풀이 시간으로 만든 결과 리포트를 화면에서 확인하고 이메일로도 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button><button class="button secondary full" id="random-submit" style="margin-top:10px">랜덤 답안 제출 · 실험용</button><p class="flow-footnote">실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 실험용 리포트도 결제가 필요합니다.</p>`);
+  render(`<span class="flow-eyebrow">IQ PUZZLE GAME · FOR FUN</span><h2 class="flow-title" id="flow-title">가볍게 즐기는 IQ 테스트</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>정답과 풀이 시간으로 만든 결과 리포트를 화면에서 확인하고 이메일로도 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button><button class="button secondary full" id="random-submit" style="margin-top:10px">랜덤 답안 제출 · 실험용</button><p class="flow-footnote">실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 실험용 리포트도 결제가 필요합니다.</p>`);
   document.querySelector('#random-submit').onclick = () => {
     reset();
     experimental = true;
@@ -117,7 +117,7 @@ function finish(timedOut = false) {
 }
 function showResult() {
   const elapsed = Math.round(clock.seconds.reduce((a, b) => a + b, 0));
-  render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">재미로 보는 당신의 IQ는...</h2><div class="iq-result"><strong id="iq-result">${puzzleReport ? Math.round(result.iq) : '??'}</strong><small>${puzzleReport ? '퍼즐 결과 리포트가 완성되었습니다' : '결과 리포트에서 확인하세요'}</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안으로 테스트를 완료했습니다.' : expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div>
+  render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">가볍게 즐기는 IQ 테스트</h2><div class="iq-result"><strong id="iq-result">${puzzleReport ? Math.round(result.iq) : '??'}</strong><small>${puzzleReport ? '퍼즐 결과 리포트가 완성되었습니다' : '결과 리포트에서 확인하세요'}</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안으로 테스트를 완료했습니다.' : expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div>
   <form id="generate-report-form" class="report-email-form">
     <label class="report-language">리포트 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label>
     <label class="report-consent adult-confirmation" for="report-adult-confirm"><input id="report-adult-confirm" type="checkbox" required><span><span lang="en">I confirm that I am 18 years of age or older.</span><br>본인은 만 18세 이상임을 확인합니다.</span></label>
