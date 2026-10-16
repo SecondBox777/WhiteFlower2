@@ -1,3 +1,5 @@
+// TEMPORARY TEST FEATURE: remove this import and the marked hooks to remove the bypass.
+import { temporaryTestButton, updateTemporaryTestButton } from './temporary-test-report.js';
 import { initialLanguage, isLanguage, languageOptions, localizeDOM, translate } from './i18n.js';
 import { localizedQuestion } from './question-locales.js';
 let pageLanguage=initialLanguage();
@@ -127,6 +129,7 @@ function showResult() {
     <label class="report-consent adult-confirmation" for="report-adult-confirm"><input id="report-adult-confirm" type="checkbox" required><span>본인은 만 18세 이상임을 확인합니다.</span></label>
     <label class="checkout-label" for="report-email">리포트를 받을 이메일</label><input class="email-input" id="report-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
     <button class="button primary full" id="generate-report" type="submit" disabled>결과 리포트 받아보기</button>
+    ${temporaryTestButton(pageLanguage)} <!-- TEMPORARY TEST FEATURE -->
     <p class="flow-footnote">오락 전용 게임입니다. 공인 IQ 검사가 아니며 추정값은 과학적으로 검증된 IQ 또는 실제 지능을 나타내지 않습니다. 교육·채용·의료 결정에 사용할 수 없습니다. 다른 사람과의 우열을 평가하지 않습니다.</p><p class="flow-footnote">퍼즐 리포트는 1회 결제 상품입니다. 가격·통화·세금은 결제 페이지에서 확인하세요.</p>
   </form>
   <p id="email-report-status" class="flow-footnote" role="status" aria-live="polite"></p>
@@ -204,6 +207,8 @@ function updateReportActions() {
   const button = document.querySelector('#generate-report');
   if (!button) return;
   const busy = reportLoading || checkoutLoading;
+  // TEMPORARY TEST FEATURE
+  updateTemporaryTestButton({disabled:REPORTS_PAUSED || busy || Boolean(puzzleReport) || !adultConfirmed || paymentPaid || paymentPending || Boolean(checkoutUrl) || Boolean(paymentTerminal),run:event=>generateReport(event,true)});
   document.querySelector('#save-report-photo').disabled = REPORTS_PAUSED;
   document.querySelector('#share-report').disabled = REPORTS_PAUSED;
   button.disabled = REPORTS_PAUSED || busy || Boolean(puzzleReport) || !adultConfirmed || Boolean(paymentTerminal);
@@ -248,20 +253,23 @@ function setupReportActions() {
   document.querySelector('#save-report-photo').onclick = saveReportPhoto;
   document.querySelector('#share-report').onclick = shareReport;
 }
-async function generateReport(event) {
+async function generateReport(event, temporaryTest = false) { // TEMPORARY TEST FEATURE: remove second argument when removing bypass.
   event?.preventDefault();
   if (REPORTS_PAUSED || checkoutLoading || reportLoading || puzzleReport || !adultConfirmed || !document.querySelector('#report-adult-confirm').checked) return;
   reportLanguage = document.querySelector('#report-language').value;
   if (!document.querySelector('#report-email').reportValidity()) return;
   emailAddress = document.querySelector('#report-email').value.trim();
-  if (paymentPending) { await restorePurchase(true); return; }
-  if (!paymentPaid) { await startCheckout(); return; }
+  // TEMPORARY TEST FEATURE: paid requests retain their original payment checks.
+  if (!temporaryTest) {
+    if (paymentPending) { await restorePurchase(true); return; }
+    if (!paymentPaid) { await startCheckout(); return; }
+  } else if (paymentPaid || paymentPending || checkoutUrl || paymentTerminal) return;
   const controller = new AbortController(); reportController = controller;
   const timeout = setTimeout(() => controller.abort(), 75000);
   reportStatus = ''; reportLoading = true; updateReportActions();
   document.querySelector('#report-progress').scrollIntoView({block:'nearest'});
   try {
-    const response = await fetch('/api/analyze', {method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Language':pageLanguage},signal:controller.signal,body:JSON.stringify({email:emailAddress})});
+    const response = await fetch(temporaryTest ? '/api/test-report' : '/api/analyze', {method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Language':pageLanguage},signal:controller.signal,body:JSON.stringify(temporaryTest ? submissionForCheckout() : {email:emailAddress})});
     const data = await response.json().catch(() => ({error:'리포트 생성 응답을 확인할 수 없습니다.'}));
     if (reportController !== controller) return;
     if (!response.ok) {
