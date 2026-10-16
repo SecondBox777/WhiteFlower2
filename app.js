@@ -1,3 +1,4 @@
+import { openReportShareMenu, closeReportShareMenu } from './share-menu.js';
 // TEMPORARY TEST FEATURE: remove this import and the marked hooks to remove the bypass.
 import { temporaryTestButton, updateTemporaryTestButton } from './temporary-test-report.js';
 import { initialLanguage, isLanguage, languageOptions, localizeDOM, translate } from './i18n.js';
@@ -139,7 +140,6 @@ function showResult() {
     <article id="puzzle-report" class="report-document"></article>
     <div class="report-tools"><button class="button secondary" id="save-report-photo" type="button">사진으로 저장</button><button class="button secondary" id="share-report" type="button">공유</button></div>
     <p id="report-export-status" class="flow-footnote" role="status" aria-live="polite"></p><div id="report-downloads" class="report-downloads"></div>
-    <div id="share-fallback" hidden><label class="checkout-label" for="share-report-text">공유할 보고서 내용</label><textarea id="share-report-text" readonly rows="8"></textarea></div>
 
   </section><div class="result-actions"><button class="button secondary" id="restart">다시 테스트하기</button><button class="button secondary" id="finish">홈으로</button></div>`);
   setupReportActions();
@@ -147,6 +147,7 @@ function showResult() {
   document.querySelector('#finish').onclick = () => dialog.close();
 }
 function reset() {
+  closeReportShareMenu();
   clearInterval(ticker);
   reportController?.abort(); reportController = null; puzzleReport = null; reportLoading = false;
   paymentPaid = false; checkoutLoading = false; checkoutUrl = null; paymentTerminal = ''; paymentPending = false;
@@ -284,7 +285,7 @@ async function generateReport(event, temporaryTest = false) { // TEMPORARY TEST 
     renderReportDocument({report:data.report,result:data.result,language:reportLanguage});
     puzzleReport = data.report; result = data.result;
     emailStatus = data.emailDelivery?.status==='sent' ? '입력하신 이메일로 리포트를 발송했습니다. 받은편지함과 스팸함을 확인해 주세요.' : data.emailDelivery?.status==='pending' ? '이메일 발송을 다시 시도하고 있습니다.' : '이메일 발송을 완료하지 못했습니다. 화면에서 리포트를 확인해 주세요.';
-    reportData = {report:puzzleReport,result,language:reportLanguage};
+    reportData = {report:puzzleReport,result,language:reportLanguage,shareToken:data.shareToken};
     displayReport();
     // Prepare images in advance so native sharing can run directly on the next click.
     prepareReportImages().catch(() => {});
@@ -334,32 +335,9 @@ async function saveReportPhoto() {
   } catch (error) { if (reportData === source) setExportStatus(error.message); }
   finally { if (reportData === source) exportBusy = false; }
 }
-async function shareReport() {
+function shareReport() {
   if (REPORTS_PAUSED || exportBusy || !reportData) return;
-  const source = reportData;
-  const {subject,text} = renderReportDocument(source);
-  exportBusy = true;
-  try {
-    // Do not await image generation here: browsers require a fresh click for native sharing.
-    if (navigator.share) {
-      const data = imageFiles && navigator.canShare?.({files:imageFiles}) ? {title:subject,files:imageFiles} : {title:subject,text};
-      await navigator.share(data);
-      if (reportData === source) setExportStatus('공유 요청을 완료했습니다.');
-    } else {
-      await navigator.clipboard.writeText(text);
-      if (reportData === source) setExportStatus('보고서 내용을 복사했습니다. 원하는 앱에 붙여넣어 공유하세요.');
-    }
-  } catch (error) {
-    if (reportData !== source) return;
-    if (error.name === 'AbortError') { setExportStatus('공유를 취소했습니다.'); return; }
-    // Clipboard permissions and native sharing vary; always provide a selectable fallback.
-    const fallback = document.querySelector('#share-fallback');
-    if (fallback) {
-      fallback.hidden = false;
-      const input = document.querySelector('#share-report-text'); input.value = text; input.focus(); input.select();
-      setExportStatus('아래 보고서 내용을 복사해서 공유하세요. 사진으로 저장해 공유할 수도 있습니다.');
-    }
-  } finally { if (reportData === source) exportBusy = false; }
+  openReportShareMenu({data:reportData,files:imageFiles,prepareFiles:prepareReportImages,uiLanguage:pageLanguage});
 }
 
 function submissionForCheckout() {

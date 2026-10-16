@@ -41,7 +41,7 @@ export function localizeDOM(root, language) {
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
   const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
   for(const node of nodes) {
-    if(node.parentElement?.closest('script,style,select,textarea,#puzzle-report,.question-prompt,.answer'))continue;
+    if(node.parentElement?.closest('script,style,select,textarea,#report-share-dialog,#puzzle-report,.question-prompt,.answer'))continue;
     const source=remembered(originalText.get(node),node.nodeValue);
     const next=translate(source,language);
     originalText.set(node,{source,last:next});

@@ -9,15 +9,16 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "run_worker_first": [
-      "/api/*"
+      "/api/*", "/s/*"
     ]
   },
   "keep_vars": true,
   "durable_objects": {
-    "bindings": [{ "name": "PAYMENT_SESSIONS", "class_name": "PaymentSession" }]
+    "bindings": [{ "name": "PAYMENT_SESSIONS", "class_name": "PaymentSession" }, { "name": "REPORT_SHARES", "class_name": "ReportShare" }]
   },
-  "migrations": [{ "tag": "payment-sessions-v1", "new_sqlite_classes": ["PaymentSession"] }],
+  "migrations": [{ "tag": "payment-sessions-v1", "new_sqlite_classes": ["PaymentSession"] }, { "tag": "report-shares-v1", "new_sqlite_classes": ["ReportShare"] }],
   "vars": {
+    "KAKAO_JAVASCRIPT_KEY": "09b8156498729b9ab0a0720fea30b3e6",
     "RESEND_FROM": "Mindscope <reports@mindscope.online>",
     "POLAR_PRODUCT_ID": "a2fae7e7-f650-4109-87f7-f1f46e46b9be",
     "POLAR_ENVIRONMENT": "sandbox",
