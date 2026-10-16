@@ -66,6 +66,7 @@ preloadQuestions(0, 1);
 
 function render(markup) {
   dialog.classList.toggle('testing', stage === 'test');
+  dialog.classList.toggle('report-ready', stage === 'done' && Boolean(puzzleReport));
   content.innerHTML = markup;
   localizeDOM(content,pageLanguage);
   dialog.scrollTop = 0;
@@ -230,6 +231,7 @@ function updateReportActions() {
 }
 function displayReport() {
   if (!reportData || !document.querySelector('#puzzle-report')) return;
+  dialog.classList.add('report-ready');
   const reportDocument = renderReportDocument(reportData);
   document.querySelector('#puzzle-report').lang=reportLanguage;
   // The shared renderer escapes all model-provided text before inserting HTML.
@@ -237,6 +239,7 @@ function displayReport() {
   document.querySelector('#completed-report').hidden = false;
   document.querySelector('#iq-result').textContent = Math.round(result.iq);
   document.querySelector('.iq-result small').textContent = '퍼즐 결과 리포트가 완성되었습니다';
+  requestAnimationFrame(()=>document.querySelector('#completed-report')?.scrollIntoView({block:'start'}));
 }
 function setupReportActions() {
   document.querySelector('#report-language').onchange = event => { reportLanguage=event.target.value; };

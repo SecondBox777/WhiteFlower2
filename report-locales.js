@@ -18,7 +18,23 @@ export const reportLocales = {
       "패턴인식능력",
       "논리추론능력",
       "공간지각능력"
-    ]
+    ],
+    "archive": "나의 퍼즐 아카이브",
+    "coverTitle": "당신의 플레이,\n하나의 기록으로.",
+    "overview": "한눈에 보는 플레이",
+    "profileTitle": "세 가지 사고의 궤적",
+    "profileNote": "이 게임 안에서의 수행 지표 · 0–5 단계",
+    "shortNotice": "오락을 위한 플레이 기록입니다. 공인 IQ 검사나 실제 지능 평가가 아닙니다.",
+    "recordRef": "기록 참조",
+    "summaryTitle": "숫자 너머의 플레이",
+    "detailTitle": "플레이를 더 가까이.",
+    "indicator": "게임 수행 지표",
+    "methodTitle": "이 기록이 만들어지는 방식",
+    "accuracyWeight": "난이도별 정답 점수",
+    "paceWeight": "정답 풀이 속도 점수",
+    "upTo": "최대",
+    "contextTitle": "이 보고서를 읽기 전에",
+    "footer": "퍼즐을 즐긴 순간을 기록하다."
   },
   "en": {
     "title": "Your puzzle results",
@@ -38,7 +54,23 @@ export const reportLocales = {
       "Pattern recognition",
       "Logical reasoning",
       "Spatial perception"
-    ]
+    ],
+    "archive": "PERSONAL PUZZLE ARCHIVE",
+    "coverTitle": "Your play.\nA story in numbers.",
+    "overview": "Your play at a glance",
+    "profileTitle": "Three dimensions of play",
+    "profileNote": "Game performance indicators · 0–5 scale",
+    "shortNotice": "A play record for entertainment. Not an official IQ test or an assessment of actual intelligence.",
+    "recordRef": "RECORD REF.",
+    "summaryTitle": "Behind the numbers",
+    "detailTitle": "A closer look at your play.",
+    "indicator": "Game indicator",
+    "methodTitle": "How this record is made",
+    "accuracyWeight": "Weighted correct answers",
+    "paceWeight": "Pace on correct answers",
+    "upTo": "Up to",
+    "contextTitle": "Reading this report in context",
+    "footer": "A record of a moment of play."
   },
   "ja": {
     "title": "パズル結果レポート",
@@ -58,7 +90,23 @@ export const reportLocales = {
       "パターン認識",
       "論理的推論",
       "空間認識"
-    ]
+    ],
+    "archive": "パーソナル・パズルアーカイブ",
+    "coverTitle": "あなたのプレイを、\nひとつの記録に。",
+    "overview": "プレイの概要",
+    "profileTitle": "3つのプレイの軌跡",
+    "profileNote": "ゲーム内の成績指標・0～5段階",
+    "shortNotice": "娯楽用のプレイ記録です。公認IQ検査や実際の知能評価ではありません。",
+    "recordRef": "記録参照",
+    "summaryTitle": "数字から見えるプレイ",
+    "detailTitle": "プレイを、より詳しく。",
+    "indicator": "ゲーム指標",
+    "methodTitle": "記録の算出方法",
+    "accuracyWeight": "難易度別の正答点",
+    "paceWeight": "正答時の速度点",
+    "upTo": "最大",
+    "contextTitle": "レポートの位置づけ",
+    "footer": "パズルを楽しんだ瞬間の記録。"
   },
   "zh-CN": {
     "title": "我的游戏结果报告",
@@ -78,7 +126,23 @@ export const reportLocales = {
       "规律识别",
       "逻辑推理",
       "空间感知"
-    ]
+    ],
+    "archive": "个人游戏档案",
+    "coverTitle": "你的表现，\n一份专属记录。",
+    "overview": "表现概览",
+    "profileTitle": "三个维度的游戏表现",
+    "profileNote": "游戏表现指标 · 0–5级",
+    "shortNotice": "仅供娱乐的游戏记录，并非正式IQ测试或实际智力评估。",
+    "recordRef": "记录编号",
+    "summaryTitle": "数字背后的表现",
+    "detailTitle": "更深入地了解你的表现。",
+    "indicator": "游戏指标",
+    "methodTitle": "本记录如何生成",
+    "accuracyWeight": "难度加权正确答案",
+    "paceWeight": "正确答案的速度得分",
+    "upTo": "最高",
+    "contextTitle": "如何理解本报告",
+    "footer": "记录享受解题的时刻。"
   },
   "es": {
     "title": "Tus resultados de puzles",
@@ -98,7 +162,23 @@ export const reportLocales = {
       "Reconocimiento de patrones",
       "Razonamiento lógico",
       "Percepción espacial"
-    ]
+    ],
+    "archive": "ARCHIVO PERSONAL DE PUZLES",
+    "coverTitle": "Tu juego.\nUna historia en cifras.",
+    "overview": "Tu juego de un vistazo",
+    "profileTitle": "Tres dimensiones de tu juego",
+    "profileNote": "Indicadores del juego · escala de 0 a 5",
+    "shortNotice": "Un registro de juego para entretenimiento. No es un test oficial de CI ni una evaluación de la inteligencia real.",
+    "recordRef": "REF. DEL REGISTRO",
+    "summaryTitle": "Detrás de las cifras",
+    "detailTitle": "Tu juego, más de cerca.",
+    "indicator": "Indicador del juego",
+    "methodTitle": "Cómo se crea este registro",
+    "accuracyWeight": "Aciertos ponderados",
+    "paceWeight": "Rapidez en los aciertos",
+    "upTo": "Hasta",
+    "contextTitle": "Cómo interpretar el informe",
+    "footer": "El recuerdo de un momento de juego."
   },
   "fr": {
     "title": "Vos résultats d’énigmes",
@@ -118,7 +198,23 @@ export const reportLocales = {
       "Reconnaissance des motifs",
       "Raisonnement logique",
       "Perception spatiale"
-    ]
+    ],
+    "archive": "ARCHIVES PERSONNELLES D’ÉNIGMES",
+    "coverTitle": "Votre jeu.\nUne histoire en chiffres.",
+    "overview": "Votre jeu en un regard",
+    "profileTitle": "Trois dimensions de votre jeu",
+    "profileNote": "Indicateurs du jeu · échelle de 0 à 5",
+    "shortNotice": "Un relevé de jeu pour le divertissement. Ni test officiel de QI ni évaluation de l’intelligence réelle.",
+    "recordRef": "RÉF. DU RELEVÉ",
+    "summaryTitle": "Derrière les chiffres",
+    "detailTitle": "Votre jeu, de plus près.",
+    "indicator": "Indicateur du jeu",
+    "methodTitle": "Comment ce relevé est établi",
+    "accuracyWeight": "Bonnes réponses pondérées",
+    "paceWeight": "Rapidité des bonnes réponses",
+    "upTo": "Jusqu’à",
+    "contextTitle": "Comment interpréter ce rapport",
+    "footer": "Le souvenir d’un moment de jeu."
   }
 };
 export const reportCopy = language => reportLocales[isLanguage(language)?language:'en'];

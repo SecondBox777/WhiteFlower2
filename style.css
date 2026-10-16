@@ -59,3 +59,13 @@ html:not([lang="ko"]) .hero-description{line-height:1.8}
 .testing .answer span{flex-shrink:0}
 @media(max-width:600px){.testing .answer{flex-direction:column;font-size:11px}}
 @media(max-height:600px){dialog.testing{overflow:auto}.testing #flow-content{height:auto;min-height:100%}.testing .question-image-link{flex:none}.testing .question-image{height:240px}}
+
+/* Keepsake report: let the document carry its own paper, typography and page edges. */
+dialog.report-ready{width:min(900px,calc(100vw - 24px));background:#eeede8}
+.report-ready .iq-result{display:none}
+.report-document{padding:0;border:0;border-radius:0;background:transparent}
+.report-document .ms-report{width:100%;max-width:760px;margin:auto}
+.report-document .ms-sheet{box-shadow:0 8px 32px rgba(36,41,64,.055)}
+.report-ready .completed-report{margin-top:24px}
+.report-ready .report-tools{position:sticky;bottom:-1px;background:rgba(238,237,232,.96);padding:14px 0;margin-bottom:0;border-top:1px solid #dbd9d2;z-index:2}
+@media(max-width:600px){dialog.report-ready{padding:38px 12px 20px}.report-ready .flow-title{font-size:21px}.report-ready .report-tools{gap:8px}.report-ready .report-tools .button{min-width:0}.report-document .ms-sheet{box-shadow:0 4px 16px rgba(36,41,64,.04)}}
