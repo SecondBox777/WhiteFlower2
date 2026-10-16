@@ -2,7 +2,7 @@ import { isLanguage } from './i18n.js';
 export const reportLocales = {
   "ko": {
     "title": "나의 퍼즐 결과 보고서",
-    "score": "점수",
+    "score": "문제풀이 점수",
     "iq": "나의 IQ 스타일 점수",
     "areas": "세 가지 퍼즐 영역",
     "summary": "퍼즐을 풀어낸 과정과 시간을 담은 나만의 플레이 리포트입니다. IQ 스타일 추정 점수는 내부 선형 회귀식으로 산출합니다.",
@@ -38,7 +38,7 @@ export const reportLocales = {
   },
   "en": {
     "title": "Your puzzle results",
-    "score": "Score",
+    "score": "Puzzle score",
     "iq": "Your IQ-style score",
     "areas": "Three puzzle areas",
     "summary": "A personal record of your puzzle performance, with an IQ-style estimate calculated using our internal linear regression model.",
@@ -74,7 +74,7 @@ export const reportLocales = {
   },
   "ja": {
     "title": "パズル結果レポート",
-    "score": "スコア",
+    "score": "問題の得点",
     "iq": "IQ風の推定スコア",
     "areas": "3つのパズル分野",
     "summary": "パズルの解答と時間を記録したレポートです。IQ風の推定スコアは内部線形回帰式で算出します。",
@@ -110,7 +110,7 @@ export const reportLocales = {
   },
   "zh-CN": {
     "title": "我的游戏结果报告",
-    "score": "分数",
+    "score": "解题得分",
     "iq": "我的IQ风格估算分",
     "areas": "三个游戏领域",
     "summary": "记录解题表现与用时的个人游戏报告。IQ风格估算分由内部线性回归模型计算。",
@@ -146,7 +146,7 @@ export const reportLocales = {
   },
   "es": {
     "title": "Tus resultados de puzles",
-    "score": "Puntuación",
+    "score": "Puntuación de los ejercicios",
     "iq": "Tu puntuación estilo CI",
     "areas": "Tres áreas de puzles",
     "summary": "Un registro personal de tu rendimiento y tiempo en los puzles. La estimación estilo CI se calcula con nuestro modelo interno de regresión lineal.",
@@ -182,7 +182,7 @@ export const reportLocales = {
   },
   "fr": {
     "title": "Vos résultats d’énigmes",
-    "score": "Score",
+    "score": "Score des exercices",
     "iq": "Votre score de type QI",
     "areas": "Trois domaines d’énigmes",
     "summary": "Un relevé personnel de vos résultats et du temps consacré aux énigmes. L’estimation de type QI est calculée par notre modèle interne de régression linéaire.",

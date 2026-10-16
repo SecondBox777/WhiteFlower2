@@ -92,3 +92,11 @@ test('public configuration exposes only a JavaScript app key and routes do not f
  const invalid=await worker.fetch(new Request('https://example.com/api/share-config'),{KAKAO_JAVASCRIPT_KEY:'invalid'});assert.deepEqual(await invalid.json(),{kakaoJavaScriptKey:null});
  assert.equal((await worker.fetch(new Request('https://example.com/s/bad'),fixture().env)).status,404);
 });
+
+// Kakao's production upload API returns HTTP CDN URLs even on HTTPS pages.
+test('Kakao upload CDN URLs are upgraded to HTTPS without accepting unsafe schemes',async()=>{
+ const {kakaoImageURL}=await import('../share-menu.js');
+ assert.equal(kakaoImageURL('http://k.kakaocdn.net/dn/sample.png'),'https://k.kakaocdn.net/dn/sample.png');
+ assert.equal(kakaoImageURL('https://k.kakaocdn.net/dn/sample.png'),'https://k.kakaocdn.net/dn/sample.png');
+ for(const url of [undefined,'javascript:alert(1)','http://other.example/image.png','http://kakaocdn.net.evil.test/image.png'])assert.throws(()=>kakaoImageURL(url));
+});

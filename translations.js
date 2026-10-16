@@ -1529,11 +1529,11 @@ export const translations = {
     "es": "© 2026 Mindscope. Todos los derechos reservados.",
     "fr": "© 2026 Mindscope. Tous droits réservés."
   },
-  "SNS 공유 또는 결과 링크 복사를 선택하면 보고서 표지 사진과 점수를 Cloudflare에 7일간 보관합니다. 공유 링크를 받은 사람은 블러 없는 사진을 볼 수 있습니다. 카카오톡 직접 공유를 선택하면 표지 사진을 카카오에 업로드합니다. 이메일과 답안은 SNS에 공유하지 않습니다.": {
-    "en": "Choosing SNS sharing or copying a result link stores the report cover and score on Cloudflare for 7 days. Anyone with that link can view the unblurred image. Direct KakaoTalk sharing uploads the cover to Kakao. Your email and answers are not shared to social media.",
-    "ja": "SNS共有または結果リンクのコピーを選ぶと、表紙画像とスコアをCloudflareに7日間保存します。リンクを持つ人はぼかしなしの画像を閲覧できます。KakaoTalkの直接共有では表紙画像をKakaoにアップロードします。メールや回答はSNSに共有しません。",
-    "zh-CN": "选择SNS分享或复制结果链接时，报告封面和分数将在Cloudflare保留7天。持有链接的人可查看未经模糊处理的图片。直接分享到KakaoTalk时，封面会上传到Kakao。不向社交平台分享邮箱和答案。",
-    "es": "Compartir en redes o copiar un enlace guarda la portada y la puntuación en Cloudflare durante 7 días. Quien tenga el enlace podrá ver la imagen sin desenfoque. El envío directo por KakaoTalk sube la portada a Kakao. Tu correo y respuestas no se comparten en redes.",
-    "fr": "Le partage sur les réseaux ou la copie du lien conserve la couverture et le score sur Cloudflare pendant 7 jours. Toute personne ayant le lien peut voir l’image sans flou. Le partage direct KakaoTalk envoie la couverture à Kakao. Votre e-mail et vos réponses ne sont pas partagés sur les réseaux."
-  }
+  "공유창을 열면 카카오톡 공유 준비를 위해 표지 사진을 카카오에 업로드합니다. 다른 SNS를 선택하면 표지와 점수를 7일간 보관하는 공유 링크를 만듭니다. 이메일과 답안은 공유하지 않습니다.": {
+    "en": "Opening this menu uploads the cover to Kakao to prepare sharing. Choosing another service creates a link storing the cover and score for 7 days. Your email and answers are not shared.",
+    "ja": "共有画面を開くと準備のため表紙画像をKakaoにアップロードします。他のSNSを選ぶと画像とスコアを7日間保存するリンクを作成します。メールや回答は共有しません。",
+    "zh-CN": "打开分享菜单时，封面会上传到Kakao以准备分享。选择其他平台时，将创建保存封面和分数7天的链接。不分享邮箱和答案。",
+    "es": "Al abrir este menú se sube la portada a Kakao para preparar el envío. Elegir otro servicio crea un enlace que guarda portada y puntuación durante 7 días. No se comparten correo ni respuestas.",
+    "fr": "L’ouverture du menu envoie la couverture à Kakao pour préparer le partage. Un autre réseau crée un lien conservant couverture et score pendant 7 jours. E-mail et réponses ne sont pas partagés."
+}
 };
