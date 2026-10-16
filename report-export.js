@@ -27,15 +27,15 @@ export async function createReportImages(data) {
   function segments(area,x,y,w,h=10) {const gap=7,segment=(w-4*gap)/5;for(let i=0;i<5;i++)box(x+i*(segment+gap),y,segment,h,i<area.level?area.color:'#e6e4dd',3);}
   newPage();
   label(copy.archive);paragraph(copy.coverTitle,{size:62,weight:700,leading:1.18,gap:30});
-  ensure(326);let top=page.y;
-  box(margin,top,bodyWidth,326,c.dark,22);
-  const iqLabel=measure(copy.iq,20,460,500);
-  iqLabel.forEach((row,i)=>text(row,margin+36,top+30+i*27,20,500,'#cbc5e5'));
-  text(iq,margin+30,top+74,164,700,'#ffffff');
-  text(`${copy.score}  ${score} / 100`,margin+36,top+268,21,500,'#dedbea');
-  const pillarX=662,pillarTop=top+64,pillarColors=['#b4a3ff','#8ec8ba','#dfbc87'];
+  ensure(364);let top=page.y;
+  box(margin,top,bodyWidth,364,c.dark,22);
+  const iqLabel=measure(copy.iq,34,800,800);
+  iqLabel.forEach((row,i)=>text(row,margin+36,top+28+i*44,34,800,'#ffffff'));
+  text(iq,margin+30,top+90,176,800,'#ffffff');
+  text(`${copy.score}  ${score} / 100`,margin+36,top+310,21,500,'#dedbea');
+  const pillarX=662,pillarTop=top+122,pillarColors=['#b4a3ff','#8ec8ba','#dfbc87'];
   areas.forEach(area=>{for(let i=0;i<5;i++)box(pillarX+area.index*76,pillarTop+i*35,55,27,5-i<=area.level?pillarColors[area.index]:'#3c4159',5);text(`0${area.index+1}`,pillarX+area.index*76+16,pillarTop+194,16,500,'#d7d7e1');});
-  page.y+=350;paragraph(copy.shortNotice,{size:18,color:c.muted,gap:24});
+  page.y+=388;paragraph(copy.shortNotice,{size:18,color:c.muted,gap:24});
   label(`01 / ${copy.overview}`);paragraph(copy.profileTitle,{size:29,weight:700,leading:1.35,gap:10});paragraph(copy.profileNote,{size:17,color:c.muted,gap:18});
   for(const area of areas) {
     const names=measure(area.title,22,480,500),height=Math.max(60,names.length*29+18);ensure(height);
