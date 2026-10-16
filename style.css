@@ -43,3 +43,19 @@ dialog.testing{padding-top:56px}
 
 @media(min-width:851px){.domain-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .chart>div{display:flex;align-items:center;justify-content:space-between;gap:12px}.chart b{white-space:nowrap;letter-spacing:2px;color:var(--purple)}
+
+/* Keep the language selector accessible on narrow and translated layouts. */
+.site-language{display:flex;align-items:center;gap:8px;font-size:12px;flex-shrink:0}
+.site-language select{max-width:135px;padding:9px 8px;border:1px solid #ddd9ef;border-radius:10px;background:#fff;color:#38334f;font:inherit;min-height:40px}
+html:not([lang="ko"]) .hero h1{font-size:clamp(34px,4.5vw,68px);overflow-wrap:anywhere}
+html:not([lang="ko"]) .hero-description{line-height:1.8}
+.header{gap:16px;flex-wrap:wrap}
+.question-prompt{line-height:1.65}
+.answers .answer{white-space:normal;overflow-wrap:anywhere}
+@media(max-width:700px){.site-language{margin-left:auto}.site-language>span{display:none}.header .nav-cta{display:none}.answers .answer{font-size:14px}}
+.testing .question-prompt{font-size:13px;line-height:1.5;letter-spacing:normal;padding:8px 10px;margin:4px 0;flex-shrink:0}
+.testing .answers{grid-template-columns:repeat(4,minmax(0,1fr))}
+.testing .answer{font-size:12px;min-width:0}
+.testing .answer span{flex-shrink:0}
+@media(max-width:600px){.testing .answer{flex-direction:column;font-size:11px}}
+@media(max-height:600px){dialog.testing{overflow:auto}.testing #flow-content{height:auto;min-height:100%}.testing .question-image-link{flex:none}.testing .question-image{height:240px}}

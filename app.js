@@ -1,15 +1,18 @@
+import { initialLanguage, isLanguage, languageOptions, localizeDOM, translate } from './i18n.js';
+import { localizedQuestion } from './question-locales.js';
+let pageLanguage=initialLanguage();
 import { renderReportDocument } from './report-content.js';
 import { createReportImages } from './report-export.js';
 import { questions } from './questions.js';
 import { LIMIT_SECONDS, scoreTest, scoringItems, TestClock } from './scoring.js';
 
 document.querySelectorAll('[data-question-count]').forEach(item => { item.textContent = questions.length; });
-document.querySelector('meta[name="description"]').content = `${questions.length}문항, 30분. 가볍게 즐기는 엔터테인먼트용 IQ 테마 테스트.`;
 
-// Temporary pause; set false together with wrangler.jsonc TESTING_PAUSED to resume.
-const TESTING_PAUSED = true;
-// Set false together with wrangler.jsonc REPORTS_PAUSED to resume reports.
-const REPORTS_PAUSED = true;
+
+// Keep in sync with wrangler.jsonc; set true to pause tests and checkout.
+const TESTING_PAUSED = false;
+// Keep in sync with wrangler.jsonc; set true to pause reports and delivery.
+const REPORTS_PAUSED = false;
 
 const dialog = document.querySelector('#flow-dialog');
 const content = document.querySelector('#flow-content');
@@ -28,7 +31,7 @@ let reportController;
 let emailAddress = '';
 let emailStatus = '';
 let adultConfirmed = false;
-let reportLanguage = 'ko';
+let reportLanguage = pageLanguage;
 let reportStatus = '';
 let reportData = null;
 let imageFiles = null;
@@ -62,6 +65,7 @@ preloadQuestions(0, 1);
 function render(markup) {
   dialog.classList.toggle('testing', stage === 'test');
   content.innerHTML = markup;
+  localizeDOM(content,pageLanguage);
   dialog.scrollTop = 0;
   const title = content.querySelector('#flow-title');
   if (title) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
@@ -119,8 +123,8 @@ function showResult() {
   const elapsed = Math.round(clock.seconds.reduce((a, b) => a + b, 0));
   render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">가볍게 즐기는 IQ 테스트</h2><div class="iq-result"><strong id="iq-result">${puzzleReport ? Math.round(result.iq) : '??'}</strong><small>${puzzleReport ? '퍼즐 결과 리포트가 완성되었습니다' : '결과 리포트에서 확인하세요'}</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안으로 테스트를 완료했습니다.' : expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div>
   <form id="generate-report-form" class="report-email-form">
-    <label class="report-language">리포트 언어 <select id="report-language"><option value="ko">한국어</option><option value="en">English</option></select></label>
-    <label class="report-consent adult-confirmation" for="report-adult-confirm"><input id="report-adult-confirm" type="checkbox" required><span><span lang="en">I confirm that I am 18 years of age or older.</span><br>본인은 만 18세 이상임을 확인합니다.</span></label>
+    <label class="report-language">리포트 언어 <select id="report-language">${languageOptions()}</select></label>
+    <label class="report-consent adult-confirmation" for="report-adult-confirm"><input id="report-adult-confirm" type="checkbox" required><span>본인은 만 18세 이상임을 확인합니다.</span></label>
     <label class="checkout-label" for="report-email">리포트를 받을 이메일</label><input class="email-input" id="report-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
     <button class="button primary full" id="generate-report" type="submit" disabled>결과 리포트 받아보기</button>
     <p class="flow-footnote">오락 전용 게임입니다. 공인 IQ 검사가 아니며 추정값은 과학적으로 검증된 IQ 또는 실제 지능을 나타내지 않습니다. 교육·채용·의료 결정에 사용할 수 없습니다. 다른 사람과의 우열을 평가하지 않습니다.</p><p class="flow-footnote">퍼즐 리포트는 1회 결제 상품입니다. 가격·통화·세금은 결제 페이지에서 확인하세요.</p>
@@ -144,7 +148,7 @@ function reset() {
   paymentPaid = false; checkoutLoading = false; checkoutUrl = null; paymentTerminal = ''; paymentPending = false;
   purchaseRestoreVersion++;
   emailAddress = ''; emailStatus = ''; adultConfirmed = false;
-  reportLanguage = 'ko'; reportStatus = ''; reportData = null; imageFiles = null; imagePromise = null; exportBusy = false;
+  reportLanguage = pageLanguage; reportStatus = ''; reportData = null; imageFiles = null; imagePromise = null; exportBusy = false;
   clearExportUrls();
   answers = Array(questions.length).fill(null);
   current = 0; clock = null; result = null; expired = false; experimental = false;
@@ -152,9 +156,9 @@ function reset() {
 
 function question() {
   if (clock.remaining(performance.now()) <= 0) { finish(true); return; }
-  const q = questions[current];
+  const q = localizedQuestion(questions[current],current,pageLanguage);
   preloadQuestions(current + 1);
-  render(`<div class="test-timer"><div class="timer-label"><span>남은 시간</span><strong id="time-left">30:00</strong></div><div class="time-track" role="progressbar" aria-label="남은 테스트 시간 (초)" aria-valuemin="0" aria-valuemax="1800" aria-valuenow="1800"><span id="time-bar"></span></div></div><div class="progress-top"><span>${q.category}</span><span>${String(current + 1).padStart(2, '0')} <span aria-hidden="true">/</span> ${questions.length}</span></div><div class="progress-track" role="progressbar" aria-label="문항 진행률" aria-valuenow="${current + 1}" aria-valuemin="0" aria-valuemax="${questions.length}"><span style="width:${(current + 1) / questions.length * 100}%"></span></div><span class="flow-eyebrow">QUESTION ${String(current + 1).padStart(2, '0')}</span><h2 class="flow-title" id="flow-title">${q.title}</h2>${q.prompt ? `<div class="question-prompt">${q.prompt}</div>` : ''}${q.image ? `<a class="question-image-link" href="${q.image}" target="_blank" rel="noopener" aria-label="${q.imageAlt} 크게 보기 (새 탭)"><img class="question-image" decoding="async" fetchpriority="high" src="${q.image}" alt="${q.imageAlt}" width="1254" height="1254"><span>문제 크게 보기 ↗</span></a><p class="flow-footnote">이미지 아래의 보기 A~D 중 하나를 선택해 주세요.</p>` : ''}<div class="answers" role="group" aria-labelledby="flow-title">${q.options.map((option, i) => `<button class="answer ${answers[current] === i ? 'selected' : ''}" data-answer="${i}" aria-pressed="${answers[current] === i}"><span>${option}</span>보기 ${option}</button>`).join('')}</div><div class="flow-actions"><button class="button secondary" id="previous" ${current === 0 ? 'disabled' : ''}>← 이전 문항</button><button class="button primary" id="next" ${answers[current] === null ? 'disabled' : ''}>${current === questions.length - 1 ? '테스트 완료' : '다음 문항'} <span>→</span></button></div><p class="flow-footnote">정답을 모르겠다면 가장 가까운 답을 선택해 주세요.</p>`);
+  render(`<div class="test-timer"><div class="timer-label"><span>남은 시간</span><strong id="time-left">30:00</strong></div><div class="time-track" role="progressbar" aria-label="남은 테스트 시간 (초)" aria-valuemin="0" aria-valuemax="1800" aria-valuenow="1800"><span id="time-bar"></span></div></div><div class="progress-top"><span>${q.category}</span><span>${String(current + 1).padStart(2, '0')} <span aria-hidden="true">/</span> ${questions.length}</span></div><div class="progress-track" role="progressbar" aria-label="문항 진행률" aria-valuenow="${current + 1}" aria-valuemin="0" aria-valuemax="${questions.length}"><span style="width:${(current + 1) / questions.length * 100}%"></span></div><span class="flow-eyebrow">QUESTION ${String(current + 1).padStart(2, '0')}</span><h2 class="flow-title" id="flow-title">${q.title}</h2>${q.prompt ? `<div class="question-prompt">${q.prompt}</div>` : ''}${q.image ? `<a class="question-image-link" href="${q.image}" target="_blank" rel="noopener" aria-label="${q.imageAlt} 크게 보기 (새 탭)"><img class="question-image" decoding="async" fetchpriority="high" src="${q.image}" alt="${q.imageAlt}" width="1254" height="1254"><span>문제 크게 보기 ↗</span></a><p class="flow-footnote">이미지 아래의 보기 A~D 중 하나를 선택해 주세요.</p>` : ''}<div class="answers" role="group" aria-labelledby="flow-title">${q.options.map((option, i) => `<button class="answer ${answers[current] === i ? 'selected' : ''}" data-answer="${i}" aria-pressed="${answers[current] === i}"><span>${'ABCD'[i]}</span>${translate('보기',pageLanguage)} ${option}</button>`).join('')}</div><div class="flow-actions"><button class="button secondary" id="previous" ${current === 0 ? 'disabled' : ''}>← 이전 문항</button><button class="button primary" id="next" ${answers[current] === null ? 'disabled' : ''}>${current === questions.length - 1 ? '테스트 완료' : '다음 문항'} <span>→</span></button></div><p class="flow-footnote">정답을 모르겠다면 가장 가까운 답을 선택해 주세요.</p>`);
   content.querySelectorAll('[data-answer]').forEach(button => {
     button.onclick = () => {
       if (clock.remaining(performance.now()) <= 0) { finish(true); return; }
@@ -222,6 +226,7 @@ function updateReportActions() {
 function displayReport() {
   if (!reportData || !document.querySelector('#puzzle-report')) return;
   const reportDocument = renderReportDocument(reportData);
+  document.querySelector('#puzzle-report').lang=reportLanguage;
   // The shared renderer escapes all model-provided text before inserting HTML.
   document.querySelector('#puzzle-report').innerHTML = new DOMParser().parseFromString(reportDocument.html, 'text/html').querySelector('main').innerHTML;
   document.querySelector('#completed-report').hidden = false;
@@ -229,6 +234,7 @@ function displayReport() {
   document.querySelector('.iq-result small').textContent = '퍼즐 결과 리포트가 완성되었습니다';
 }
 function setupReportActions() {
+  document.querySelector('#report-language').onchange = event => { reportLanguage=event.target.value; };
   const adultInput = document.querySelector('#report-adult-confirm');
   adultInput.checked = adultConfirmed;
   adultInput.onchange = () => { adultConfirmed = adultInput.checked; updateReportActions(); };
@@ -255,12 +261,12 @@ async function generateReport(event) {
   reportStatus = ''; reportLoading = true; updateReportActions();
   document.querySelector('#report-progress').scrollIntoView({block:'nearest'});
   try {
-    const response = await fetch('/api/analyze', {method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({email:emailAddress})});
+    const response = await fetch('/api/analyze', {method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Language':pageLanguage},signal:controller.signal,body:JSON.stringify({email:emailAddress})});
     const data = await response.json().catch(() => ({error:'리포트 생성 응답을 확인할 수 없습니다.'}));
     if (reportController !== controller) return;
     if (!response.ok) {
       if (['refunded','refund_pending','refund_failed','partially_refunded'].includes(data.paymentStatus)) paymentTerminal=data.paymentStatus;
-      throw new Error(data.error || '리포트 생성에 실패했습니다.');
+      throw new Error(localizedError(data.error) || '리포트 생성에 실패했습니다.');
     }
     if (!data.report || !data.result) throw new Error('리포트 형식이 올바르지 않습니다.');
     // Prepare the document before committing the successful state.
@@ -272,7 +278,7 @@ async function generateReport(event) {
     // Prepare images in advance so native sharing can run directly on the next click.
     prepareReportImages().catch(() => {});
   } catch (error) {
-    if (reportController === controller) reportStatus = controller.signal.aborted ? '생성 시간이 길어지고 있습니다. 다시 시도해 주세요.' : error.message;
+    if (reportController === controller) reportStatus = controller.signal.aborted ? '생성 시간이 길어지고 있습니다. 다시 시도해 주세요.' : localizedError(error.message);
   } finally {
     clearTimeout(timeout);
     if (reportController === controller) { reportLoading = false; reportController = null; updateReportActions(); }
@@ -353,11 +359,11 @@ async function startCheckout() {
   if (checkoutUrl) { window.location.assign(checkoutUrl); return; }
   checkoutLoading = true; reportStatus = ''; updateReportActions();
   try {
-    const response = await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(submissionForCheckout()),signal:AbortSignal.timeout(25000)});
+    const response = await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Language':pageLanguage},body:JSON.stringify(submissionForCheckout()),signal:AbortSignal.timeout(25000)});
     const data = await response.json();
-    if (!response.ok || !data.url) throw Error(data.error || '결제 페이지를 열 수 없습니다.');
+    if (!response.ok || !data.url) throw Error(localizedError(data.error) || '결제 페이지를 열 수 없습니다.');
     window.location.assign(data.url);
-  } catch (error) { reportStatus = error.message; }
+  } catch (error) { reportStatus = localizedError(error.message); }
   finally { checkoutLoading=false; if (document.querySelector('#generate-report')) updateReportActions(); }
 }
 async function restorePurchase(force = false) {
@@ -367,10 +373,10 @@ async function restorePurchase(force = false) {
   if (!returning) return;
   const restoreVersion = ++purchaseRestoreVersion;
   try {
-    const response = await fetch('/api/payment/status',{signal:AbortSignal.timeout(20000)});
+    const response = await fetch('/api/payment/status',{headers:{'X-Mindscope-Language':pageLanguage},signal:AbortSignal.timeout(20000)});
     const data = await response.json();
     if (!response.ok || !data.submission || data.status === 'none') {
-      if (returning) throw Error(data.error || '결제 내역을 복원할 수 없습니다. 같은 브라우저에서 다시 확인해 주세요.');
+      if (returning) throw Error(localizedError(data.error) || '결제 내역을 복원할 수 없습니다. 같은 브라우저에서 다시 확인해 주세요.');
       return;
     }
     // A delayed restoration must not overwrite a test already started by the user.
@@ -381,7 +387,7 @@ async function restorePurchase(force = false) {
     const saved=data.submission;
     answers=saved.answers; clock=new TestClock(performance.now()); clock.seconds=saved.seconds;
     expired=saved.expiredIndex!==null; current=saved.expiredIndex??0;
-    experimental=saved.experimental; reportLanguage=saved.language; adultConfirmed=true;
+    experimental=saved.experimental; reportLanguage=saved.language; setPageLanguage(saved.language); adultConfirmed=true;
     result=scoreTest(answers,clock.seconds,saved.expiredIndex);
     paymentPaid=data.status==='paid'; paymentPending=data.status==='confirmed'; checkoutUrl=data.checkoutUrl;
     if (['refunded','refund_pending','refund_failed','partially_refunded'].includes(data.status)) paymentTerminal=data.status;
@@ -393,10 +399,42 @@ async function restorePurchase(force = false) {
   } catch (error) {
     if (returning) {
       const notice=document.createElement('p'); notice.className='flow-text'; notice.setAttribute('role','alert');
-      notice.textContent=error.message; document.querySelector('main').prepend(notice);
+      notice.textContent=localizedError(error.message); document.querySelector('main').prepend(notice);
     }
   } finally {
     if (returning) { const url=new URL(location.href);url.searchParams.delete('payment');history.replaceState(null,'',url); }
   }
 }
+const languageSelect=document.querySelector('#site-language');
+languageSelect.innerHTML=languageOptions();
+languageSelect.onchange=event=>{
+  setPageLanguage(event.target.value);
+  if(!paymentPaid && !checkoutUrl && !puzzleReport && !reportLoading && !checkoutLoading)reportLanguage=pageLanguage;
+  if(dialog.open && stage==='test')question();
+  else if(dialog.open && stage==='intro')intro();
+  else if(dialog.open && stage==='done')showResult();
+};
+function setPageLanguage(language) {
+  if(!isLanguage(language))return;
+  pageLanguage=language;
+  document.documentElement.lang=language;
+  languageSelect.value=language;
+  try { localStorage.setItem('mindscope-language',language); } catch {}
+  const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);
+  document.title=`Mindscope — ${translate('가볍게 즐기는 IQ 테스트',language)}`;
+  document.querySelector('meta[name="description"]').content=`30 · 30 min · ${translate('오락 전용 IQ 테마 퍼즐 게임입니다.',language)}`;
+  localizeDOM(document,language);
+}
+function localizedError(message) {
+  if(!message)return '';
+  const localized=translate(message,pageLanguage);
+  return pageLanguage!=='ko' && (/[가-힣]/.test(localized) || localized===message && /error|fetch|network|invalid|failed/i.test(message))
+    ? translate('요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',pageLanguage) : localized;
+}
+setPageLanguage(pageLanguage);
+const languageObserver=new MutationObserver(()=>{
+  localizeDOM(document,pageLanguage);
+  languageSelect.disabled=reportLoading || checkoutLoading || paymentPaid || Boolean(checkoutUrl) || Boolean(puzzleReport);
+});
+languageObserver.observe(document.body,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['title','aria-label','placeholder']});
 restorePurchase();

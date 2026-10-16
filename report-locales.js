@@ -1,0 +1,125 @@
+import { isLanguage } from './i18n.js';
+export const reportLocales = {
+  "ko": {
+    "title": "나의 퍼즐 결과 보고서",
+    "score": "점수",
+    "iq": "나의 IQ 스타일 점수",
+    "areas": "세 가지 퍼즐 영역",
+    "summary": "퍼즐을 풀어낸 과정과 시간을 담은 나만의 플레이 리포트입니다. IQ 스타일 추정 점수는 내부 선형 회귀식으로 산출합니다.",
+    "notice": "오락 전용입니다. 공인된 IQ 검사가 아니며 과학적으로 검증된 IQ 점수가 아닙니다. 추정값은 실제 IQ를 나타내지 않습니다. 막대는 이 게임의 수행만 나타내며 다른 사람과의 우열·백분위가 아닙니다. 교육·채용·의료 등 중요한 결정에 사용하지 마세요.",
+    "method": "막대는 이 게임에서의 대략적인 수행 기록이며 실제 능력이나 타인과의 순위가 아닙니다. 난이도별 정답 점수 80%와 정답 풀이의 내부 기준시간 대비 속도 점수 최대 20%를 합산합니다. 미응답·시간 초과·지나치게 빠른 응답은 점수에서 제외합니다.",
+    "evidence": "영역 점수 {score}/{max}점 · 소요 시간 약 {seconds}초",
+    "band0": "내부적으로 산정된 기준에 비해 보완이 필요합니다.",
+    "band1": "내부적으로 산정된 기준에 비해 평범한 편입니다.",
+    "band2": "내부적으로 산정된 기준에 비해 우수한 편입니다.",
+    "band3": "내부적으로 산정된 기준에 비해 매우 우수한 편입니다.",
+    "insufficient": "유효 응답이 없어 분류할 수 없습니다.",
+    "names": [
+      "패턴인식능력",
+      "논리추론능력",
+      "공간지각능력"
+    ]
+  },
+  "en": {
+    "title": "Your puzzle results",
+    "score": "Score",
+    "iq": "Your IQ-style score",
+    "areas": "Three puzzle areas",
+    "summary": "A personal record of your puzzle performance, with an IQ-style estimate calculated using our internal linear regression model.",
+    "notice": "For entertainment only. This is NOT an official IQ test or a scientifically validated IQ score. The estimate does not represent your actual IQ. Bars reflect this game only, not population rankings. Do not use results for educational, employment, medical or other consequential decisions.",
+    "method": "Bars show approximate game performance, not intelligence or ranking. Weighted correct answers contribute 80%; pace on correct answers contributes up to 20%, using internal reference times. Unanswered, timed-out and implausibly fast responses earn no points.",
+    "evidence": "Score {score}/{max} · approximately {seconds} seconds",
+    "band0": "Relative to our internal benchmark, there is room for improvement.",
+    "band1": "Relative to our internal benchmark, performance is average.",
+    "band2": "Relative to our internal benchmark, performance is strong.",
+    "band3": "Relative to our internal benchmark, performance is very strong.",
+    "insufficient": "Cannot classify without valid responses.",
+    "names": [
+      "Pattern recognition",
+      "Logical reasoning",
+      "Spatial perception"
+    ]
+  },
+  "ja": {
+    "title": "パズル結果レポート",
+    "score": "スコア",
+    "iq": "IQ風の推定スコア",
+    "areas": "3つのパズル分野",
+    "summary": "パズルの解答と時間を記録したレポートです。IQ風の推定スコアは内部線形回帰式で算出します。",
+    "notice": "娯楽専用です。公認IQ検査や科学的に検証されたIQ値ではありません。推定値は実際のIQを示しません。バーはこのゲーム内の記録で、順位や百分位ではありません。教育・採用・医療など重要な判断に使わないでください。",
+    "method": "バーはゲーム内の概算記録で、実際の能力や順位ではありません。難易度別の正答点80%と、正答時の内部基準時間に対する速度点最大20%を合算します。未回答・時間切れ・極端に速い回答は得点になりません。",
+    "evidence": "分野スコア {score}/{max}・約{seconds}秒",
+    "band0": "内部基準では改善の余地があります。",
+    "band1": "内部基準では標準的な成績です。",
+    "band2": "内部基準では優れた成績です。",
+    "band3": "内部基準では非常に優れた成績です。",
+    "insufficient": "有効な回答がなく分類できません。",
+    "names": [
+      "パターン認識",
+      "論理的推論",
+      "空間認識"
+    ]
+  },
+  "zh-CN": {
+    "title": "我的游戏结果报告",
+    "score": "分数",
+    "iq": "我的IQ风格估算分",
+    "areas": "三个游戏领域",
+    "summary": "记录解题表现与用时的个人游戏报告。IQ风格估算分由内部线性回归模型计算。",
+    "notice": "仅供娱乐。这不是正式IQ测试，也不是经过科学验证的IQ分数，估算不代表实际IQ。条形仅反映本游戏表现，不代表人群排名或百分位。请勿用于教育、招聘、医疗等重要决策。",
+    "method": "条形表示本游戏的大致表现，不是实际能力或排名。难度加权正确答案占80%，正确答案相对内部参考时间的速度分最高占20%。未答、超时和快得不合理的答案不得分。",
+    "evidence": "领域得分 {score}/{max} · 约{seconds}秒",
+    "band0": "相对内部标准，尚有提升空间。",
+    "band1": "相对内部标准，表现为一般水平。",
+    "band2": "相对内部标准，表现良好。",
+    "band3": "相对内部标准，表现非常好。",
+    "insufficient": "无有效答案，无法分类。",
+    "names": [
+      "规律识别",
+      "逻辑推理",
+      "空间感知"
+    ]
+  },
+  "es": {
+    "title": "Tus resultados de puzles",
+    "score": "Puntuación",
+    "iq": "Tu puntuación estilo CI",
+    "areas": "Tres áreas de puzles",
+    "summary": "Un registro personal de tu rendimiento y tiempo en los puzles. La estimación estilo CI se calcula con nuestro modelo interno de regresión lineal.",
+    "notice": "Solo para entretenimiento. NO es un test oficial de CI ni una puntuación validada científicamente. La estimación no representa tu CI real. Las barras reflejan solo este juego, no una clasificación poblacional. No uses los resultados para decisiones educativas, laborales, médicas u otras decisiones importantes.",
+    "method": "Las barras muestran el rendimiento aproximado del juego, no inteligencia ni clasificación. Los aciertos ponderados aportan el 80%; la rapidez en los aciertos, hasta el 20% según tiempos internos. Las respuestas omitidas, fuera de tiempo o inverosímilmente rápidas no puntúan.",
+    "evidence": "Puntuación {score}/{max} · unos {seconds} segundos",
+    "band0": "Según nuestro criterio interno, hay margen de mejora.",
+    "band1": "Según nuestro criterio interno, el rendimiento es medio.",
+    "band2": "Según nuestro criterio interno, el rendimiento es alto.",
+    "band3": "Según nuestro criterio interno, el rendimiento es muy alto.",
+    "insufficient": "No se puede clasificar sin respuestas válidas.",
+    "names": [
+      "Reconocimiento de patrones",
+      "Razonamiento lógico",
+      "Percepción espacial"
+    ]
+  },
+  "fr": {
+    "title": "Vos résultats d’énigmes",
+    "score": "Score",
+    "iq": "Votre score de type QI",
+    "areas": "Trois domaines d’énigmes",
+    "summary": "Un relevé personnel de vos résultats et du temps consacré aux énigmes. L’estimation de type QI est calculée par notre modèle interne de régression linéaire.",
+    "notice": "Pour le divertissement uniquement. Ce n’est PAS un test officiel de QI ni un score validé scientifiquement. L’estimation ne représente pas votre QI réel. Les barres concernent uniquement ce jeu, sans classement dans la population. N’utilisez pas les résultats pour des décisions éducatives, professionnelles, médicales ou importantes.",
+    "method": "Les barres indiquent les résultats approximatifs du jeu, sans mesurer l’intelligence ni un classement. Les bonnes réponses pondérées comptent pour 80 % ; leur rapidité, jusqu’à 20 % selon des temps de référence internes. Les réponses manquantes, hors délai ou trop rapides ne rapportent aucun point.",
+    "evidence": "Score {score}/{max} · environ {seconds} secondes",
+    "band0": "Selon notre repère interne, une amélioration est possible.",
+    "band1": "Selon notre repère interne, les résultats sont moyens.",
+    "band2": "Selon notre repère interne, les résultats sont bons.",
+    "band3": "Selon notre repère interne, les résultats sont très bons.",
+    "insufficient": "Classification impossible sans réponses valides.",
+    "names": [
+      "Reconnaissance des motifs",
+      "Raisonnement logique",
+      "Perception spatiale"
+    ]
+  }
+};
+export const reportCopy = language => reportLocales[isLanguage(language)?language:'en'];
+export const formatCopy = (text, values) => text.replace(/\{(\w+)\}/g, (_,key)=>String(values[key]));

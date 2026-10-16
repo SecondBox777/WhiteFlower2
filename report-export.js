@@ -1,3 +1,4 @@
+import { translate } from './i18n.js';
 import { reportBlocks } from './report-content.js';
 
 // Draw the full report, including its limitations, without sending it to a third party.
@@ -7,7 +8,7 @@ export async function createReportImages(data) {
   const width=1000, margin=64, maxHeight=10000;
   const canvas=document.createElement('canvas');
   const ctx=canvas.getContext('2d');
-  if(!ctx)throw new Error('이 브라우저에서 사진 저장을 지원하지 않습니다.');
+  if(!ctx)throw new Error(translate('이 브라우저에서 사진 저장을 지원하지 않습니다.',data.language));
   const styles={title:[34,700,'#222437'],iq:[44,800,'#7360d8'],heading:[30,700,'#7360d8'],subheading:[26,700,'#222437'],body:[24,400,'#222437'],muted:[21,400,'#777b8d']};
   const pages=[];
   let lines=[],y=140;
@@ -39,7 +40,7 @@ export async function createReportImages(data) {
     }
     ctx.font='400 18px Arial, sans-serif';ctx.fillStyle='#777b8d';
     ctx.fillText(`Mindscope · ${index+1} / ${pages.length}`,margin,page.height-46);
-    const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error('사진을 만들지 못했습니다. 다시 시도해 주세요.')),'image/png'));
+    const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error(translate('사진을 만들지 못했습니다. 다시 시도해 주세요.',data.language))),'image/png'));
     files.push(new File([blob],`mindscope-report${pages.length>1?`-${index+1}`:''}.png`,{type:'image/png'}));
   }
   return files;
