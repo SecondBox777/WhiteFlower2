@@ -3,6 +3,7 @@ import { questions } from './questions.js';
 import { readFile } from 'node:fs/promises';
 
 const files = { '/favicon.svg': ['favicon.svg', 'image/svg+xml'], '/report-content.js': ['report-content.js', 'text/javascript'], '/report-export.js': ['report-export.js', 'text/javascript'], '/scoring.js': ['scoring.js', 'text/javascript'], '/': ['index.html', 'text/html'], '/index.html': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'], '/app.js': ['app.js', 'text/javascript'], '/questions.js': ['questions.js', 'text/javascript'] };
+files['/design-ui.css'] = ['design-ui.css', 'text/css'];
 for (const name of ['share-copy.js','share-menu.js','temporary-test-report.js','i18n.js','translations.js','report-locales.js','question-locales.js']) files[`/${name}`]=[name,'text/javascript'];
 for (const { image: name } of questions) {
   files[`/${name}`] = [name, 'image/webp'];
