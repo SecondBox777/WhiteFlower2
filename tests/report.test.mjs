@@ -26,11 +26,12 @@ test('analysis preserves excluded-response reasons',()=>{
  const analysis=buildAnalysis(data);assert.equal(analysis.items[0].excluded,'too_fast');assert.equal(analysis.items[0].earned,0);assert.equal(analysis.items[1].excluded,'unanswered');
 });
 
-test('experimental submissions are marked as random integration data', () => {
- const data = validateSubmission({...submission(), experimental:true});
- assert.equal(buildAnalysis(data).experimental, true);
- assert.equal(buildAnalysis(validateSubmission(submission())).experimental, false);
- assert.throws(() => validateSubmission({...submission(), experimental:'true'}));
+test('legacy development metadata does not alter purchased report content', () => {
+ const normal=validateSubmission(submission());
+ const legacy=validateSubmission({...submission(),experimental:true});
+ assert.deepEqual(legacy,normal);
+ assert.deepEqual(buildAnalysis(legacy),buildAnalysis(normal));
+ assert.equal(Object.hasOwn(buildAnalysis(legacy),'experimental'),false);
 });
 
 test('AI report requires explicit adult confirmation before external requests', async () => {

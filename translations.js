@@ -608,20 +608,6 @@ export const translations = {
     "es": "Iniciar prueba",
     "fr": "Commencer le test"
   },
-  "랜덤 답안 제출 · 실험용": {
-    "en": "Submit random answers · Demo",
-    "ja": "ランダム回答・実験用",
-    "zh-CN": "随机提交 · 演示",
-    "es": "Respuestas aleatorias · Demo",
-    "fr": "Réponses aléatoires · Démo"
-  },
-  "실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 실험용 리포트도 결제가 필요합니다.": {
-    "en": "Demo generates 30 random answers and times. Demo reports also require payment.",
-    "ja": "実験用は30問の回答と時間を自動生成します。レポートは有料です。",
-    "zh-CN": "演示自动生成30个答案和用时，演示报告也需付费。",
-    "es": "La demo genera 30 respuestas y tiempos aleatorios. El informe también es de pago.",
-    "fr": "La démo génère 30 réponses et temps aléatoires. Son rapport est également payant."
-  },
   "퍼즐 결과 리포트가 완성되었습니다": {
     "en": "Your puzzle report is ready",
     "ja": "レポートが完成しました",
@@ -635,13 +621,6 @@ export const translations = {
     "zh-CN": "请在报告中查看",
     "es": "Consulta tu informe",
     "fr": "Consultez votre rapport"
-  },
-  "실험용 랜덤 답안으로 테스트를 완료했습니다.": {
-    "en": "Completed with demo random answers.",
-    "ja": "実験用ランダム回答で完了しました。",
-    "zh-CN": "已使用演示随机答案完成。",
-    "es": "Completado con respuestas aleatorias de demo.",
-    "fr": "Terminé avec les réponses aléatoires de démo."
   },
   "제한 시간이 종료되어 테스트를 완료했습니다.": {
     "en": "The time limit has ended.",

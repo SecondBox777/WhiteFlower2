@@ -9,7 +9,7 @@ import { join } from 'node:path';
 test('deployment contains only public assets and removes stale output', async () => {
   const fixture = await mkdtemp(join(tmpdir(), 'mindscope-build-'));
   const root = new URL('../', import.meta.url);
-  const assets = ['app.js', 'share-copy.js', 'share-menu.js', 'temporary-test-report.js', 'i18n.js', 'translations.js', 'report-locales.js', 'question-locales.js', 'favicon.svg', 'report-content.js', 'report-export.js', 'index.html', 'questions.js', 'scoring.js', 'style.css', 'design-ui.css', ...questions.map(q => q.image)].sort();
+  const assets = ['app.js', 'share-copy.js', 'share-menu.js', 'i18n.js', 'translations.js', 'report-locales.js', 'question-locales.js', 'favicon.svg', 'report-content.js', 'report-export.js', 'index.html', 'questions.js', 'scoring.js', 'style.css', 'design-ui.css', ...questions.map(q => q.image)].sort();
   try {
     await mkdir(join(fixture, 'scripts'));
     await copyFile(new URL('scripts/build.mjs', root), join(fixture, 'scripts/build.mjs'));
@@ -25,6 +25,10 @@ test('deployment contains only public assets and removes stale output', async ()
       const published = await readFile(join(fixture, 'dist', file));
       assert.deepEqual(published, await readFile(new URL(file, root)));
       assert.ok(published.length < 25 * 1024 * 1024);
+    }
+    for (const name of ['app.js','translations.js','index.html','report-content.js','report-export.js','report-locales.js']) {
+      const source=await readFile(join(fixture,'dist',name),'utf8');
+      assert.doesNotMatch(source,/temporary-test-report|random-submit|실험용|테스트용|demo random|Submit random/i,`${name} must not ship development buttons or labels`);
     }
     const config = JSON.parse(await readFile(new URL('wrangler.jsonc', root), 'utf8'));
     assert.equal(config.assets.directory, './dist');

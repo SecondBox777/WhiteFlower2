@@ -50,3 +50,14 @@ test('report-only pause blocks both APIs before body reads or OpenAI calls while
   const response = await handleReport({request:new Request('https://example.com/api/analyze'),env},()=>{throw Error('Must not call OpenAI');});
   assert.equal(response.status,503);
 });
+
+test('removed free report endpoint stays unavailable even with a stale enabled flag',async()=>{
+ const env={TEMPORARY_TEST_REPORT_ENABLED:'true',ASSETS:{fetch:()=>{throw Error('Removed API must not fall through to assets');}},PAYMENT_SESSIONS:{get:()=>{throw Error('Removed API must not access purchases');}}};
+ for(const method of ['GET','POST']) {
+  const request=new Request('https://example.com/api/test-report',{method,...(method==='POST'?{headers:{'Content-Type':'application/json'},body:'{}'}:{})});
+  const response=await worker.fetch(request,env);
+  assert.equal(response.status,404);
+  assert.equal((await response.json()).error,'API endpoint not found');
+  assert.equal(request.bodyUsed,false);
+ }
+});

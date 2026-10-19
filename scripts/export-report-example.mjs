@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { buildAnalysis, buildReport } from '../lib/report.js';
 import { scoringItems } from '../scoring.js';
 import { renderReportDocument } from '../report-content.js';
-const submission={answers:scoringItems.map((q,i)=>i%4===0?('ABCD'.indexOf(q.answer)+1)%4:'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko',experimental:true};
+const submission={answers:scoringItems.map((q,i)=>i%4===0?('ABCD'.indexOf(q.answer)+1)%4:'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'ko'};
 const analysis=buildAnalysis(submission);
 const document=renderReportDocument({report:buildReport(analysis),result:analysis.result,language:'ko'});
 await mkdir(new URL('../docs/examples/',import.meta.url),{recursive:true});

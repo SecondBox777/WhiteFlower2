@@ -7,7 +7,6 @@ import { shareMessage, shareCopy, serviceURL, services } from '../share-copy.js'
 import { languages } from '../i18n.js';
 import { buildAnalysis, buildReport } from '../lib/report.js';
 import { scoringItems } from '../scoring.js';
-import { handleTemporaryTestReport } from '../lib/temporary-test-report.js';
 import worker from '../src/index.js';
 const secret='test-share-secret-at-least-32-characters';
 const data={language:'ko',result:{iq:100,score:40}};
@@ -75,15 +74,6 @@ test('all language captions include the score and Mindscope URL; service URLs en
   for(const [service] of services){const url=serviceURL(service,{message:message+' & <test>',url:'https://example.com/s/test',imageUrl:'https://example.com/s/test/result.png'});assert.ok(!url.includes('<test>'));}
  }
  assert.throws(()=>serviceURL('javascript:alert(1)',{message:'x',url:'https://example.com'}));
-});
-
-test('temporary reports issue share authorization without contacting any SNS automatically',async()=>{
- const submission={answers:scoringItems.map(q=>'ABCD'.indexOf(q.answer)),seconds:scoringItems.map(q=>q.referenceSeconds),expiredIndex:null,language:'en',adultConfirmed:true,consent:true,email:'private@example.com'};
- const env={TEMPORARY_TEST_REPORT_ENABLED:'true',RESEND_API_KEY:'test',RESEND_FROM:'reports@example.com',REPORT_EMAIL_SECRET:secret};
- const response=await handleTemporaryTestReport({request:new Request('https://example.com/api/test-report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(submission)}),env},async url=>{assert.equal(url,'https://api.resend.com/emails');return Response.json({id:'sent'});});
- const body=await response.json(),token=await verifyShareToken(body.shareToken,secret);assert.equal(token.iq,Math.round(body.result.iq));assert.equal(token.language,'en');
- const f=fixture();assert.equal((await worker.fetch(upload(body.shareToken),f.env)).status,200);
- for(const path of ['/api/report','/api/analyze'])assert.equal((await worker.fetch(new Request(`https://example.com${path}`,{method:'POST'}),{POLAR_ACCESS_TOKEN:'test',PAYMENT_SESSIONS:{}})).status,402);
 });
 
 test('public configuration exposes only a JavaScript app key and routes do not fall through to static hosting',async()=>{

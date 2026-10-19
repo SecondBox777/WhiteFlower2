@@ -1,13 +1,11 @@
 import { openReportShareMenu, closeReportShareMenu } from './share-menu.js';
-// TEMPORARY TEST FEATURE: remove this import and the marked hooks to remove the bypass.
-import { temporaryTestButton, updateTemporaryTestButton } from './temporary-test-report.js';
 import { initialLanguage, isLanguage, languageOptions, localizeDOM, translate } from './i18n.js';
 import { localizedQuestion } from './question-locales.js';
 let pageLanguage=initialLanguage();
 import { renderReportDocument } from './report-content.js';
 import { createReportImages } from './report-export.js';
 import { questions } from './questions.js';
-import { LIMIT_SECONDS, scoreTest, scoringItems, TestClock } from './scoring.js';
+import { LIMIT_SECONDS, scoreTest, TestClock } from './scoring.js';
 
 document.querySelectorAll('[data-question-count]').forEach(item => { item.textContent = questions.length; });
 
@@ -27,7 +25,6 @@ let clock;
 let ticker;
 let result;
 let expired = false;
-let experimental = false;
 let puzzleReport = null;
 let reportLoading = false;
 let reportController;
@@ -78,21 +75,7 @@ function render(markup) {
 function intro() {
   stage = 'intro';
   preloadQuestions(0, 4);
-  render(`<span class="flow-eyebrow">IQ PUZZLE GAME · FOR FUN</span><h2 class="flow-title" id="flow-title">가볍게 즐기는 IQ 테스트</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>정답과 풀이 시간으로 만든 결과 리포트를 화면에서 확인하고 이메일로도 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button><button class="button secondary full" id="random-submit" style="margin-top:10px">랜덤 답안 제출 · 실험용</button><p class="flow-footnote">실험용 버튼은 30개 답안과 풀이 시간을 자동 생성합니다. 실험용 리포트도 결제가 필요합니다.</p>`);
-  document.querySelector('#random-submit').onclick = () => {
-    reset();
-    experimental = true;
-    answers = questions.map(() => Math.floor(Math.random() * 4));
-    clock = new TestClock(performance.now());
-    clock.seconds = scoringItems.map(item => Math.round(item.referenceSeconds * (0.6 + Math.random() * 0.8) * 10) / 10);
-    const total = clock.seconds.reduce((sum, seconds) => sum + seconds, 0);
-    if (total > LIMIT_SECONDS * 0.9) {
-      clock.seconds = clock.seconds.map(seconds => Math.floor(seconds * LIMIT_SECONDS * 0.9 / total * 10) / 10);
-    }
-    result = scoreTest(answers, clock.seconds);
-    stage = 'done';
-    showResult();
-  };
+  render(`<span class="flow-eyebrow">IQ PUZZLE GAME · FOR FUN</span><h2 class="flow-title" id="flow-title">가볍게 즐기는 IQ 테스트</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>정답과 풀이 시간으로 만든 결과 리포트를 화면에서 확인하고 이메일로도 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button>`);
   document.querySelector('#begin').onclick = () => {
     clock = new TestClock(performance.now());
     stage = 'test';
@@ -125,13 +108,12 @@ function finish(timedOut = false) {
 }
 function showResult() {
   const elapsed = Math.round(clock.seconds.reduce((a, b) => a + b, 0));
-  render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">가볍게 즐기는 IQ 테스트</h2><div class="iq-result"><strong id="iq-result">${puzzleReport ? Math.round(result.iq) : '??'}</strong><small>${puzzleReport ? '퍼즐 결과 리포트가 완성되었습니다' : '결과 리포트에서 확인하세요'}</small></div><p class="flow-text center">${experimental ? '실험용 랜덤 답안으로 테스트를 완료했습니다.' : expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div>
+  render(`<span class="flow-eyebrow">TEST COMPLETE</span><h2 class="flow-title center" id="flow-title">가볍게 즐기는 IQ 테스트</h2><div class="iq-result"><strong id="iq-result">${puzzleReport ? Math.round(result.iq) : '??'}</strong><small>${puzzleReport ? '퍼즐 결과 리포트가 완성되었습니다' : '결과 리포트에서 확인하세요'}</small></div><p class="flow-text center">${expired ? '제한 시간이 종료되어 테스트를 완료했습니다.' : '테스트를 완료했습니다.'}</p><div class="result-stats"><div><span>총 소요 시간</span><strong>${Math.floor(elapsed / 60)}분 ${elapsed % 60}초</strong></div></div>
   <form id="generate-report-form" class="report-email-form">
     <label class="report-language">리포트 언어 <select id="report-language">${languageOptions()}</select></label>
     <label class="report-consent adult-confirmation" for="report-adult-confirm"><input id="report-adult-confirm" type="checkbox" required><span>본인은 만 18세 이상임을 확인합니다.</span></label>
     <label class="checkout-label" for="report-email">리포트를 받을 이메일</label><input class="email-input" id="report-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
     <button class="button primary full" id="generate-report" type="submit" disabled>결과 리포트 받아보기</button>
-    ${temporaryTestButton(pageLanguage)} <!-- TEMPORARY TEST FEATURE -->
     <p class="flow-footnote">오락 전용 게임입니다. 공인 IQ 검사가 아니며 추정값은 과학적으로 검증된 IQ 또는 실제 지능을 나타내지 않습니다. 교육·채용·의료 결정에 사용할 수 없습니다. 다른 사람과의 우열을 평가하지 않습니다.</p><p class="flow-footnote">퍼즐 리포트는 1회 결제 상품입니다. 가격·통화·세금은 결제 페이지에서 확인하세요.</p>
   </form>
   <p id="email-report-status" class="flow-footnote" role="status" aria-live="polite"></p>
@@ -156,7 +138,7 @@ function reset() {
   reportLanguage = pageLanguage; reportStatus = ''; reportData = null; imageFiles = null; imagePromise = null; exportBusy = false;
   clearExportUrls();
   answers = Array(questions.length).fill(null);
-  current = 0; clock = null; result = null; expired = false; experimental = false;
+  current = 0; clock = null; result = null; expired = false;
 }
 
 function question() {
@@ -209,8 +191,6 @@ function updateReportActions() {
   const button = document.querySelector('#generate-report');
   if (!button) return;
   const busy = reportLoading || checkoutLoading;
-  // TEMPORARY TEST FEATURE
-  updateTemporaryTestButton({disabled:REPORTS_PAUSED || busy || Boolean(puzzleReport) || !adultConfirmed || paymentPaid || paymentPending || Boolean(checkoutUrl) || Boolean(paymentTerminal),run:event=>generateReport(event,true)});
   document.querySelector('#save-report-photo').disabled = REPORTS_PAUSED;
   document.querySelector('#share-report').disabled = REPORTS_PAUSED;
   button.disabled = REPORTS_PAUSED || busy || Boolean(puzzleReport) || !adultConfirmed || Boolean(paymentTerminal);
@@ -257,23 +237,20 @@ function setupReportActions() {
   document.querySelector('#save-report-photo').onclick = saveReportPhoto;
   document.querySelector('#share-report').onclick = shareReport;
 }
-async function generateReport(event, temporaryTest = false) { // TEMPORARY TEST FEATURE: remove second argument when removing bypass.
+async function generateReport(event) {
   event?.preventDefault();
   if (REPORTS_PAUSED || checkoutLoading || reportLoading || puzzleReport || !adultConfirmed || !document.querySelector('#report-adult-confirm').checked) return;
   reportLanguage = document.querySelector('#report-language').value;
   if (!document.querySelector('#report-email').reportValidity()) return;
   emailAddress = document.querySelector('#report-email').value.trim();
-  // TEMPORARY TEST FEATURE: paid requests retain their original payment checks.
-  if (!temporaryTest) {
-    if (paymentPending) { await restorePurchase(true); return; }
-    if (!paymentPaid) { await startCheckout(); return; }
-  } else if (paymentPaid || paymentPending || checkoutUrl || paymentTerminal) return;
+  if (paymentPending) { await restorePurchase(true); return; }
+  if (!paymentPaid) { await startCheckout(); return; }
   const controller = new AbortController(); reportController = controller;
   const timeout = setTimeout(() => controller.abort(), 75000);
   reportStatus = ''; reportLoading = true; updateReportActions();
   document.querySelector('#report-progress').scrollIntoView({block:'nearest'});
   try {
-    const response = await fetch(temporaryTest ? '/api/test-report' : '/api/analyze', {method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Language':pageLanguage},signal:controller.signal,body:JSON.stringify(temporaryTest ? submissionForCheckout() : {email:emailAddress})});
+    const response = await fetch('/api/analyze', {method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Language':pageLanguage},signal:controller.signal,body:JSON.stringify({email:emailAddress})});
     const data = await response.json().catch(() => ({error:'리포트 생성 응답을 확인할 수 없습니다.'}));
     if (reportController !== controller) return;
     if (!response.ok) {
@@ -342,7 +319,7 @@ function shareReport() {
 
 function submissionForCheckout() {
   if (!clock) throw new Error('테스트 결과를 불러오지 못했습니다. 페이지를 새로고침해 주세요.');
-  return {answers,seconds:clock.seconds,expiredIndex:expired?current:null,language:reportLanguage,consent:true,adultConfirmed,experimental,email:emailAddress};
+  return {answers,seconds:clock.seconds,expiredIndex:expired?current:null,language:reportLanguage,consent:true,adultConfirmed,email:emailAddress};
 }
 async function startCheckout() {
   if (checkoutUrl) { window.location.assign(checkoutUrl); return; }
@@ -376,7 +353,7 @@ async function restorePurchase(force = false) {
     const saved=data.submission;
     answers=saved.answers; clock=new TestClock(performance.now()); clock.seconds=saved.seconds;
     expired=saved.expiredIndex!==null; current=saved.expiredIndex??0;
-    experimental=saved.experimental; reportLanguage=saved.language; setPageLanguage(saved.language); adultConfirmed=true;
+    reportLanguage=saved.language; setPageLanguage(saved.language); adultConfirmed=true;
     result=scoreTest(answers,clock.seconds,saved.expiredIndex);
     paymentPaid=data.status==='paid'; paymentPending=data.status==='confirmed'; checkoutUrl=data.checkoutUrl;
     if (['refunded','refund_pending','refund_failed','partially_refunded'].includes(data.status)) paymentTerminal=data.status;

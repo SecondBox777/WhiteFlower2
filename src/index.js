@@ -1,6 +1,5 @@
 import { handleShareCard } from '../lib/share-card.js';
 export { ReportShare } from '../lib/share-card.js';
-import { handleTemporaryTestReport } from '../lib/temporary-test-report.js'; // TEMPORARY TEST FEATURE
 import { localizeResponse } from '../lib/localize-response.js';
 import { handlePayment } from '../lib/payment.js';
 export { PaymentSession } from '../lib/payment.js';
@@ -10,7 +9,6 @@ export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname;
     if (path==='/api/share-card'||path==='/api/share-config'||path.startsWith('/s/')) return handleShareCard({request,env});
-    if (path === '/api/test-report') return localizeResponse(await handleTemporaryTestReport({request,env}),request); // TEMPORARY TEST FEATURE
     if (path === '/api/email-report') return localizeResponse(await handleReportEmail({request,env}),request);
     if (['/api/checkout','/api/payment/status','/api/analyze','/api/report'].includes(path)) {
       return localizeResponse(await handlePayment({ request, env }),request);
