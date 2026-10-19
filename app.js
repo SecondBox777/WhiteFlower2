@@ -13,9 +13,9 @@ document.querySelectorAll('[data-question-count]').forEach(item => { item.textCo
 
 
 // Keep in sync with wrangler.jsonc; set true to pause tests and checkout.
-const TESTING_PAUSED = true;
+const TESTING_PAUSED = false;
 // Keep in sync with wrangler.jsonc; set true to pause reports and delivery.
-const REPORTS_PAUSED = true;
+const REPORTS_PAUSED = false;
 
 const dialog = document.querySelector('#flow-dialog');
 const content = document.querySelector('#flow-content');
