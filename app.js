@@ -1,4 +1,5 @@
 import { openReportShareMenu, closeReportShareMenu } from './share-menu.js';
+import { readApiResponse } from './api-response.js';
 import { initialLanguage, isLanguage, languageOptions, localizeDOM, translate } from './i18n.js';
 import { localizedQuestion } from './question-locales.js';
 let pageLanguage=initialLanguage();
@@ -251,7 +252,7 @@ async function generateReport(event) {
   document.querySelector('#report-progress').scrollIntoView({block:'nearest'});
   try {
     const response = await fetch('/api/analyze', {method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Language':pageLanguage},signal:controller.signal,body:JSON.stringify({email:emailAddress})});
-    const data = await response.json().catch(() => ({error:'리포트 생성 응답을 확인할 수 없습니다.'}));
+    const data = await readApiResponse(response,'리포트 생성 응답을 확인할 수 없습니다.');
     if (reportController !== controller) return;
     if (!response.ok) {
       if (['refunded','refund_pending','refund_failed','partially_refunded'].includes(data.paymentStatus)) paymentTerminal=data.paymentStatus;
@@ -326,7 +327,7 @@ async function startCheckout() {
   checkoutLoading = true; reportStatus = ''; updateReportActions();
   try {
     const response = await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json','X-Mindscope-Language':pageLanguage},body:JSON.stringify(submissionForCheckout()),signal:AbortSignal.timeout(25000)});
-    const data = await response.json();
+    const data = await readApiResponse(response,'결제 페이지를 열 수 없습니다.');
     if (!response.ok || !data.url) throw Error(localizedError(data.error) || '결제 페이지를 열 수 없습니다.');
     window.location.assign(data.url);
   } catch (error) { reportStatus = localizedError(error.message); }
@@ -340,7 +341,7 @@ async function restorePurchase(force = false) {
   const restoreVersion = ++purchaseRestoreVersion;
   try {
     const response = await fetch('/api/payment/status',{headers:{'X-Mindscope-Language':pageLanguage},signal:AbortSignal.timeout(20000)});
-    const data = await response.json();
+    const data = await readApiResponse(response,'결제 내역을 복원할 수 없습니다. 같은 브라우저에서 다시 확인해 주세요.');
     if (!response.ok || !data.submission || data.status === 'none') {
       if (returning) throw Error(localizedError(data.error) || '결제 내역을 복원할 수 없습니다. 같은 브라우저에서 다시 확인해 주세요.');
       return;

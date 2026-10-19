@@ -2,13 +2,18 @@ import http from 'node:http';
 import { questions } from './questions.js';
 import { readFile } from 'node:fs/promises';
 
-const files = { '/favicon.svg': ['favicon.svg', 'image/svg+xml'], '/report-content.js': ['report-content.js', 'text/javascript'], '/report-export.js': ['report-export.js', 'text/javascript'], '/scoring.js': ['scoring.js', 'text/javascript'], '/': ['index.html', 'text/html'], '/index.html': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'], '/app.js': ['app.js', 'text/javascript'], '/questions.js': ['questions.js', 'text/javascript'] };
+const files = { '/api-response.js': ['api-response.js', 'text/javascript'], '/favicon.svg': ['favicon.svg', 'image/svg+xml'], '/report-content.js': ['report-content.js', 'text/javascript'], '/report-export.js': ['report-export.js', 'text/javascript'], '/scoring.js': ['scoring.js', 'text/javascript'], '/': ['index.html', 'text/html'], '/index.html': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'], '/app.js': ['app.js', 'text/javascript'], '/questions.js': ['questions.js', 'text/javascript'] };
 files['/design-ui.css'] = ['design-ui.css', 'text/css'];
 for (const name of ['share-copy.js','share-menu.js','i18n.js','translations.js','report-locales.js','question-locales.js']) files[`/${name}`]=[name,'text/javascript'];
 for (const { image: name } of questions) {
   files[`/${name}`] = [name, 'image/webp'];
 }
 const server = http.createServer(async (req, res) => {
+  if (new URL(req.url, 'http://localhost').pathname.startsWith('/api/')) {
+    res.writeHead(503, {'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});
+    res.end(JSON.stringify({error:'로컬 미리보기에서는 결제와 리포트를 이용할 수 없습니다. mindscope.online에서 진행해 주세요.',code:'STATIC_PREVIEW_API_UNAVAILABLE'}));
+    return;
+  }
   const file = files[new URL(req.url, 'http://localhost').pathname];
   if (!file || !['GET', 'HEAD'].includes(req.method)) { res.writeHead(404); res.end('Not found'); return; }
   try {
