@@ -1,0 +1,78 @@
+{
+  "source": "https://showcase.noomoagency.com/",
+  "method": "Original CSS custom properties, @font-face and Chromium computed styles. Dembrandt full extraction timed out; contrast checked using its MCP check_contrast tool.",
+  "observed": {
+    "colors": {
+      "background": "#000000",
+      "surface": [
+        "#050516",
+        "#020411"
+      ],
+      "accent": "#0004eb",
+      "text": [
+        "#d6e3fc",
+        "#d9e0ed",
+        "#d2e0ff"
+      ]
+    },
+    "fonts": {
+      "body": "ppneuemontreal-book",
+      "title": "ppneuemontreal-medium",
+      "metadataAlias": "GTAmericaMonoRegular",
+      "metadataFile": "SpaceMono-Regular.ttf"
+    },
+    "cssTypeSizesPx": [
+      14,
+      16,
+      20,
+      22,
+      34,
+      80
+    ],
+    "bodySample": {
+      "fontSizePx": 20,
+      "lineHeightPx": 22
+    },
+    "spacingTokensPx": [
+      14,
+      16,
+      28,
+      30,
+      32,
+      40,
+      42
+    ],
+    "containerPaddingPx": 20,
+    "smallContainerPaddingPx": 16,
+    "radiusTokensPx": [
+      2,
+      4,
+      6,
+      50
+    ],
+    "ctaSample": {
+      "heightPx": 32,
+      "paddingInlinePx": 3,
+      "radiusPx": 0,
+      "boxShadow": "none"
+    }
+  },
+  "adaptedForMindscope": {
+    "background": "#050516",
+    "surface": "#0c1024",
+    "text": "#d9e0ed",
+    "secondaryText": "#9da9be",
+    "accent": "#0004eb",
+    "buttonMinimumHeightPx": 48,
+    "buttonRadiusPx": 4,
+    "koreanFont": "Noto Sans KR",
+    "latinFont": "DM Sans",
+    "metadataFont": "Space Mono"
+  },
+  "limits": [
+    "Performance/debug controls excluded.",
+    "Loader size is not treated as a measured page heading.",
+    "No general card system or every hover state was verified.",
+    "No proprietary reference font assets were copied."
+  ]
+}

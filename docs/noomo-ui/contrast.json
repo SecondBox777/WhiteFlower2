@@ -1,0 +1,58 @@
+{
+  "pairs": [
+    {
+      "foreground": "#D9E0ED",
+      "background": "#050516",
+      "label": "Main text",
+      "ratio": 15.23,
+      "large": false,
+      "requiredAA": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "foreground": "#9DA9BE",
+      "background": "#050516",
+      "label": "Secondary text",
+      "ratio": 8.51,
+      "large": false,
+      "requiredAA": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "foreground": "#FFFFFF",
+      "background": "#0004EB",
+      "label": "Primary action",
+      "ratio": 9.47,
+      "large": false,
+      "requiredAA": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "foreground": "#D9E0ED",
+      "background": "#151F3B",
+      "label": "Answer option",
+      "ratio": 12.27,
+      "large": false,
+      "requiredAA": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "foreground": "#9CB0FF",
+      "background": "#0C1024",
+      "label": "Metadata",
+      "ratio": 9.03,
+      "large": false,
+      "requiredAA": 4.5,
+      "passAA": true,
+      "passAAA": true
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "failingAA": 0
+  }
+}
