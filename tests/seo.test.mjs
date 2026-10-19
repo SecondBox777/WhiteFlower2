@@ -14,7 +14,7 @@ test('all six crawlable landing pages have matching language, canonical URLs and
   assert.ok(html.includes(`<link rel="canonical" href="${meta.url}"`));
   assert.ok(sitemap.includes(`<loc>${meta.url}</loc>`));
   assert.equal((html.match(/<title>/g)||[]).length,1);
-  assert.ok(html.includes(`<option value="${language}">${languages[language]}</option>`));
+  assert.ok(html.includes(`<option value="${language}" selected>${languages[language]}</option>`));
   const data=JSON.parse(html.match(/id="site-structured-data">([\s\S]*?)<\/script>/)[1]);
   const page=data['@graph'][2];
   assert.equal(page.inLanguage,language);assert.equal(page.url,meta.url);

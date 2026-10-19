@@ -48,6 +48,7 @@ export function renderLanding(source, language='ko') {
   // All current landing text is authored in Korean; keep scripts/styles intact.
   let html=source.replace(/(<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>|<[^>]+>)|([^<]+)/g,(all,tag,text)=>tag || translate(text,code));
   html=html.replace(/(<html\b[^>]*lang=")[^"]+/,`$1${code}`);
+  html=html.replace(/<option value="([^"]+)"(?: selected)?/g,(_,value)=>`<option value="${value}"${value===code?' selected':''}`);
   html=html.replace(/(aria-label|placeholder|title)="([^"]*)"/g,(_,attr,value)=>`${attr}="${escape(translate(value,code))}"`);
   const questions=[...html.matchAll(/<details><summary>([\s\S]*?)<span>\+<\/span><\/summary><p>([\s\S]*?)<\/p><\/details>/g)].map(m=>({question:plain(m[1]),answer:plain(m[2])}));
   return html.replace(/<!-- SEO:START -->[\s\S]*?<!-- SEO:END -->/,seoHead(code,questions));
