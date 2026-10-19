@@ -68,7 +68,7 @@ CLI 배포는 `npm run deploy`, 로컬 Worker 실행은 `npm run worker:dev`입�
 
 Polar 1회 결제 확인 후 보고서를 생성하고 Resend로 자동 이메일 발송합니다. 화면·이메일·사진 내보내기는 동일한 내용을 사용합니다. 이메일 설정은 [Resend 안내](docs/resend-email.md)를 참고하세요. 답안과 구매 보고서는 Cloudflare에 30일 보관합니다.
 
-현재 테스트·결제·보고서·이메일 기능은 활성화되어 있습니다. `app.js`와 `wrangler.jsonc`의 두 PAUSED 설정은 모두 false입니다. Polar 환경은 sandbox를 유지합니다. 리포트는 결제 확인 후 생성하며 임시 무료 리포트와 랜덤 답안 제출 기능은 제거했습니다. 운영 결제 전에는 Polar 운영 계정 설정과 상품을 별도로 확인해야 합니다.
+현재 테스트·결제·보고서·이메일 기능은 활성화되어 있습니다. `app.js`와 `wrangler.jsonc`의 두 PAUSED 설정은 모두 false입니다. Polar 환경은 production이며 운영 상품 `d8ec786b-c015-47dd-94c3-19c769ae9069`를 사용합니다. 리포트는 결제 확인 후 생성하며 임시 무료 리포트와 랜덤 답안 제출 기능은 제거했습니다. 운영 토큰은 Cloudflare의 `POLAR_ACCESS_TOKEN` Secret에 등록합니다.
 
 ## 다국어 지원
 

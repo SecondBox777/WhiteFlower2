@@ -20,8 +20,8 @@
   "vars": {
     "KAKAO_JAVASCRIPT_KEY": "09b8156498729b9ab0a0720fea30b3e6",
     "RESEND_FROM": "Mindscope <reports@mindscope.online>",
-    "POLAR_PRODUCT_ID": "a2fae7e7-f650-4109-87f7-f1f46e46b9be",
-    "POLAR_ENVIRONMENT": "sandbox",
+    "POLAR_PRODUCT_ID": "d8ec786b-c015-47dd-94c3-19c769ae9069",
+    "POLAR_ENVIRONMENT": "production",
     "TESTING_PAUSED": "false",
     "REPORTS_PAUSED": "false"
   }

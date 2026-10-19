@@ -106,6 +106,24 @@ test('bounded request reads and sandbox routing do not expose credentials',async
   await polarRequest({...env,POLAR_ENVIRONMENT:'sandbox'},'/checkouts/id',undefined,async url=>{assert.equal(url,'https://sandbox-api.polar.sh/v1/checkouts/id');return Response.json({});});
 });
 
+test('provider failures expose only the API category and status, never private details',async t=>{
+  const log=t.mock.method(console,'error',()=>{});
+  for (const [resource,status] of [['orders',401],['refunds',403],['checkouts',422]]) {
+    const f=fixture();
+    const mock=t.mock.method(globalThis,'fetch',async url=>new URL(url).pathname===`/v1/${resource}/`
+      ? new Response('private-provider-detail reader@example.com private-polar',{status})
+      : Response.json({items:[]}));
+    const response=await f.object.fetch(request('/api/checkout'));
+    const data=await response.json();
+    assert.equal(response.status,502);
+    assert.equal(data.code,`POLAR_${resource.toUpperCase()}_${status}`);
+    assert.equal(f.values.has('purchase'),false);
+    assert.doesNotMatch(JSON.stringify(data),/private-provider-detail|reader@example.com|private-polar/);
+    mock.mock.restore();
+  }
+  assert.doesNotMatch(JSON.stringify(log.mock.calls.map(call=>call.arguments)),/private-provider-detail|reader@example.com|private-polar/);
+});
+
 test('an ambiguous refund POST is reconciled after restart without posting a duplicate',async t=>{
  const f=fixture();f.values.set('purchase',record());f.values.set('attempts',3);let posts=0;
  t.mock.method(globalThis,'fetch',async(url,options)=>{
@@ -187,4 +205,29 @@ test('pause blocks checkout, payment restoration and background report/email/ref
    await f.object.alarm();assert.equal(f.values.has('refund'),false);assert.equal(f.values.has('emailDelivery'),false);
  }
  assert.equal(calls,0);
+});
+
+test('production checkout uses the configured live product and keeps unpaid reports locked',async t=>{
+ const {readFile}=await import('node:fs/promises');
+ const config=JSON.parse(await readFile(new URL('../wrangler.jsonc',import.meta.url),'utf8'));
+ assert.equal(config.vars.POLAR_ENVIRONMENT,'production');
+ assert.equal(config.vars.POLAR_PRODUCT_ID,'d8ec786b-c015-47dd-94c3-19c769ae9069');
+ assert.equal(PRODUCT_ID,config.vars.POLAR_PRODUCT_ID);
+ const f=fixture();const liveEnv={...env,...config.vars};f.object=new PaymentSession(f.state,liveEnv);
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+  assert.equal(new URL(url).hostname,'api.polar.sh');
+  if(url.endsWith('/checkouts/')){
+   const body=JSON.parse(options.body);
+   assert.deepEqual(body.products,[config.vars.POLAR_PRODUCT_ID]);
+   return Response.json({...checkout('open'),url:'https://polar.sh/checkout/live-session'});
+  }
+  return Response.json({items:[]});
+ });
+ const result=await f.object.fetch(request('/api/checkout',{...submission(),email:'buyer@example.com'}));
+ assert.equal(result.status,200);
+ assert.equal(new URL((await result.json()).url).hostname,'polar.sh');
+ assert.equal(f.values.get('purchase').environment,'production');
+ assert.equal((await worker.fetch(request('/api/analyze'),{...liveEnv,PAYMENT_SESSIONS:{}})).status,402);
+ const old=record();old.environment='sandbox';f.values.set('purchase',old);
+ assert.equal((await f.object.fetch(new Request('https://example.com/api/payment/status'))).status,410);
 });
