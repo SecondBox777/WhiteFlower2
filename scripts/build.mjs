@@ -8,7 +8,7 @@ import { languages } from '../i18n.js';
 // Never copy the repository root: it can contain dependencies and secrets.
 const root = new URL('../', import.meta.url);
 const output = new URL('dist/', root);
-const assets = ['google8e1ad6d7f4037882.html', 'seo.js', 'robots.txt', 'sitemap.xml', 'api-response.js', 'index.html', 'i18n.js', 'translations.js', 'report-locales.js', 'question-locales.js', 'favicon.svg', 'report-content.js', 'report-export.js', 'style.css', 'design-ui.css', 'app.js', 'share-copy.js', 'share-menu.js', 'questions.js', 'scoring.js', ...questions.map(q => q.image)];
+const assets = ['naver366e597dfb634369d3031aa2cccfd6b3.html', 'google8e1ad6d7f4037882.html', 'seo.js', 'robots.txt', 'sitemap.xml', 'api-response.js', 'index.html', 'i18n.js', 'translations.js', 'report-locales.js', 'question-locales.js', 'favicon.svg', 'report-content.js', 'report-export.js', 'style.css', 'design-ui.css', 'app.js', 'share-copy.js', 'share-menu.js', 'questions.js', 'scoring.js', ...questions.map(q => q.image)];
 
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
