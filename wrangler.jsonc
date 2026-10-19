@@ -24,6 +24,6 @@
     "POLAR_ENVIRONMENT": "sandbox",
     "TESTING_PAUSED": "false",
     "REPORTS_PAUSED": "false",
-    "TEMPORARY_TEST_REPORT_ENABLED": "false"
+    "TEMPORARY_TEST_REPORT_ENABLED": "true"
   }
 }

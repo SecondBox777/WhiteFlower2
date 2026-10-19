@@ -2,7 +2,7 @@
 
 결과 화면에서 성인 확인과 이메일 입력 후 **테스트용: 바로 확인하기**를 누르면 `/api/test-report`가 답안·시간을 서버에서 채점하고 선택 언어의 보고서를 화면에 반환하며 Resend로 이메일을 보냅니다. 실제 결제·환불·구매 데이터는 생성하지 않습니다. 이메일 전송이 실패해도 화면에는 보고서를 표시하고 발송 실패 상태를 알립니다. 같은 응답·이메일의 재요청은 같은 Resend 멱등 키를 사용합니다.
 
-현재 `wrangler.jsonc`의 `TEMPORARY_TEST_REPORT_ENABLED=true`일 때 이 전용 API를 사용할 수 있습니다. 비활성화하려면 이를 `false`로 바꾸고 `temporary-test-report.js`의 `temporaryTestReportsEnabled=false`로 바꿔 배포합니다. 기존 유료 보고서 API는 결제 검증을 계속 적용합니다.
+현재 화면의 테스트용 버튼과 `wrangler.jsonc`의 `TEMPORARY_TEST_REPORT_ENABLED=true`를 함께 활성화했습니다. 두 설정의 일치 여부를 자동 테스트로 검증합니다. 비활성화하려면 이를 `false`로 바꾸고 `temporary-test-report.js`의 `temporaryTestReportsEnabled=false`로 바꿔 배포합니다. 기존 유료 보고서 API는 결제 검증을 계속 적용합니다.
 
 완전히 삭제할 때:
 

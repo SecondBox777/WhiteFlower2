@@ -1,4 +1,6 @@
 import test from 'node:test';
+import { readFile } from 'node:fs/promises';
+import { temporaryTestReportsEnabled } from '../temporary-test-report.js';
 import assert from 'node:assert/strict';
 import { handleTemporaryTestReport } from '../lib/temporary-test-report.js';
 import { scoringItems } from '../scoring.js';
@@ -80,4 +82,12 @@ test('enabling temporary reports does not bypass paid report routes',async()=>{
  }
  const disabled=await worker.fetch(context().request,{...env,TEMPORARY_TEST_REPORT_ENABLED:'false'});
  assert.equal(disabled.status,404);
+});
+
+
+test('deployed temporary report API agrees with the visible test button',async()=>{
+ const config=JSON.parse(await readFile(new URL('../wrangler.jsonc',import.meta.url),'utf8'));
+ assert.equal(temporaryTestReportsEnabled,config.vars.TEMPORARY_TEST_REPORT_ENABLED==='true','A visible test report button must have an enabled server route');
+ const response=await worker.fetch(new Request('https://example.com/api/test-report'),config.vars);
+ assert.equal(response.status,temporaryTestReportsEnabled?405:404);
 });
