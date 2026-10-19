@@ -8,7 +8,9 @@ export function resolveLanguage(value) {
 }
 export function translate(text, language='en') {
   const source=String(text), trimmed=source.trim();
-  const translated=translations[trimmed]?.[language];
+  const key=Object.hasOwn(translations,trimmed)?trimmed:authoredText.get(trimmed);
+  const entry=translations[key];
+  const translated=entry?.[language] ?? (language==='ko' && entry ? key : undefined);
   if(translated!==undefined)return source.replace(trimmed,translated);
   if(/^QUESTION \d+$/.test(trimmed))return source.replace('QUESTION',({ko:'문항',en:'QUESTION',ja:'問題','zh-CN':'题目',es:'PREGUNTA',fr:'QUESTION'})[language]);
   if(language==='ko')return source;
@@ -34,8 +36,20 @@ export function initialLanguage() {
 // Translate text and accessibility attributes without replacing interactive elements.
 const originalText=new WeakMap();
 const originalAttributes=new WeakMap();
+// The landing page may already be rendered in any supported language by the
+// server. Recover its authored source before remembering text for UI changes.
+const authoredText=new Map();
+for(const [source,entry] of Object.entries(translations)) {
+  const authored=source;
+  for(const value of Object.values(entry))if(!authoredText.has(value.trim()))authoredText.set(value.trim(),authored);
+}
+function authoredSource(text) {
+  const trimmed=text.trim();
+  if(Object.hasOwn(translations,trimmed))return text;
+  return authoredText.has(trimmed)?text.replace(trimmed,authoredText.get(trimmed)):text;
+}
 function remembered(record, current) {
-  return record && record.last===current ? record.source : current;
+  return record && record.last===current ? record.source : authoredSource(current);
 }
 export function localizeDOM(root, language) {
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);

@@ -9,7 +9,7 @@ import { join } from 'node:path';
 test('deployment contains only public assets and removes stale output', async () => {
   const fixture = await mkdtemp(join(tmpdir(), 'mindscope-build-'));
   const root = new URL('../', import.meta.url);
-  const assets = ['api-response.js', 'app.js', 'share-copy.js', 'share-menu.js', 'i18n.js', 'translations.js', 'report-locales.js', 'question-locales.js', 'favicon.svg', 'report-content.js', 'report-export.js', 'index.html', 'questions.js', 'scoring.js', 'style.css', 'design-ui.css', ...questions.map(q => q.image)].sort();
+  const assets = ['seo.js', 'robots.txt', 'sitemap.xml', 'api-response.js', 'app.js', 'share-copy.js', 'share-menu.js', 'i18n.js', 'translations.js', 'report-locales.js', 'question-locales.js', 'favicon.svg', 'report-content.js', 'report-export.js', 'index.html', 'questions.js', 'scoring.js', 'style.css', 'design-ui.css', ...questions.map(q => q.image)].sort();
   try {
     await mkdir(join(fixture, 'scripts'));
     await copyFile(new URL('scripts/build.mjs', root), join(fixture, 'scripts/build.mjs'));
@@ -20,7 +20,7 @@ test('deployment contains only public assets and removes stale output', async ()
     await mkdir(join(fixture, 'dist'));
     await writeFile(join(fixture, 'dist/stale.txt'), 'old deployment file');
     execFileSync(process.execPath, [join(fixture, 'scripts/build.mjs')]);
-    assert.deepEqual((await readdir(join(fixture, 'dist'))).sort(), assets);
+    assert.deepEqual((await readdir(join(fixture, 'dist'))).sort(), [...assets,'_home'].sort());
     for (const file of assets) {
       const published = await readFile(join(fixture, 'dist', file));
       assert.deepEqual(published, await readFile(new URL(file, root)));
@@ -34,7 +34,7 @@ test('deployment contains only public assets and removes stale output', async ()
     assert.equal(config.assets.directory, './dist');
     assert.equal(config.main, 'src/index.js');
     assert.equal(config.assets.binding, 'ASSETS');
-    assert.deepEqual(config.assets.run_worker_first, ['/api/*','/s/*']);
+    assert.deepEqual(config.assets.run_worker_first, ['/','/index.html','/api/*','/s/*']);
     assert.equal(config.pages_build_output_dir, undefined);
   } finally {
     await rm(fixture, { recursive: true, force: true });

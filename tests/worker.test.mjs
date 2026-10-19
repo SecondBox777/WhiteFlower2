@@ -4,7 +4,7 @@ import worker from '../src/index.js';
 import { handleReport } from '../lib/analyze.js';
 
 test('ordinary requests delegate unchanged to the asset binding', async () => {
-  for (const path of ['/', '/app.js', '/Q30.webp', '/missing']) {
+  for (const path of ['/app.js', '/Q30.webp', '/missing']) {
     const request = new Request(`https://example.com${path}`);
     const response = new Response('asset', {status: path === '/missing' ? 404 : 200});
     assert.equal(await worker.fetch(request, {ASSETS: {fetch: incoming => {

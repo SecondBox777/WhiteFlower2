@@ -1,5 +1,6 @@
 import { openReportShareMenu, closeReportShareMenu } from './share-menu.js';
 import { readApiResponse } from './api-response.js';
+import { updatePageMetadata } from './seo.js';
 import { initialLanguage, isLanguage, languageOptions, localizeDOM, translate } from './i18n.js';
 import { localizedQuestion } from './question-locales.js';
 let pageLanguage=initialLanguage();
@@ -388,9 +389,8 @@ function setPageLanguage(language) {
   languageSelect.value=language;
   try { localStorage.setItem('mindscope-language',language); } catch {}
   const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);
-  document.title=`Mindscope — ${translate('가볍게 즐기는 IQ 테스트',language)}`;
-  document.querySelector('meta[name="description"]').content=`30 · 30 min · ${translate('오락 전용 IQ 테마 퍼즐 게임입니다.',language)}`;
   localizeDOM(document,language);
+  updatePageMetadata(language,document);
 }
 function localizedError(message) {
   if(!message)return '';
@@ -401,7 +401,6 @@ function localizedError(message) {
 setPageLanguage(pageLanguage);
 const languageObserver=new MutationObserver(()=>{
   localizeDOM(document,pageLanguage);
-  languageSelect.disabled=reportLoading || checkoutLoading || paymentPaid || Boolean(checkoutUrl) || Boolean(puzzleReport);
 });
 languageObserver.observe(document.body,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['title','aria-label','placeholder']});
 restorePurchase();

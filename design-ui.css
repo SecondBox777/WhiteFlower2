@@ -33,8 +33,8 @@ input:focus-visible, textarea:focus-visible { outline: 2px solid #a3b1ff; outlin
 .header nav a:hover { color: #fff; }
 .site-language { order: 2; font-family: 'DM Sans','Noto Sans KR',sans-serif; font-size: 12px; }
 .site-language>span { display: none; }
-.site-language select { color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 3px; min-height: 40px; max-width: 115px; padding: 8px; }
-.site-language option { background: var(--ui-surface); }
+.site-language select { appearance: auto; -webkit-appearance: menulist; color-scheme: dark; color: #d9e0ed; -webkit-text-fill-color: #d9e0ed; background: #0c1024; border: 1px solid #4c5578; border-radius: 3px; width: 120px; min-width: 120px; max-width: 120px; height: 44px; padding: 8px 10px; font-size: 14px; line-height: normal; opacity: 1; cursor: pointer; }
+.site-language option { color: #d9e0ed; background: #0c1024; }
 .header .nav-cta { order: 3; background: transparent; color: var(--ink); border: 1px solid #4c5578; padding: 11px 16px; font-size: 12px; }
 .button { min-height: 48px; border-radius: 4px; padding: 15px 22px; gap: 24px; font-size: 14px; line-height: 1.5; font-weight: 500; transition: background .18s, border-color .18s, color .18s; box-shadow: none; }
 .button:hover { transform: none; }

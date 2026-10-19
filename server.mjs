@@ -1,8 +1,9 @@
 import http from 'node:http';
 import { questions } from './questions.js';
 import { readFile } from 'node:fs/promises';
+import { renderLanding } from './seo.js';
 
-const files = { '/api-response.js': ['api-response.js', 'text/javascript'], '/favicon.svg': ['favicon.svg', 'image/svg+xml'], '/report-content.js': ['report-content.js', 'text/javascript'], '/report-export.js': ['report-export.js', 'text/javascript'], '/scoring.js': ['scoring.js', 'text/javascript'], '/': ['index.html', 'text/html'], '/index.html': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'], '/app.js': ['app.js', 'text/javascript'], '/questions.js': ['questions.js', 'text/javascript'] };
+const files = { '/seo.js':['seo.js','text/javascript'], '/robots.txt':['robots.txt','text/plain'], '/sitemap.xml':['sitemap.xml','application/xml'], '/api-response.js': ['api-response.js', 'text/javascript'], '/favicon.svg': ['favicon.svg', 'image/svg+xml'], '/report-content.js': ['report-content.js', 'text/javascript'], '/report-export.js': ['report-export.js', 'text/javascript'], '/scoring.js': ['scoring.js', 'text/javascript'], '/': ['index.html', 'text/html'], '/index.html': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'], '/app.js': ['app.js', 'text/javascript'], '/questions.js': ['questions.js', 'text/javascript'] };
 files['/design-ui.css'] = ['design-ui.css', 'text/css'];
 for (const name of ['share-copy.js','share-menu.js','i18n.js','translations.js','report-locales.js','question-locales.js']) files[`/${name}`]=[name,'text/javascript'];
 for (const { image: name } of questions) {
@@ -17,7 +18,8 @@ const server = http.createServer(async (req, res) => {
   const file = files[new URL(req.url, 'http://localhost').pathname];
   if (!file || !['GET', 'HEAD'].includes(req.method)) { res.writeHead(404); res.end('Not found'); return; }
   try {
-    const body = await readFile(new URL(file[0], import.meta.url));
+    let body = await readFile(new URL(file[0], import.meta.url));
+    if(file[0]==='index.html')body=renderLanding(body.toString(),new URL(req.url,'http://localhost').searchParams.get('lang'));
     res.writeHead(200, { 'Content-Type': `${file[1]}; charset=utf-8`, 'X-Content-Type-Options': 'nosniff' });
     res.end(req.method === 'HEAD' ? undefined : body);
   } catch { res.writeHead(500); res.end('Unable to load page'); }

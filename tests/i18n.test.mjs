@@ -28,8 +28,18 @@ test('language detection has a single allowlist and all translations are complet
  }
 });
 
+test('server-translated landing text can switch back to Korean and another language',()=>{
+ for(const source of ['개의 질문, 새로운 나의 발견.','개 문항','Mindscope는 어떤 서비스인가요?']) {
+  for(const language of codes.filter(x=>x!=='ko')) {
+   const rendered=translate(source,language);
+   assert.equal(translate(rendered,'ko').trim(),source);
+   assert.equal(translate(rendered,'ja').trim(),translate(source,'ja').trim());
+  }
+ }
+});
+
 test('all Korean page text and accessibility labels have translations',async()=>{
- const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+ const html=(await readFile(new URL('../index.html',import.meta.url),'utf8')).replace(/<head\b[\s\S]*?<\/head>/g,'').replace(/<script\b[\s\S]*?<\/script>/g,'').replace(/<select\b[\s\S]*?<\/select>/g,'');
  const chunks=[...[...html.matchAll(/>([^<>]+)</g)].map(m=>m[1]),...[...html.matchAll(/(?:aria-label|placeholder)="([^"]+)"/g)].map(m=>m[1])];
  for(const source of chunks.filter(s=>/[가-힣]/.test(s)&&!s.startsWith('Mindscope —')))for(const code of codes.filter(x=>x!=='ko'))assert.ok(!/[가-힣]/.test(translate(source,code)),`${code}: ${source}`);
 });

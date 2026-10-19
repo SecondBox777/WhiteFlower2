@@ -286,7 +286,7 @@ export const translations = {
     "es": "Con las respuestas y el tiempo de 30 puzles,",
     "fr": "À partir des réponses et du temps sur 30 énigmes,"
   },
-  "IQ 스타일 추정 점수과 분석 리포트를 화면에서 확인하세요.": {
+  "IQ 스타일 추정 점수와 분석 리포트를 화면에서 확인하세요.": {
     "en": "view your IQ-style estimate and puzzle report.",
     "ja": "IQ風の推定スコアとレポートを確認できます。",
     "zh-CN": "查看IQ风格估算分和游戏报告。",
@@ -1140,7 +1140,7 @@ export const translations = {
     "es": "No se pudo crear la imagen. Reintenta.",
     "fr": "Impossible de créer l’image. Réessayez."
   },
-  "오락 전용 퍼즐 게임입니다. 공인 IQ 검사가 아니며, 추정 점수은 과학적으로 검증된 IQ나 실제 지능을 나타내지 않습니다.": {
+  "오락 전용 퍼즐 게임입니다. 공인 IQ 검사가 아니며, 추정 점수는 과학적으로 검증된 IQ나 실제 지능을 나타내지 않습니다.": {
     "en": "For entertainment only. This is not an official IQ test. Estimates are not scientifically validated IQ scores and do not represent actual intelligence.",
     "ja": "娯楽専用です。公認のIQ検査ではなく、推定スコアは科学的に検証されたIQや実際の知能を示しません。",
     "zh-CN": "仅供娱乐。这不是正式IQ测试，估算分未经科学验证，也不代表实际智力。",
@@ -1514,5 +1514,12 @@ export const translations = {
     "zh-CN": "打开分享菜单时，封面会上传到Kakao以准备分享。选择其他平台时，将创建保存封面和分数7天的链接。不分享邮箱和答案。",
     "es": "Al abrir este menú se sube la portada a Kakao para preparar el envío. Elegir otro servicio crea un enlace que guarda portada y puntuación durante 7 días. No se comparten correo ni respuestas.",
     "fr": "L’ouverture du menu envoie la couverture à Kakao pour préparer le partage. Un autre réseau crée un lien conservant couverture et score pendant 7 jours. E-mail et réponses ne sont pas partagés."
-}
+},
+"Mindscope는 어떤 서비스인가요?": {"en": "What is Mindscope?", "ja": "Mindscopeとは？", "zh-CN": "Mindscope是什么服务？", "es": "¿Qué es Mindscope?", "fr": "Qu’est-ce que Mindscope ?"},
+"Mindscope는 패턴·논리·공간 퍼즐 30문항을 30분 동안 즐기는 오락 전용 웹 게임입니다. 문제 풀이는 무료이며, 완료 후 원하면 1회 결제로 개인 퍼즐 리포트를 받을 수 있습니다.": {"en": "Mindscope is an entertainment web game with 30 pattern, logic and spatial puzzles and a 30-minute limit. Playing is free. After finishing, you can optionally purchase a personal puzzle report with a one-time payment.", "ja": "Mindscopeはパターン・論理・空間の30問を制限時間30分で楽しむ娯楽用ウェブゲームです。問題は無料で、終了後に希望する場合は1回払いで個人のパズルレポートを購入できます。", "zh-CN": "Mindscope是一款娱乐网页游戏，包含30道模式、逻辑和空间谜题，限时30分钟。答题免费，完成后可自愿一次性付费购买个人解谜报告。", "es": "Mindscope es un juego web de entretenimiento con 30 puzles de patrones, lógica y espacio y un límite de 30 minutos. Jugar es gratis. Al terminar, puedes comprar opcionalmente un informe personal con un pago único.", "fr": "Mindscope est un jeu web de divertissement avec 30 énigmes de motifs, de logique et d’espace, limité à 30 minutes. Jouer est gratuit. Ensuite, vous pouvez acheter un rapport personnel avec un paiement unique."},
+"누가 이용할 수 있나요?": {"en": "Who can use Mindscope?", "ja": "誰が利用できますか？", "zh-CN": "谁可以使用Mindscope？", "es": "¿Quién puede usar Mindscope?", "fr": "Qui peut utiliser Mindscope ?"},
+"만 18세 이상 성인이 가볍게 퍼즐을 즐기고 자신의 플레이 기록을 살펴보는 서비스입니다. 공인 IQ 검사나 의료·심리 진단, 교육·채용 평가 용도로 사용할 수 없습니다.": {"en": "Mindscope is for adults aged 18 and over who want to enjoy puzzles and review their play records. It is not a certified IQ test and must not be used for medical or psychological diagnosis, education or hiring decisions.", "ja": "18歳以上の成人が気軽にパズルを楽しみ、プレイ記録を振り返るサービスです。公認IQ検査ではなく、医療・心理診断や教育・採用の評価には利用できません。", "zh-CN": "本服务面向年满18岁的成年人，用于轻松解谜和查看游戏记录。它不是官方IQ测试，不得用于医疗或心理诊断、教育或招聘评估。", "es": "El servicio es para adultos de 18 años o más que quieran disfrutar de puzles y revisar su juego. No es una prueba de CI certificada y no debe usarse para diagnósticos médicos o psicológicos ni para decisiones educativas o de contratación.", "fr": "Le service s’adresse aux adultes de 18 ans et plus souhaitant jouer et consulter leurs résultats. Ce n’est pas un test de QI certifié et il ne doit pas servir au diagnostic médical ou psychologique, ni aux décisions scolaires ou de recrutement."},
+"퍼즐 점수는 어떻게 계산하나요?": {"en": "How are puzzle scores calculated?", "ja": "パズルのスコアはどう計算されますか？", "zh-CN": "解谜分数如何计算？", "es": "¿Cómo se calculan las puntuaciones?", "fr": "Comment les scores sont-ils calculés ?"},
+"정답과 풀이 시간을 내부 채점식에 반영하고 패턴·논리·공간 영역별 기록을 정리합니다. IQ 스타일 추정 점수는 합성·예비 자료에 기반한 게임 지표이며, 실제 응시자로 검증된 IQ나 인구 백분위가 아닙니다.": {"en": "Correct answers and time spent are combined using an internal scoring formula, with records for pattern, logic and spatial puzzles. The IQ-style estimate is a game metric based on synthetic preliminary data, not a validated IQ score or population percentile.", "ja": "正答と解答時間を内部採点式に反映し、パターン・論理・空間の記録をまとめます。IQ形式の推定値は合成・予備データに基づくゲーム指標で、実際の受検者で検証されたIQや人口パーセンタイルではありません。", "zh-CN": "系统通过内部评分公式结合正确答案和答题时间，并整理模式、逻辑和空间领域的记录。IQ风格估计值是基于合成初步数据的游戏指标，不是经真实参与者验证的IQ或人口百分位。", "es": "Las respuestas correctas y el tiempo se combinan con una fórmula interna, con registros de patrones, lógica y espacio. La estimación de estilo CI es una métrica de juego basada en datos sintéticos preliminares, no un CI validado ni un percentil poblacional.", "fr": "Les bonnes réponses et le temps sont combinés selon une formule interne, avec des résultats par domaine. L’estimation de style QI est un indicateur de jeu fondé sur des données synthétiques préliminaires, pas un QI validé ni un percentile de population."},
+"언어": {"ko":"언어","en":"Language","ja":"言語","zh-CN":"语言","es":"Idioma","fr":"Langue"}
 };
