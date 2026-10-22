@@ -77,7 +77,7 @@ function render(markup) {
 function intro() {
   stage = 'intro';
   preloadQuestions(0, 4);
-  render(`<span class="flow-eyebrow">IQ PUZZLE GAME · FOR FUN</span><h2 class="flow-title" id="flow-title">가볍게 즐기는 IQ 테스트</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>정답과 풀이 시간으로 만든 결과 리포트를 화면에서 확인하고 이메일로도 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button>`);
+  render(`<h2 class="flow-title" id="flow-title">가볍게 즐기는 IQ 테스트</h2><p class="flow-text">도형·논리·공간 추론 30문제에 답해 주세요.<br>정답과 풀이 시간으로 만든 결과 리포트를 화면에서 확인하고 이메일로도 받아보세요.</p><div class="flow-info">◷ 시작 버튼을 누르면 30분 카운트다운이 시작돼요.<br>↶ 제출 전에는 이전 답변을 바꿀 수 있어요.<br>창을 닫거나 다른 탭으로 이동해도 시간은 계속 흘러요.<br>시간이 끝나면 응답이 자동 제출돼요.</div><button class="button primary full" id="begin">TEST 시작 <span>→</span></button>`);
   document.querySelector('#begin').onclick = () => {
     clock = new TestClock(performance.now());
     stage = 'test';
