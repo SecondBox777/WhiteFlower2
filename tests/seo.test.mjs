@@ -45,11 +45,22 @@ test('English IQ test landing is discoverable and keeps price and validity discl
  assert.match(pageMetadata('en').title,/Free Online IQ Test/);
  assert.match(body,/<h1>[\s\S]*Online IQ Test[\s\S]*?<\/h1>/);
  assert.doesNotMatch(body,/IQ-themed|IQ theme/i);
- assert.match(body,/Personal results report available as a separate one-time purchase/);
+ assert.match(html,/Personal results report sold separately/);
  const footer=body.match(/<footer[\s\S]*?<\/footer>/)[0];
  assert.match(footer,/not an official IQ test/i);
  for(const language of Object.keys(languages)) {
   const url=language==='ko'?'/':`/?lang=${language}`;
   assert.ok(footer.includes(`href="${url}" lang="${language}" hreflang="${language}"`));
+ }
+});
+
+
+test('all landing languages show the free start button without the hero purchase note',async()=>{
+ const source=await readFile(new URL('../index.html',import.meta.url),'utf8');
+ const labels={ko:'무료로 테스트 시작하기',en:'Start the Free Test',ja:'無料でテストを始める','zh-CN':'免费开始测试',es:'Empezar el test gratis',fr:'Commencer le test gratuit'};
+ for(const [language,label] of Object.entries(labels)) {
+  const html=renderLanding(source,language);
+  assert.ok(html.includes(`class="button primary hero-button" data-start>${label} <span>`));
+  assert.doesNotMatch(html,/hero-purchase-note/);
  }
 });

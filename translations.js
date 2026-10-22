@@ -1,5 +1,4 @@
 export const translations = {
-"개인 결과 리포트는 별도 1회 결제 상품입니다.": {"en":"Personal results report available as a separate one-time purchase.","ja":"個人結果レポートは別途1回払いで提供します。","zh-CN":"个人结果报告为单独的一次性付费商品。","es":"El informe personal se vende por separado con un pago único.","fr":"Le rapport personnel est vendu séparément en un paiement unique."},
 "온라인으로 만나는": {"en":"Take an","ja":"オンラインで挑戦する","zh-CN":"在线挑战","es":"Pon a prueba tu mente con un","fr":"Relevez le défi avec un"},
 "IQ 테스트": {"en":"Online IQ Test","ja":"IQテスト","zh-CN":"IQ测试","es":"Test de CI online","fr":"Test de QI en ligne"},
 "패턴·논리·공간 추론에 도전하는 온라인 IQ 테스트.": {"en":"An online IQ test with pattern recognition, logical reasoning, and spatial questions.","ja":"パターン認識・論理・空間推論に挑戦するオンラインIQテスト。","zh-CN":"挑战模式识别、逻辑和空间推理的在线IQ测试。","es":"Un test de CI online con reconocimiento de patrones, lógica y razonamiento espacial.","fr":"Un test de QI en ligne avec reconnaissance de motifs, logique et raisonnement spatial."},
@@ -70,12 +69,12 @@ export const translations = {
     "es": "Resuelve puzles de patrones, lógica y espacio y consulta tus resultados.",
     "fr": "Résolvez des énigmes de motifs, de logique et d’espace et consultez vos résultats."
   },
-  "나의 결과 알아보기": {
-    "en": "Discover my results",
-    "ja": "結果を見る",
-    "zh-CN": "查看我的结果",
-    "es": "Ver mis resultados",
-    "fr": "Voir mes résultats"
+  "무료로 테스트 시작하기": {
+    "en": "Start the Free Test",
+    "ja": "無料でテストを始める",
+    "zh-CN": "免费开始测试",
+    "es": "Empezar el test gratis",
+    "fr": "Commencer le test gratuit"
   },
   "◷ 제한 시간 30분": {
     "en": "◷ 30-minute limit",
