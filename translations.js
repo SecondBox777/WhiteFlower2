@@ -1218,12 +1218,12 @@ export const translations = {
     "es": "Activa JavaScript para realizar la prueba.",
     "fr": "Activez JavaScript pour passer le test."
   },
-  "오락 전용 게임입니다. 공인 IQ 검사가 아니며 추정값은 과학적으로 검증된 IQ 또는 실제 지능을 나타내지 않습니다. 교육·채용·의료 결정에 사용할 수 없습니다. 다른 사람과의 우열을 평가하지 않습니다.": {
-    "en": "For entertainment only. This is not an official IQ test. Estimates are not validated IQ scores or actual intelligence. Do not use them for educational, hiring or medical decisions or to rank people.",
-    "ja": "娯楽専用です。公認IQ検査ではなく、推定値は検証済みIQや実際の知能を示しません。教育・採用・医療判断や他者との優劣比較に使えません。",
-    "zh-CN": "仅供娱乐。这不是正式IQ测试，估算不代表经验证的IQ或实际智力，不可用于教育、招聘、医疗决策或比较人与人的优劣。",
-    "es": "Solo para entretenimiento. No es un test oficial de CI. Las estimaciones no son un CI validado ni inteligencia real. No las uses para decisiones educativas, laborales o médicas ni para clasificar personas.",
-    "fr": "Pour le divertissement uniquement. Ce n’est pas un test officiel de QI. L’estimation n’est ni un QI validé ni l’intelligence réelle. Ne l’utilisez pas pour des décisions éducatives, professionnelles ou médicales, ni pour classer les personnes."
+  "공인 IQ 검사가 아니며 추정값은 과학적으로 검증된 IQ 또는 실제 지능을 나타내지 않습니다. 교육·채용·의료 결정에 사용할 수 없습니다. 다른 사람과의 우열을 평가하지 않습니다.": {
+    "en": "This is not an official IQ test. Estimates are not validated IQ scores or actual intelligence. Do not use them for educational, hiring or medical decisions or to rank people.",
+    "ja": "公認IQ検査ではなく、推定値は検証済みIQや実際の知能を示しません。教育・採用・医療判断や他者との優劣比較に使えません。",
+    "zh-CN": "这不是正式IQ测试，估算不代表经验证的IQ或实际智力，不可用于教育、招聘、医疗决策或比较人与人的优劣。",
+    "es": "No es un test oficial de CI. Las estimaciones no son un CI validado ni inteligencia real. No las uses para decisiones educativas, laborales o médicas ni para clasificar personas.",
+    "fr": "Ce n’est pas un test officiel de QI. L’estimation n’est ni un QI validé ni l’intelligence réelle. Ne l’utilisez pas pour des décisions éducatives, professionnelles ou médicales, ni pour classer les personnes."
   },
   "Mindscope 홈": {
     "en": "Mindscope home",

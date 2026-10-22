@@ -116,7 +116,7 @@ function showResult() {
     <label class="report-consent adult-confirmation" for="report-adult-confirm"><input id="report-adult-confirm" type="checkbox" required><span>본인은 만 18세 이상임을 확인합니다.</span></label>
     <label class="checkout-label" for="report-email">리포트를 받을 이메일</label><input class="email-input" id="report-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
     <button class="button primary full" id="generate-report" type="submit" disabled>결과 리포트 받아보기</button>
-    <p class="flow-footnote">오락 전용 게임입니다. 공인 IQ 검사가 아니며 추정값은 과학적으로 검증된 IQ 또는 실제 지능을 나타내지 않습니다. 교육·채용·의료 결정에 사용할 수 없습니다. 다른 사람과의 우열을 평가하지 않습니다.</p><p class="flow-footnote">퍼즐 리포트는 1회 결제 상품입니다. 가격·통화·세금은 결제 페이지에서 확인하세요.</p>
+    <p class="flow-footnote">공인 IQ 검사가 아니며 추정값은 과학적으로 검증된 IQ 또는 실제 지능을 나타내지 않습니다. 교육·채용·의료 결정에 사용할 수 없습니다. 다른 사람과의 우열을 평가하지 않습니다.</p><p class="flow-footnote">퍼즐 리포트는 1회 결제 상품입니다. 가격·통화·세금은 결제 페이지에서 확인하세요.</p>
   </form>
   <p id="email-report-status" class="flow-footnote" role="status" aria-live="polite"></p>
   <div id="report-progress" class="report-progress" role="status" aria-live="polite" aria-atomic="true"><span class="report-spinner" aria-hidden="true" hidden></span><div><strong id="report-progress-title"></strong><p id="report-progress-detail"></p></div></div>
