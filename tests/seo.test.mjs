@@ -37,3 +37,19 @@ test('homepage routing serves language-specific HTML and preserves payment retur
  const redirect=await worker.fetch(new Request('https://mindscope.online/index.html?lang=en&payment=return'),{});
  assert.equal(redirect.status,308);assert.equal(redirect.headers.get('Location'),'https://mindscope.online/?lang=en&payment=return');
 });
+
+test('English IQ test landing is discoverable and keeps price and validity disclosures visible',async()=>{
+ const source=await readFile(new URL('../index.html',import.meta.url),'utf8');
+ const html=renderLanding(source,'en');
+ const body=html.split('<body>')[1];
+ assert.match(pageMetadata('en').title,/Free Online IQ Test/);
+ assert.match(body,/<h1>[\s\S]*Online IQ Test[\s\S]*?<\/h1>/);
+ assert.doesNotMatch(body,/IQ-themed|IQ theme/i);
+ assert.match(body,/Personal results report available as a separate one-time purchase/);
+ const footer=body.match(/<footer[\s\S]*?<\/footer>/)[0];
+ assert.match(footer,/not an official IQ test/i);
+ for(const language of Object.keys(languages)) {
+  const url=language==='ko'?'/':`/?lang=${language}`;
+  assert.ok(footer.includes(`href="${url}" lang="${language}" hreflang="${language}"`));
+ }
+});

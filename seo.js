@@ -1,12 +1,12 @@
 import { languages, isLanguage, translate } from './i18n.js';
 export const SITE_URL = 'https://mindscope.online/';
 const copy = {
-  ko: ['Mindscope | 무료 30문항 IQ 테마 퍼즐 · 개인 리포트', '패턴·논리·공간 퍼즐 30문항을 30분 동안 무료로 즐기세요. 만 18세 이상을 위한 오락용 게임이며, 완료 후 개인 퍼즐 리포트를 1회 결제로 받을 수 있습니다. 공인 IQ 검사가 아닙니다.'],
-  en: ['Mindscope | 30 Free IQ-Themed Puzzles & Personal Reports', 'Play 30 free pattern, logic and spatial puzzles in 30 minutes. An entertainment game for adults 18+, with an optional personal report for a one-time payment. Not a certified IQ test.'],
-  ja: ['Mindscope | 無料のIQテーマパズル30問と個人レポート', 'パターン・論理・空間の30問を30分で無料プレイ。18歳以上向けの娯楽ゲームです。終了後は1回払いで個人レポートを購入できます。公認IQ検査ではありません。'],
-  'zh-CN': ['Mindscope | 30道免费IQ主题谜题与个人报告', '在30分钟内免费挑战30道模式、逻辑和空间谜题。面向18岁以上成年人的娱乐游戏，完成后可一次性付费购买个人报告。非官方IQ测试。'],
-  es: ['Mindscope | 30 puzles gratis de estilo CI e informes personales', 'Resuelve 30 puzles gratis de patrones, lógica y espacio en 30 minutos. Juego para mayores de 18 años con informe personal opcional de pago único. No es una prueba de CI certificada.'],
-  fr: ['Mindscope | 30 énigmes gratuites de style QI et rapports personnels', 'Jouez à 30 énigmes gratuites de motifs, de logique et d’espace en 30 minutes. Pour les adultes de 18 ans et plus, avec rapport personnel facultatif à paiement unique. Pas un test de QI certifié.']
+  ko: ['무료 온라인 IQ 테스트 | 30문항 · 30분 | Mindscope', '무료 온라인 IQ 테스트로 패턴 인식·논리 추론·공간 지각에 도전하세요. 30문항, 제한 시간 30분, 회원가입 없이 시작. 개인 결과 리포트는 별도 1회 결제 상품입니다.'],
+  en: ['Free Online IQ Test | 30 Questions, 30 Minutes | Mindscope', 'Take a free online IQ test with 30 pattern, logic, and spatial reasoning questions in 30 minutes. No sign-up required. Personal results report sold separately.'],
+  ja: ['無料オンラインIQテスト | 30問・30分 | Mindscope', 'パターン認識・論理・空間推論に挑戦する無料オンラインIQテスト。30問、制限時間30分、登録不要。個人結果レポートは別途1回払いで提供します。'],
+  'zh-CN': ['免费在线IQ测试 | 30道题・30分钟 | Mindscope', '通过免费在线IQ测试挑战模式识别、逻辑和空间推理。30道题，限时30分钟，无需注册。个人结果报告为单独的一次性付费商品。'],
+  es: ['Test de CI online gratis | 30 preguntas, 30 minutos | Mindscope', 'Haz un test de CI online gratis con 30 preguntas de patrones, lógica y razonamiento espacial en 30 minutos. Sin registro. Informe personal de pago por separado.'],
+  fr: ['Test de QI en ligne gratuit | 30 questions, 30 minutes | Mindscope', 'Essayez un test de QI en ligne gratuit : 30 questions de motifs, de logique et de raisonnement spatial en 30 minutes. Sans inscription. Rapport personnel payant en option.']
 };
 export function pageMetadata(language) {
   const code=isLanguage(language)?language:'ko';
