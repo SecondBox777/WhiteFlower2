@@ -8,3 +8,6 @@ dist/
 .dev.vars
 .dev.vars.*
 !.dev.vars.example
+
+# Downloadable local Codespace backups; may contain private development data.
+codespace-local-backup-*.tar.gz

@@ -2,18 +2,18 @@
 
 30문항 테스트는 무료이며 AI 리포트는 Polar의 1회 결제 상품으로 제공합니다.
 
-## Sandbox 설정
+## 운영 설정
 
 Cloudflare → Workers & Pages → whiteflower2 → Settings → Variables and Secrets에 `POLAR_ACCESS_TOKEN`을 **Secret**으로 등록하고 Deploy합니다. Polar 조직 설정에서 Organization Access Token을 생성하며 `checkouts:write`, `checkouts:read`, `orders:read`, `refunds:read`, `refunds:write` 권한이 필요합니다. 키는 소스 코드나 GitHub에 넣지 않습니다. 사용자 제공 `polar.txt`는 API 참고 문서이며 실제 인증 키가 아닙니다. 이 문서는 로컬에 보관하고 Git과 배포에서 제외합니다.
 
 `wrangler.jsonc`에 다음 설정을 포함했습니다.
 
-- `POLAR_PRODUCT_ID`: `a2fae7e7-f650-4109-87f7-f1f46e46b9be`
-- `POLAR_ENVIRONMENT`: `sandbox`
+- `POLAR_PRODUCT_ID`: `d8ec786b-c015-47dd-94c3-19c769ae9069`
+- `POLAR_ENVIRONMENT`: `production`
 - `PAYMENT_SESSIONS`: SQLite Durable Object binding
 - `payment-sessions-v1`: Durable Object 생성 migration
 
-OpenAI 설정이 누락된 서버는 결제를 시작하지 않습니다. Resend 설정도 새 결제를 시작하기 전에 확인합니다. 일반 정적 개발 서버는 결제 API를 제공하지 않으므로 `npm run worker:dev`로 확인합니다.
+보고서는 내부 코드로 생성하므로 OpenAI API 키는 필요하지 않습니다. Resend 설정은 새 결제를 시작하기 전에 확인합니다. 일반 정적 개발 서버는 결제 API를 제공하지 않으므로 `npm run worker:dev`로 확인합니다.
 
 ## 구매 흐름
 
@@ -27,7 +27,7 @@ OpenAI 설정이 누락된 서버는 결제를 시작하지 않습니다. Resend
 
 구매 및 리포트 데이터는 30일 후 삭제됩니다. 일반 새로고침·홈페이지 방문에서는 홈 화면을 유지하고 결제 복귀 URL(`/?payment=return` 또는 `/?payment=cancelled`)에서만 같은 브라우저의 마지막 구매를 복원합니다. 쿠키를 삭제하거나 다른 기기에서는 자동 복원되지 않습니다. 새 테스트를 결제하면 해당 브라우저의 마지막 구매 쿠키가 교체됩니다. 현재는 계정별 구매 목록, 다른 기기로 복원, webhook 처리는 구현하지 않습니다. 결제 확인은 Polar API 조회로 수행하므로 webhook Secret은 필요하지 않습니다.
 
-사이트의 데이터 전송 안내에 결제 단계의 서버 저장과 30일 보관을 표시합니다. 미결제 요청과 인증 실패는 OpenAI 호출 전에 차단합니다. 실험용 랜덤 답안도 동일한 결제가 필요합니다.
+사이트의 데이터 전송 안내에 결제 단계의 서버 저장과 30일 보관을 표시합니다. 미결제 요청과 인증 실패는 보고서 생성 전에 차단합니다.
 
 ## 자동 환불
 
@@ -37,8 +37,18 @@ OpenAI 설정이 누락된 서버는 결제를 시작하지 않습니다. Resend
 
 ## 검증
 
-`npm test`는 Polar·OpenAI를 모의 응답으로 처리해 미결제 차단, 상품/구매 불일치 차단, 성인 확인, 리다이렉트 복원, 동시 생성 방지, 저장된 답안 사용, 성공 리포트 재사용과 실패 후 재시도를 검증합니다. 실제 결제나 이메일 발송은 수행하지 않습니다. 자동 환불·중복 요청 방지·환불 상태 확인·실결제 주문 검증도 모의 API로 검증합니다.
+`npm test`는 Polar를 모의 응답으로 처리하고 내부 보고서 생성으로 미결제 차단, 상품/구매 불일치 차단, 성인 확인, 리다이렉트 복원, 동시 생성 방지, 저장된 답안 사용, 성공 리포트 재사용과 실패 후 재시도를 검증합니다. 실제 결제나 이메일 발송은 수행하지 않습니다. 자동 환불·중복 요청 방지·환불 상태 확인·실결제 주문 검증도 모의 API로 검증합니다.
 
-현재는 Sandbox 상품 ID·토큰을 사용하고 `POLAR_ENVIRONMENT=sandbox`로 고정합니다. 운영 상품 ID와 Sandbox 상품 ID는 서로 바꿔 쓸 수 없습니다.
+현재 저장소의 설정은 운영 상품 ID와 `POLAR_ENVIRONMENT=production`을 사용합니다. 운영 상품 ID와 Sandbox 상품 ID는 서로 바꿔 쓸 수 없습니다.
 
 API 참고: [Create Checkout Session](https://polar.sh/docs/api-reference/checkouts/create-session), [Get Checkout Session](https://polar.sh/docs/api-reference/checkouts/get-session).
+
+## Production 전환
+
+1. Polar Production 조직에서 1회 결제 상품을 만들고 운영용 Product ID를 확인합니다. Sandbox 상품 ID를 재사용하지 않습니다.
+2. Production 조직에서 `checkouts:read`, `checkouts:write`, `orders:read`, `refunds:read`, `refunds:write` 권한의 토큰을 만듭니다.
+3. Cloudflare `whiteflower2`의 `POLAR_ACCESS_TOKEN` Secret을 Production 토큰으로 교체합니다. 토큰은 저장소나 채팅에 넣지 않습니다.
+4. `wrangler.jsonc`의 `POLAR_ENVIRONMENT`를 `production`, `POLAR_PRODUCT_ID`를 확인한 운영 상품 ID로 변경하고 배포합니다.
+5. 기존 Sandbox 구매는 환경 검사로 차단되며 새 결제는 `api.polar.sh`와 `polar.sh`를 사용합니다. 청구 없이 결제 페이지 생성·미결제 차단을 확인하고, 실제 결제 및 환불 실행은 별도 테스트 범위로 구분합니다.
+
+현재 저장소는 Production 설정입니다. 운영 Secret은 Cloudflare에서 관리하며 `.dev.vars.example`에는 실제 비밀값을 넣지 않습니다.
